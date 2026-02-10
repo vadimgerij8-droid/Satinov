@@ -213,4 +213,162 @@ document.querySelectorAll('.cat-btn').forEach(btn => {
 </script>
 
 </body>
+</html><!DOCTYPE html>
+<html lang="uk" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Новини — Мобільний</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            'mono-bg': '#0a0a0a',
+            'mono-text': '#f5f5f5',
+            'mono-card': '#111111',
+            'mono-accent': '#ffffff',
+            'mono-border': '#222222',
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.7s ease-out forwards',
+            'pulse-slow': 'pulseSlow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            fadeInUp: { '0%': { opacity: '0', transform: 'translateY(40px) scale(0.95)' }, '100%': { opacity: '1', transform: 'translateY(0) scale(1)' } },
+            pulseSlow: { '0%, 100%': { opacity: '0.6' }, '50%': { opacity: '1' } }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-mono-bg text-mono-text min-h-screen font-sans antialiased">
+
+<!-- HEADER -->
+<header class="sticky top-0 z-50 bg-mono-bg/80 backdrop-blur-xl border-b border-mono-border flex items-center justify-between px-5 py-4">
+  <button id="open-sidebar" class="p-2 -ml-2 rounded-full hover:bg-gray-900/50 transition">
+    <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <h1 class="text-3xl font-extrabold tracking-tight text-mono-accent">Новини</h1>
+  <div class="w-10"></div>
+</header>
+
+<!-- SIDEBAR -->
+<aside id="sidebar" class="fixed inset-y-0 left-0 w-72 bg-mono-card border-r border-mono-border p-6 transform -translate-x-full transition-transform duration-500 z-50">
+  <button id="close-sidebar" class="mb-8 text-gray-400 text-4xl font-light">×</button>
+  <h2 class="text-3xl font-bold mb-8">Категорії</h2>
+  <div class="space-y-3">
+    <button data-cat="all" class="cat-btn w-full text-left px-4 py-3 bg-gray-900/70 rounded-xl hover:bg-gray-800 transition">Усі</button>
+    <button data-cat="politics" class="cat-btn w-full text-left px-4 py-3 hover:bg-gray-800 rounded-xl transition">Політика</button>
+    <button data-cat="business" class="cat-btn w-full text-left px-4 py-3 hover:bg-gray-800 rounded-xl transition">Економіка</button>
+    <button data-cat="technology" class="cat-btn w-full text-left px-4 py-3 hover:bg-gray-800 rounded-xl transition">Технології</button>
+    <button data-cat="sports" class="cat-btn w-full text-left px-4 py-3 hover:bg-gray-800 rounded-xl transition">Спорт</button>
+    <button data-cat="world" class="cat-btn w-full text-left px-4 py-3 hover:bg-gray-800 rounded-xl transition">Світ</button>
+  </div>
+</aside>
+<div id="overlay" class="fixed inset-0 bg-black/70 hidden z-40"></div>
+
+<!-- MAIN CONTENT -->
+<main class="p-5 pt-2">
+  <p id="loading" class="text-center text-gray-500 mt-16 animate-pulse-slow text-lg">Завантаження свіжих новин…</p>
+
+  <section class="mt-6">
+    <h2 class="text-2xl font-bold mb-5 text-center tracking-wide">Стрічка новин</h2>
+    <div id="news-feed" class="flex gap-5 overflow-x-auto pb-10 snap-x snap-mandatory scrollbar-hide -mx-2 px-2"></div>
+  </section>
+</main>
+
+<style>
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+
+<script>
+const API_KEY = 'BEkquRVH3PtoBeGk2DrPQGig2XalmtjiKKpgv0pa';  // твій ключ
+
+const feedEl    = document.getElementById('news-feed');
+const loadingEl = document.getElementById('loading');
+
+// Sidebar toggle
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+document.getElementById('open-sidebar').onclick = () => { sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); };
+document.getElementById('close-sidebar').onclick = () => { sidebar.classList.add('-translate-x-full'); overlay.classList.add('hidden'); };
+overlay.onclick = () => { sidebar.classList.add('-translate-x-full'); overlay.classList.add('hidden'); };
+
+async function loadNews(category = 'all') {
+  feedEl.innerHTML = '';
+  loadingEl.classList.remove('hidden');
+
+  try {
+    let url = `https://api.thenewsapi.com/v1/news/all?api_token=${API_KEY}&language=uk&limit=3&sort=published_at`;
+    if (category !== 'all') url += `&categories=${category}`;
+    url += '&search=Україна';  // робить результати релевантнішими
+
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      let msg = `Помилка: ${res.status}`;
+      if (res.status === 401 || res.status === 403) msg = 'Невірний або заблокований API-ключ. Згенеруй новий на thenewsapi.com';
+      if (res.status === 429) msg = 'Перевищено ліміт (100 запитів/день). Зачекай 24 години';
+      if (res.status === 402) msg = 'Потрібна оплата (free-план не дозволяє цей запит)';
+      throw new Error(msg);
+    }
+
+    const data = await res.json();
+
+    if (!data?.data?.length) {
+      feedEl.innerHTML = '<p class="text-center text-gray-500 py-12 w-full">Немає свіжих новин за цим запитом (або ліміт free-плану)</p>';
+      return;
+    }
+
+    data.data.forEach((article, i) => {
+      const card = document.createElement('div');
+      card.className = `min-w-[85vw] bg-gradient-to-b from-mono-card to-black/40 rounded-2xl border border-mono-border overflow-hidden snap-start shadow-2xl transform transition-all duration-500 hover:scale-[1.04] active:scale-95 opacity-0 translate-y-12`;
+      card.style.animation = `fadeInUp 0.9s ease-out forwards ${i * 120}ms`;
+
+      const imgSrc = article.image_url || '';
+      const img = imgSrc 
+        ? `<img src="${imgSrc}" class="w-full h-60 object-cover" alt="${article.title}" loading="lazy" onerror="this.outerHTML='<div class=\\\'w-full h-60 bg-gray-900 flex items-center justify-center text-gray-600 text-sm\\\'>Без фото</div>'">`
+        : `<div class="w-full h-60 bg-gray-900 flex items-center justify-center text-gray-600 text-sm">Без фото</div>`;
+
+      card.innerHTML = `
+        ${img}
+        <div class="p-5">
+          <h3 class="font-bold text-lg leading-tight mb-2 line-clamp-3">${article.title || 'Без заголовка'}</h3>
+          <p class="text-gray-400 text-sm line-clamp-3 mb-3">${article.description || 'Опис відсутній'}</p>
+          <div class="flex justify-between items-center text-xs text-gray-500 mb-3">
+            <span>${new Date(article.published_at).toLocaleString('uk-UA', {dateStyle: 'short', timeStyle: 'short'})}</span>
+          </div>
+          <a href="${article.url}" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm font-medium">Читати →</a>
+        </div>
+      `;
+      feedEl.appendChild(card);
+    });
+
+  } catch (err) {
+    console.error(err);
+    feedEl.innerHTML = `<p class="text-center text-red-400 py-12 w-full font-medium">${err.message || 'Помилка завантаження. Перевір інтернет або ключ.'}</p>`;
+  } finally {
+    loadingEl.classList.add('hidden');
+  }
+}
+
+// Початкове завантаження
+loadNews();
+
+// Фільтрація категорій
+document.querySelectorAll('.cat-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('bg-gray-800', 'text-white'));
+    btn.classList.add('bg-gray-800', 'text-white');
+    loadNews(btn.dataset.cat);
+    document.getElementById('close-sidebar').click();
+  };
+});
+</script>
+</body>
 </html>

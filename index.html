@@ -174,4 +174,50 @@
     }
   </script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-</head>
+</head>async function loadNews(category = 'all') {
+  newsContainer.innerHTML = '';
+  loading.classList.remove('hidden');
+  errorDiv.classList.add('hidden');
+
+  let url = API_URL;
+  if (category !== 'all') {
+    // Додаємо фільтр по категорії на рівні API (правильний параметр — categories)
+    // Використовуємо точні значення з API: politics, sports, business тощо
+    url += `&categories=${category}`;
+  }
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Помилка: ${res.status} — перевір API-ключ або ліміт`);
+    const data = await res.json();
+    const articles = data.data || [];
+
+    if (articles.length === 0) {
+      newsContainer.innerHTML = '<p class="col-span-full text-center text-gray-500">Новин за цією категорією немає зараз</p>';
+    } else {
+      articles.forEach((article, index) => {
+        const delay = index * 100; // для анімації
+        const card = document.createElement('div');
+        card.className = `bg-black/60 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/5 hover:border-white/20 hover:shadow-2xl hover:scale-[1.03] transition-all duration-500 opacity-0 translate-y-8 animate-fade-in-up`;
+        card.style.animationDelay = `${delay}ms`;
+
+        card.innerHTML = `
+          ${article.image_url ? `<img src="${article.image_url}" alt="" class="w-full h-48 object-cover transition-transform duration-700 hover:scale-110">` : ''}
+          <div class="p-6">
+            <span class="text-xs text-gray-500">${new Date(article.published_at).toLocaleDateString('uk-UA')} · ${article.source}</span>
+            <h3 class="mt-2 text-xl font-semibold line-clamp-2">${article.title}</h3>
+            <p class="mt-3 text-gray-400 line-clamp-3">${article.description || '...'}</p>
+            <a href="${article.url}" target="_blank" class="mt-4 inline-block text-white hover:underline">Читати →</a>
+          </div>
+        `;
+        newsContainer.appendChild(card);
+      });
+    }
+  } catch (err) {
+    errorDiv.textContent = 'Не вдалося завантажити. Перевір інтернет або API-ключ.';
+    errorDiv.classList.remove('hidden');
+    console.error(err);
+  } finally {
+    loading.classList.add('hidden');
+  }
+}

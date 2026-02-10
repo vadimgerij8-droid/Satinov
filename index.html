@@ -3,17 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Новини — Сьогодні</title>
-
+<title>Новини — Мобільний</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
 tailwind.config = {
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
         'mono-bg': '#0f0f0f',
         'mono-text': '#e5e5e5',
         'mono-card': '#1a1a1a',
+        'mono-accent': '#ffffff'
+      },
+      animation: {
+        'fade-in-up': 'fadeInUp 0.8s ease-out forwards'
+      },
+      keyframes: {
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(30px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' }
+        }
       }
     }
   }
@@ -23,9 +33,22 @@ tailwind.config = {
 
 <body class="bg-mono-bg text-mono-text min-h-screen">
 
+<!-- HEADER -->
+<header class="sticky top-0 z-50 bg-mono-bg/90 backdrop-blur-md border-b border-gray-800 flex items-center justify-between p-4">
+  <button id="open-sidebar" class="p-2 rounded hover:bg-gray-800">
+    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+    </svg>
+  </button>
+  <h1 class="text-2xl font-bold text-mono-accent">Новини</h1>
+</header>
+
 <!-- SIDEBAR -->
-<aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-mono-card border-r border-gray-800 p-6 hidden lg:block">
-  <h2 class="text-2xl font-bold mb-6">Новини</h2>
+<aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-mono-card border-r border-gray-800 p-6 transform -translate-x-full transition-transform duration-300 z-50">
+  <button id="close-sidebar" class="mb-6 text-gray-400">
+    &times;
+  </button>
+  <h2 class="text-2xl font-bold mb-6">Категорії</h2>
   <div class="space-y-2">
     <button data-cat="all" class="cat-btn w-full text-left px-3 py-2 bg-gray-800 rounded">Усі</button>
     <button data-cat="politics" class="cat-btn w-full text-left px-3 py-2 hover:bg-gray-800 rounded">Політика</button>
@@ -35,17 +58,23 @@ tailwind.config = {
     <button data-cat="world" class="cat-btn w-full text-left px-3 py-2 hover:bg-gray-800 rounded">Світ</button>
   </div>
 </aside>
+<div id="overlay" class="fixed inset-0 bg-black/60 hidden z-40"></div>
 
-<!-- MAIN -->
-<main class="lg:ml-64 p-6">
-  <h1 class="text-4xl font-bold mb-10 text-center">Свіжі новини</h1>
-  <div id="news" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+<!-- MAIN CONTENT -->
+<main class="p-4 mt-4">
+  <div id="news" class="grid gap-6"></div>
   <p id="loading" class="text-center text-gray-400 mt-10 hidden">Завантаження…</p>
+
+  <!-- Горизонтальна стрічка новин -->
+  <section class="mt-8">
+    <h2 class="text-xl font-bold mb-4 text-center">Стрічка новин</h2>
+    <div id="news-feed" class="flex gap-4 overflow-x-auto pb-4"></div>
+  </section>
 </main>
 
 <!-- MODAL -->
 <div id="modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-50">
-  <div class="bg-mono-card max-w-3xl w-full p-6 rounded-xl relative overflow-y-auto max-h-[90vh]">
+  <div class="bg-mono-card w-full max-w-md p-6 rounded-xl relative overflow-y-auto max-h-[90vh]">
     <button onclick="closeModal()" class="absolute top-3 right-4 text-2xl">&times;</button>
     <h2 id="modal-title" class="text-2xl font-bold mb-4"></h2>
     <p id="modal-text" class="text-gray-300 leading-relaxed"></p>
@@ -53,8 +82,16 @@ tailwind.config = {
 </div>
 
 <script>
+// Sidebar toggle
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+document.getElementById('open-sidebar').onclick = () => { sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); };
+document.getElementById('close-sidebar').onclick = () => { sidebar.classList.add('-translate-x-full'); overlay.classList.add('hidden'); };
+overlay.onclick = () => { sidebar.classList.add('-translate-x-full'); overlay.classList.add('hidden'); };
+
+// API
 const API_KEY = 'ТУТ_ТВІЙ_API';
-const BASE_URL = `https://api.thenewsapi.com/v1/news/all?api_token=${API_KEY}&language=uk,ru,en&limit=15`;
+const BASE_URL = `https://api.thenewsapi.com/v1/news/all?api_token=${API_KEY}&language=uk,ru,en&limit=10`;
 
 const newsEl = document.getElementById('news');
 const loadingEl = document.getElementById('loading');
@@ -62,126 +99,57 @@ const modal = document.getElementById('modal');
 const modalTitle = document.getElementById('modal-title');
 const modalText = document.getElementById('modal-text');
 
-document.querySelectorAll('.cat-btn').forEach(btn => {
-  btn.onclick = () => {
-    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('bg-gray-800'));
+// Категорії
+document.querySelectorAll('.cat-btn').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('bg-gray-800'));
     btn.classList.add('bg-gray-800');
     loadNews(btn.dataset.cat);
-  };
+    sidebar.classList.add('-translate-x-full'); overlay.classList.add('hidden');
+  }
 });
 
-async function loadNews(category = 'all') {
-  newsEl.innerHTML = '';
-  loadingEl.classList.remove('hidden');
-
-  let url = BASE_URL;
-  if (category !== 'all') url += `&categories=${category}`;
-
-  const res = await fetch(url);
-  const data = await res.json();
-
-  data.data.forEach(a => {
-    const div = document.createElement('div');
-    div.className = 'bg-mono-card p-5 rounded-xl border border-gray-800';
-
-    div.innerHTML = `
-      <h3 class="text-xl font-semibold mb-2">${a.title}</h3>
-      <p class="text-gray-400 mb-4">${a.description || 'Без опису'}</p>
-      <button class="underline" onclick="openModal('${escape(a.title)}','${escape(a.description || '')}')">
-        Читати
-      </button>
-    `;
-    newsEl.appendChild(div);
-  });
-
-  loadingEl.classList.add('hidden');
+// Завантаження новин
+async function loadNews(category='all'){
+  newsEl.innerHTML=''; loadingEl.classList.remove('hidden');
+  try{
+    let url = BASE_URL;
+    if(category!=='all') url+=`&categories=${category}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    data.data.forEach(a=>{
+      const div = document.createElement('div');
+      div.className='bg-mono-card p-4 rounded-xl border border-gray-800 opacity-0 translate-y-10 animate-fade-in-up';
+      div.style.animationDelay = `${Math.random()*200}ms`;
+      div.innerHTML=`
+        <h3 class="text-lg font-semibold mb-2">${a.title}</h3>
+        <p class="text-gray-400 mb-3 line-clamp-3">${a.description||'Без опису'}</p>
+        <button class="underline text-sm" onclick="openModal('${escape(a.title)}','${escape(a.description||'')}')">Читати</button>
+      `;
+      newsEl.appendChild(div);
+    });
+  }catch(e){
+    newsEl.innerHTML='<p class="text-center text-gray-500">Не вдалося завантажити новини</p>';
+  }finally{ loadingEl.classList.add('hidden'); }
 }
 
-function openModal(title, text) {
-  modalTitle.innerText = title;
-  modalText.innerText = text || 'Повного тексту немає';
-  modal.classList.remove('hidden');
-  modal.classList.add('flex');
-}
+// Модалка
+function openModal(title,text){ modalTitle.innerText=unescape(title); modalText.innerText=unescape(text)||'Повного тексту немає'; modal.classList.remove('hidden'); modal.classList.add('flex'); }
+function closeModal(){ modal.classList.add('hidden'); }
 
-function closeModal() {
-  modal.classList.add('hidden');
-}
-
-loadNews();
-</script>
-
-</body>
-</html><!-- Нова стрічка новин -->
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-  <h2 class="text-3xl font-bold mb-6 text-center">Стрічка новин</h2>
-  <div id="news-feed" class="overflow-x-auto flex gap-6 py-4">
-    <!-- Картки новин підвантажуються тут -->
-  </div>
-</section>
-
-<script>
-// Приклад масиву новин (максимум 480 елементів)
-const newsFeedData = Array.from({length: 20}, (_, i) => ({
-  title: `Заголовок новини ${i + 1}`,
-  description: `Короткий опис новини ${i + 1}. Тут можна вставити трохи тексту про подію, щоб зацікавити читача.`,
-  image: 'https://picsum.photos/400/250?random=' + (i + 1),
-  url: '#'
+// Стрічка новин
+const newsFeedData = Array.from({length:20},(_,i)=>({
+  title:`Новина ${i+1}`,
+  description:`Короткий опис новини ${i+1}`,
+  image:'https://picsum.photos/300/180?random='+ (i+1),
+  url:'#'
 }));
-
 const feedContainer = document.getElementById('news-feed');
-
-newsFeedData.forEach((news, index) => {
+newsFeedData.forEach((news,index)=>{
   const card = document.createElement('div');
-  card.className = 'min-w-[300px] bg-mono-card rounded-xl overflow-hidden border border-gray-800 hover:border-gray-600 transition-all duration-300 hover:shadow-lg flex-shrink-0 opacity-0 translate-y-10 animate-fade-in-up';
-  card.style.animationDelay = `${index * 50}ms`;
-
-  card.innerHTML = `
-    <img src="${news.image}" alt="" class="w-full h-40 object-cover transition-transform duration-700 hover:scale-105">
-    <div class="p-4 flex flex-col justify-between h-[150px]">
-      <h3 class="text-lg font-semibold mb-2 line-clamp-2">${news.title}</h3>
-      <p class="text-gray-400 line-clamp-3">${news.description}</p>
-      <a href="${news.url}" class="mt-3 inline-block text-sm px-3 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition">Читати</a>
-    </div>
-  `;
-  feedContainer.appendChild(card);
-});
-
-// Анімація підвантаження карток при скролі
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.remove('opacity-0', 'translate-y-10');
-    }
-  });
-}, { threshold: 0.2 });
-
-document.querySelectorAll('#news-feed > div').forEach(card => observer.observe(card));
-</script><!-- Мобільна стрічка новин -->
-<section class="max-w-full px-4 py-6">
-  <h2 class="text-2xl font-bold mb-4 text-center">Стрічка новин</h2>
-  <div id="news-feed-mobile" class="flex gap-4 overflow-x-auto pb-4">
-    <!-- Картки новин будуть тут -->
-  </div>
-</section>
-
-<script>
-// Масив новин (можна до 480)
-const newsFeedMobile = Array.from({length: 20}, (_, i) => ({
-  title: `Новина ${i + 1}`,
-  description: `Короткий опис новини ${i + 1}.`,
-  image: 'https://picsum.photos/300/180?random=' + (i + 1),
-  url: '#'
-}));
-
-const feedContainerMobile = document.getElementById('news-feed-mobile');
-
-newsFeedMobile.forEach((news, index) => {
-  const card = document.createElement('div');
-  card.className = 'min-w-[220px] bg-mono-card rounded-xl overflow-hidden border border-gray-800 flex-shrink-0 shadow-sm hover:shadow-md transition-all duration-300 opacity-0 translate-y-6 animate-fade-in-up';
-  card.style.animationDelay = `${index * 60}ms`;
-
-  card.innerHTML = `
+  card.className='min-w-[250px] bg-mono-card rounded-xl overflow-hidden border border-gray-800 flex-shrink-0 shadow-sm hover:shadow-md transition-all duration-300 opacity-0 translate-y-6 animate-fade-in-up';
+  card.style.animationDelay=`${index*60}ms`;
+  card.innerHTML=`
     <img src="${news.image}" alt="" class="w-full h-36 object-cover transition-transform duration-500 hover:scale-105">
     <div class="p-3">
       <h3 class="text-base font-semibold mb-1 line-clamp-2">${news.title}</h3>
@@ -189,17 +157,16 @@ newsFeedMobile.forEach((news, index) => {
       <a href="${news.url}" class="mt-2 inline-block text-xs px-2 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded transition">Читати</a>
     </div>
   `;
-  feedContainerMobile.appendChild(card);
+  feedContainer.appendChild(card);
 });
 
-// Анімація при скролі (для мобільного теж)
-const observerMobile = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.remove('opacity-0', 'translate-y-6');
-    }
-  });
-}, { threshold: 0.2 });
+// Анімація при скролі
+const observer = new IntersectionObserver(entries=>{ entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.remove('opacity-0','translate-y-6','translate-y-10'); }); },{threshold:0.2});
+document.querySelectorAll('#news > div, #news-feed > div').forEach(card=>observer.observe(card));
 
-document.querySelectorAll('#news-feed-mobile > div').forEach(card => observerMobile.observe(card));
+// Початкове завантаження
+loadNews();
 </script>
+
+</body>
+</html>

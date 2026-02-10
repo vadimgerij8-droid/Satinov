@@ -1,209 +1,202 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="uk" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Новини України</title>
+  <title>Новини · UA</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
+    :root {
+      --bg: #000;
+      --surface: #0a0a0a;
+      --border: #1a1a1a;
+      --text: #e5e5e5;
+      --text-muted: #888;
+    }
     body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: linear-gradient(to bottom, #0f0f11, #17171b);
-      color: #e5e7eb;
+      font-family: 'Geist', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+    header {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
     .sidebar {
       transform: translateX(-100%);
-      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
     }
     .sidebar.open {
       transform: translateX(0);
     }
     .card {
-      transition: all 0.3s ease;
       opacity: 0;
       transform: translateY(20px);
+      transition: all 0.55s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .card.loaded {
+    .card.visible {
       opacity: 1;
       transform: translateY(0);
     }
-    .skeleton {
-      background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
-      background-size: 200% 100%;
-      animation: loading 1.5s infinite;
-    }
-    @keyframes loading {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
     img {
-      object-fit: cover;
+      filter: grayscale(90%) contrast(1.1);
+      transition: filter 0.5s ease, transform 0.7s ease;
+    }
+    .card:hover img {
+      filter: grayscale(40%) contrast(1.05);
+      transform: scale(1.04);
+    }
+    #scrollToTop {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s, transform 0.3s;
+    }
+    #scrollToTop.show {
+      opacity: 0.6;
+      pointer-events: auto;
+    }
+    #scrollToTop:hover {
+      opacity: 1;
+      transform: scale(1.1);
     }
   </style>
 </head>
-<body class="min-h-screen pb-12">
+<body class="min-h-screen">
 
   <!-- Header -->
-  <header class="fixed top-0 left-0 right-0 z-50 bg-neutral-900/90 backdrop-blur-md border-b border-neutral-800/50">
-    <div class="flex items-center justify-between px-5 py-4">
-      <button id="menuBtn" class="text-2xl font-bold text-white hover:text-blue-400 transition-colors">
-        ☰
-      </button>
-      <h1 class="text-xl font-semibold tracking-tight">
-        Новини <span class="text-blue-400">України</span>
-      </h1>
-      <div class="w-8"></div> <!-- placeholder for symmetry -->
+  <header class="fixed top-0 inset-x-0 z-50 bg-black/80 border-b border-[#111] py-4 px-5">
+    <div class="flex items-center justify-between max-w-3xl mx-auto">
+      <button id="menuBtn" class="text-2xl font-bold">≡</button>
+      <h1 class="text-lg font-medium tracking-wider">НОВИНИ</h1>
+      <div class="w-8"></div>
     </div>
   </header>
 
   <!-- Overlay -->
-  <div id="overlay" class="fixed inset-0 bg-black/70 z-40 hidden transition-opacity duration-400"></div>
+  <div id="overlay" class="fixed inset-0 bg-black/85 z-40 hidden transition-opacity duration-500"></div>
 
   <!-- Sidebar -->
-  <aside id="sidebar" class="sidebar fixed inset-y-0 left-0 w-72 bg-neutral-900/95 backdrop-blur-lg border-r border-neutral-800/60 z-50 flex flex-col">
-    <div class="p-6 border-b border-neutral-800/50">
-      <button id="closeBtn" class="text-3xl text-gray-400 hover:text-white transition-colors">
-        ×
-      </button>
+  <aside id="sidebar" class="sidebar fixed inset-y-0 left-0 w-72 bg-black border-r border-[#111] z-50 flex flex-col">
+    <div class="p-6 border-b border-[#111]">
+      <button id="closeBtn" class="text-3xl font-light text-gray-600 hover:text-white">×</button>
     </div>
-    <nav class="flex-1 px-4 py-6 space-y-2">
-      <button data-rss="https://www.pravda.com.ua/rss/" class="w-full text-left px-5 py-4 rounded-xl bg-neutral-800/60 hover:bg-blue-600/30 hover:text-blue-300 transition-all font-medium">
+    <nav class="flex-1 px-4 py-8 space-y-2">
+      <button data-rss="https://www.pravda.com.ua/rss/" class="w-full text-left px-5 py-4 rounded-lg hover:bg-[#111] transition font-medium text-gray-300 hover:text-white">
         Українська правда
       </button>
-      <button data-rss="https://tsn.ua/rss" class="w-full text-left px-5 py-4 rounded-xl bg-neutral-800/60 hover:bg-blue-600/30 hover:text-blue-300 transition-all font-medium">
+      <button data-rss="https://tsn.ua/rss" class="w-full text-left px-5 py-4 rounded-lg hover:bg-[#111] transition font-medium text-gray-300 hover:text-white">
         ТСН
       </button>
-      <button data-rss="https://24tv.ua/rss/all.xml" class="w-full text-left px-5 py-4 rounded-xl bg-neutral-800/60 hover:bg-blue-600/30 hover:text-blue-300 transition-all font-medium">
+      <button data-rss="https://24tv.ua/rss/all.xml" class="w-full text-left px-5 py-4 rounded-lg hover:bg-[#111] transition font-medium text-gray-300 hover:text-white">
         24 Канал
       </button>
     </nav>
   </aside>
 
-  <!-- Main content -->
-  <main class="pt-20 px-4 max-w-3xl mx-auto space-y-6">
-    <div id="news" class="grid gap-5"></div>
-  </main>
+  <!-- Content -->
+  <main class="pt-20 px-4 max-w-3xl mx-auto pb-16 space-y-8" id="news"></main>
+
+  <!-- Scroll to top -->
+  <button id="scrollToTop" class="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-[#111] border border-[#222] text-white flex items-center justify-center text-xl shadow-lg z-40">
+    ↑
+  </button>
 
   <script>
-    const newsContainer = document.getElementById('news');
+    const news = document.getElementById('news');
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('overlay');
     const menuBtn = document.getElementById('menuBtn');
     const closeBtn = document.getElementById('closeBtn');
+    const scrollBtn = document.getElementById('scrollToTop');
 
-    // Відкриття / закриття меню
-    menuBtn.addEventListener('click', () => {
-      sidebar.classList.add('open');
-      overlay.classList.remove('hidden');
-    });
+    // Menu toggle
+    menuBtn.onclick = () => { sidebar.classList.add('open'); overlay.classList.remove('hidden'); };
+    closeBtn.onclick = overlay.onclick = () => { sidebar.classList.remove('open'); setTimeout(() => overlay.classList.add('hidden'), 400); };
 
-    closeBtn.addEventListener('click', closeMenu);
-    overlay.addEventListener('click', closeMenu);
+    // Scroll to top
+    window.onscroll = () => {
+      scrollBtn.classList.toggle('show', window.scrollY > 300);
+    };
+    scrollBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    function closeMenu() {
-      sidebar.classList.remove('open');
-      overlay.classList.add('hidden');
-    }
-
-    // Завантаження новин
-    async function loadNews(rssUrl) {
-      closeMenu();
-      newsContainer.innerHTML = '';
-
-      // Скелетон (placeholder) для 6 новин
-      for (let i = 0; i < 6; i++) {
-        newsContainer.innerHTML += `
-          <div class="card rounded-2xl overflow-hidden bg-neutral-800/40 border border-neutral-700/50">
-            <div class="skeleton h-48 w-full"></div>
+    async function loadNews(rss) {
+      news.innerHTML = '';
+      // Skeleton
+      for (let i = 0; i < 5; i++) {
+        news.innerHTML += `
+          <div class="card bg-[#0a0a0a] border border-[#111] rounded-xl overflow-hidden">
+            <div class="h-52 bg-gradient-to-r from-[#0f0f0f] to-[#1a1a1a] animate-pulse"></div>
             <div class="p-5 space-y-3">
-              <div class="skeleton h-6 w-4/5 rounded"></div>
-              <div class="skeleton h-4 w-full rounded"></div>
-              <div class="skeleton h-4 w-5/6 rounded"></div>
+              <div class="h-6 bg-[#111] rounded animate-pulse"></div>
+              <div class="h-4 bg-[#111] rounded animate-pulse w-5/6"></div>
+              <div class="h-4 bg-[#111] rounded animate-pulse w-4/6"></div>
             </div>
-          </div>
-        `;
+          </div>`;
       }
 
       try {
-        const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
-        const response = await fetch(proxyUrl);
-        if (!response.ok) throw new Error('Проблема з мережею');
+        const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}`);
+        const { items } = await res.json();
 
-        const data = await response.json();
+        news.innerHTML = '';
 
-        newsContainer.innerHTML = '';
-
-        if (!data.items || data.items.length === 0) {
-          newsContainer.innerHTML = `<p class="text-center text-gray-400 py-12">Немає новин за даний момент...</p>`;
+        if (!items?.length) {
+          news.innerHTML = '<p class="text-center py-20 text-gray-600 text-lg">Немає новин</p>';
           return;
         }
 
-        data.items.slice(0, 12).forEach((item, index) => {
-          let image = '';
-          if (item.enclosure && item.enclosure.url) {
-            image = item.enclosure.url;
-          } else if (item.description?.includes('<img')) {
-            const match = item.description.match(/src=["'](.*?)["']/);
-            if (match) image = match[1];
+        items.slice(0, 12).forEach((item, i) => {
+          let img = item.enclosure?.url || '';
+          if (!img && item.description?.match(/<img/)) {
+            img = (item.description.match(/src=["'](.*?)["']/i) || [])[1] || '';
           }
 
           const card = document.createElement('div');
-          card.className = 'card rounded-2xl overflow-hidden bg-neutral-800/40 border border-neutral-700/50 hover:border-blue-600/50 hover:shadow-xl hover:shadow-blue-900/20';
-          card.style.transitionDelay = `${index * 80}ms`;
-
+          card.className = 'card bg-[#0a0a0a] border border-[#111] rounded-xl overflow-hidden hover:border-gray-700 transition-all';
           card.innerHTML = `
-            ${image ? `
-              <div class="relative h-48 overflow-hidden">
-                <img src="${image}" alt="${item.title}" class="w-full h-full object-cover transition-transform duration-700 hover:scale-105">
+            ${img ? `
+              <div class="h-52 overflow-hidden bg-black">
+                <img src="${img}" alt loading="lazy" class="w-full h-full object-cover">
               </div>
             ` : `
-              <div class="h-48 bg-gradient-to-br from-neutral-700 to-neutral-900 flex items-center justify-center text-gray-500">
+              <div class="h-52 bg-[#0d0d0d] flex items-center justify-center text-gray-700 text-sm">
                 без фото
               </div>
             `}
             <div class="p-5">
-              <h2 class="font-semibold text-lg leading-tight line-clamp-2 mb-3">
+              <h2 class="text-xl font-medium leading-tight mb-2 line-clamp-2">
                 ${item.title}
               </h2>
-              <p class="text-sm text-gray-400 line-clamp-3 mb-4">
-                ${item.description?.replace(/<[^>]+>/g, '').substring(0, 160) || 'Опис відсутній'}…
+              <p class="text-gray-400 text-[15px] leading-relaxed line-clamp-3 mb-4">
+                ${item.description?.replace(/<[^>]+>/g, '').substring(0, 180).trim() || '…'}…
               </p>
-              <a href="${item.link}" target="_blank" rel="noopener noreferrer"
-                 class="inline-flex items-center text-blue-400 hover:text-blue-300 font-medium transition-colors">
-                Читати повністю →
+              <a href="${item.link}" target="_blank" class="text-gray-300 hover:text-white text-sm uppercase tracking-wide">
+                Читати →
               </a>
             </div>
           `;
 
-          newsContainer.appendChild(card);
-
-          // Анімація появи
-          setTimeout(() => card.classList.add('loaded'), 100);
+          news.appendChild(card);
+          setTimeout(() => card.classList.add('visible'), i * 80);
         });
 
-      } catch (err) {
-        newsContainer.innerHTML = `
-          <div class="text-center py-16 text-gray-400">
-            <p class="text-xl mb-2">😔 Щось пішло не так...</p>
-            <p>${err.message}</p>
-          </div>
-        `;
+      } catch (e) {
+        news.innerHTML = `<p class="text-center py-20 text-gray-600">Помилка завантаження</p>`;
       }
     }
 
     // Початкове завантаження
     loadNews('https://www.pravda.com.ua/rss/');
 
-    // Обробка кліків по пунктах меню
+    // Обробка вибору джерела
     document.querySelectorAll('[data-rss]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const rss = btn.getAttribute('data-rss');
-        loadNews(rss);
-      });
+      btn.onclick = () => loadNews(btn.dataset.rss);
     });
   </script>
 </body>

@@ -112,4 +112,49 @@ loadNews();
 </script>
 
 </body>
-</html>
+</html><!-- Нова стрічка новин -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <h2 class="text-3xl font-bold mb-6 text-center">Стрічка новин</h2>
+  <div id="news-feed" class="overflow-x-auto flex gap-6 py-4">
+    <!-- Картки новин підвантажуються тут -->
+  </div>
+</section>
+
+<script>
+// Приклад масиву новин (максимум 480 елементів)
+const newsFeedData = Array.from({length: 20}, (_, i) => ({
+  title: `Заголовок новини ${i + 1}`,
+  description: `Короткий опис новини ${i + 1}. Тут можна вставити трохи тексту про подію, щоб зацікавити читача.`,
+  image: 'https://picsum.photos/400/250?random=' + (i + 1),
+  url: '#'
+}));
+
+const feedContainer = document.getElementById('news-feed');
+
+newsFeedData.forEach((news, index) => {
+  const card = document.createElement('div');
+  card.className = 'min-w-[300px] bg-mono-card rounded-xl overflow-hidden border border-gray-800 hover:border-gray-600 transition-all duration-300 hover:shadow-lg flex-shrink-0 opacity-0 translate-y-10 animate-fade-in-up';
+  card.style.animationDelay = `${index * 50}ms`;
+
+  card.innerHTML = `
+    <img src="${news.image}" alt="" class="w-full h-40 object-cover transition-transform duration-700 hover:scale-105">
+    <div class="p-4 flex flex-col justify-between h-[150px]">
+      <h3 class="text-lg font-semibold mb-2 line-clamp-2">${news.title}</h3>
+      <p class="text-gray-400 line-clamp-3">${news.description}</p>
+      <a href="${news.url}" class="mt-3 inline-block text-sm px-3 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition">Читати</a>
+    </div>
+  `;
+  feedContainer.appendChild(card);
+});
+
+// Анімація підвантаження карток при скролі
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.remove('opacity-0', 'translate-y-10');
+    }
+  });
+}, { threshold: 0.2 });
+
+document.querySelectorAll('#news-feed > div').forEach(card => observer.observe(card));
+</script>

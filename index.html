@@ -248,3 +248,126 @@
     day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
   });
 </script>
+<script>
+  const API_KEY = 'BEkquRVH3PtoBeGk2DrPQGig2XalmtjiKKpgv0pa';
+  const BASE_URL = `https://api.thenewsapi.com/v1/news/all?api_token=${API_KEY}&language=uk,ru,en&limit=100`;
+
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  const openBtn = document.getElementById('open-sidebar');
+  const closeBtn = document.getElementById('close-sidebar');
+  const newsContainer = document.getElementById('news-container');
+  const loading = document.getElementById('loading');
+  const errorDiv = document.getElementById('error');
+
+  openBtn.addEventListener('click', () => { 
+    sidebar.classList.remove('-translate-x-full'); 
+    overlay.classList.remove('hidden'); 
+  });
+  closeBtn.addEventListener('click', closeMenu);
+  overlay.addEventListener('click', closeMenu);
+
+  function closeMenu() { 
+    sidebar.classList.add('-translate-x-full'); 
+    overlay.classList.add('hidden'); 
+  }
+
+  const categoryBtns = document.querySelectorAll('.category-btn');
+  categoryBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      categoryBtns.forEach(b => b.classList.remove('active', 'bg-gray-800'));
+      btn.classList.add('active', 'bg-gray-800');
+      loadNews(btn.dataset.category);
+    });
+  });
+
+  async function loadNews(category = 'all') {
+    newsContainer.innerHTML = '';
+    loading.classList.remove('hidden');
+    errorDiv.classList.add('hidden');
+
+    let url = BASE_URL;
+    if (category !== 'all') {
+      url += `&categories=${category}`;
+    }
+
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Помилка: ${res.status}`);
+      const data = await res.json();
+      const articles = data.data || [];
+
+      if (articles.length === 0) {
+        newsContainer.innerHTML = '<p class="col-span-full text-center text-gray-500 py-10">Новин у цій категорії немає зараз</p>';
+      } else {
+        articles.forEach((article, index) => {
+          const card = document.createElement('div');
+          card.className = `bg-mono-card rounded-xl overflow-hidden border border-gray-800 hover:border-gray-600 transition-all duration-300 hover:shadow-[0_0_25px_rgba(255,255,255,0.08)] opacity-0 translate-y-10 animate-fade-in-up`;
+          card.style.animationDelay = `${index * 80}ms`;
+
+          card.innerHTML = `
+            ${article.image_url ? `<img src="${article.image_url}" alt="" class="w-full h-56 object-cover transition-transform duration-700 hover:scale-105">` : ''}
+            <div class="p-6">
+              <span class="text-xs text-gray-500 block mb-2">${new Date(article.published_at).toLocaleString('uk-UA', { dateStyle: 'short', timeStyle: 'short' })} · ${article.source}</span>
+              <h3 class="text-xl font-semibold line-clamp-2 mb-3">${article.title || 'Без заголовка'}</h3>
+              <p class="text-gray-400 line-clamp-4 mb-4">${article.description || '...'}</p>
+              <button onclick="showFullArticle('${article.url}', this.closest('.bg-mono-card'))" class="inline-block text-mono-accent hover:underline font-medium cursor-pointer">Читати повністю на сайті →</button>
+            </div>
+          `;
+          newsContainer.appendChild(card);
+        });
+      }
+    } catch (err) {
+      errorDiv.textContent = 'Не вдалося завантажити новини. Перевірте інтернет або API-ключ.';
+      errorDiv.classList.remove('hidden');
+      console.error(err);
+    } finally {
+      loading.classList.add('hidden');
+    }
+  }
+
+  // Нова функція: показує повний текст статті в модальному вікні
+  async function showFullArticle(url, cardElement) {
+    try {
+      // Проксі для обходу CORS
+      const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+      const res = await fetch(proxyUrl);
+      if (!res.ok) throw new Error('Не вдалося завантажити статтю (можливо сайт блокує)');
+
+      const html = await res.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+
+      // Простий витяг тексту (можна покращити пізніше)
+      let fullText = '';
+      const paragraphs = doc.querySelectorAll('p, article p, div[class*="content"] p, div[class*="article"] p');
+      paragraphs.forEach(p => {
+        const text = p.innerText.trim();
+        if (text.length > 20) fullText += text + '\n\n';
+      });
+
+      if (!fullText) {
+        fullText = doc.body.innerText.trim().substring(0, 5000) + '... (повний текст не вдалося витягти чисто)';
+      }
+
+      // Модальне вікно з текстом
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4 overflow-y-auto';
+      modal.innerHTML = `
+        <div class="bg-mono-card rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-8 relative border border-gray-700">
+          <button onclick="this.closest('div.fixed').remove()" class="absolute top-4 right-6 text-gray-400 hover:text-white text-2xl">&times;</button>
+          <h2 class="text-2xl font-bold mb-6">${cardElement.querySelector('h3').innerText}</h2>
+          <div class="prose prose-invert max-w-none text-gray-300 leading-relaxed whitespace-pre-wrap">${fullText.replace(/\n/g, '<br><br>')}</div>
+          <p class="mt-8 text-sm text-gray-500">Джерело: ${cardElement.querySelector('span').innerText.split('·')[1].trim()}</p>
+          <a href="${url}" target="_blank" class="block mt-4 text-mono-accent hover:underline">Відкрити оригінал (якщо потрібно) →</a>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    } catch (err) {
+      alert('Не вдалося завантажити повну статтю: ' + err.message + '\nСпробуй відкрити оригінал.');
+    }
+  }
+
+  // Початкове завантаження
+  loadNews();
+</script>

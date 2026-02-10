@@ -169,4 +169,192 @@ loadNews();
 </script>
 
 </body>
+</html><!DOCTYPE html>
+<html lang="uk" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Новини — Сьогодні</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'mono-bg': '#0f0f0f',
+        'mono-text': '#e5e5e5',
+        'mono-card': '#1a1a1a',
+      },
+      animation: {
+        'fade-in-up': 'fadeInUp 0.8s ease-out forwards'
+      },
+      keyframes: {
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(30px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' }
+        }
+      }
+    }
+  }
+}
+</script>
+</head>
+
+<body class="bg-mono-bg text-mono-text min-h-screen">
+
+<!-- SIDEBAR -->
+<aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-mono-card border-r border-gray-800 p-6 hidden lg:block">
+  <h2 class="text-2xl font-bold mb-6">Новини</h2>
+  <div class="space-y-2">
+    <button data-cat="all" class="cat-btn w-full text-left px-3 py-2 bg-gray-800 rounded">Усі</button>
+    <button data-cat="politics" class="cat-btn w-full text-left px-3 py-2 hover:bg-gray-800 rounded">Політика</button>
+    <button data-cat="business" class="cat-btn w-full text-left px-3 py-2 hover:bg-gray-800 rounded">Економіка / Бізнес</button>
+    <button data-cat="tech" class="cat-btn w-full text-left px-3 py-2 hover:bg-gray-800 rounded">Технології</button>
+    <button data-cat="sports" class="cat-btn w-full text-left px-3 py-2 hover:bg-gray-800 rounded">Спорт</button>
+    <button data-cat="entertainment" class="cat-btn w-full text-left px-3 py-2 hover:bg-gray-800 rounded">Розваги</button>
+    <button data-cat="science" class="cat-btn w-full text-left px-3 py-2 hover:bg-gray-800 rounded">Наука</button>
+    <button data-cat="health" class="cat-btn w-full text-left px-3 py-2 hover:bg-gray-800 rounded">Здоров'я</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="lg:ml-64 p-6">
+  <h1 class="text-4xl font-bold mb-10 text-center">Свіжі новини</h1>
+  <div id="news" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  <p id="loading" class="text-center text-gray-400 mt-10 hidden">Завантаження новин...</p>
+
+  <!-- Горизонтальна стрічка останніх новин -->
+  <section class="max-w-full px-4 py-10">
+    <h2 class="text-2xl font-bold mb-6 text-center">Останні новини</h2>
+    <div id="news-feed" class="overflow-x-auto flex gap-5 pb-6 snap-x snap-mandatory"></div>
+  </section>
+</main>
+
+<!-- MODAL -->
+<div id="modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
+  <div class="bg-mono-card max-w-3xl w-full p-8 rounded-xl relative overflow-y-auto max-h-[90vh]">
+    <button onclick="closeModal()" class="absolute top-4 right-6 text-3xl font-bold">&times;</button>
+    <h2 id="modal-title" class="text-3xl font-bold mb-6"></h2>
+    <p id="modal-text" class="text-gray-300 leading-relaxed mb-6"></p>
+    <a id="modal-link" href="#" target="_blank" class="inline-block bg-gray-700 hover:bg-gray-600 text-white px-5 py-3 rounded-lg transition">Читати оригінал на сайті →</a>
+  </div>
+</div>
+
+<script>
+const API_KEY = 'BEkquRVH3PtoBeGk2DrPQGig2XalmtjiKKpgv0pa';
+const BASE_URL = `https://api.thenewsapi.com/v1/news/all?api_token=${API_KEY}&language=ru,en&limit=15&sort=published_at`;
+
+const newsEl = document.getElementById('news');
+const feedEl = document.getElementById('news-feed');
+const loadingEl = document.getElementById('loading');
+const modal = document.getElementById('modal');
+const modalTitle = document.getElementById('modal-title');
+const modalText = document.getElementById('modal-text');
+const modalLink = document.getElementById('modal-link');
+
+// Обробка кнопок категорій
+document.querySelectorAll('.cat-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('bg-gray-800'));
+    btn.classList.add('bg-gray-800');
+    loadNews(btn.dataset.cat);
+  };
+});
+
+// Завантаження новин
+async function loadNews(category = 'all') {
+  newsEl.innerHTML = '';
+  feedEl.innerHTML = '';
+  loadingEl.classList.remove('hidden');
+
+  try {
+    let url = BASE_URL;
+    if (category !== 'all') url += `&categories=${category}`;
+
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const data = await res.json();
+
+    if (!data.data || data.data.length === 0) {
+      newsEl.innerHTML = '<p class="text-center text-gray-500 col-span-full">Немає новин за обраною категорією</p>';
+      return;
+    }
+
+    // Головна сітка
+    data.data.forEach((article, index) => {
+      const div = document.createElement('div');
+      div.className = 'bg-mono-card p-5 rounded-xl border border-gray-800 opacity-0 translate-y-10 animate-fade-in-up flex flex-col';
+      div.style.animationDelay = `${index * 80}ms`;
+
+      const imgHtml = article.image_url
+        ? `<img src="${article.image_url}" alt="${article.title}" class="w-full h-48 object-cover rounded-lg mb-4">`
+        : `<div class="w-full h-48 bg-gray-800 rounded-lg mb-4 flex items-center justify-center text-gray-500">Без фото</div>`;
+
+      div.innerHTML = `
+        ${imgHtml}
+        <h3 class="text-xl font-semibold mb-3 line-clamp-2">${article.title}</h3>
+        <p class="text-gray-400 mb-4 line-clamp-3 flex-grow">${article.description || article.snippet || 'Немає опису'}</p>
+        <button class="underline text-blue-400 hover:text-blue-300 self-start mt-auto" 
+                onclick="openModal('${escapeHtml(article.title)}', '${escapeHtml(article.description || article.snippet || '')}', '${article.url}')">
+          Детальніше
+        </button>
+      `;
+      newsEl.appendChild(div);
+    });
+
+    // Горизонтальна стрічка — беремо перші 10
+    data.data.slice(0, 10).forEach((article, index) => {
+      const card = document.createElement('div');
+      card.className = 'min-w-[280px] bg-mono-card rounded-xl overflow-hidden border border-gray-800 flex-shrink-0 snap-start opacity-0 translate-y-6 animate-fade-in-up';
+      card.style.animationDelay = `${index * 80}ms`;
+
+      const img = article.image_url
+        ? `<img src="${article.image_url}" alt="" class="w-full h-40 object-cover">`
+        : `<div class="w-full h-40 bg-gray-800 flex items-center justify-center text-sm text-gray-500">Фото відсутнє</div>`;
+
+      card.innerHTML = `
+        ${img}
+        <div class="p-4">
+          <h4 class="font-semibold mb-2 line-clamp-2">${article.title}</h4>
+          <a href="${article.url}" target="_blank" class="text-xs text-blue-400 hover:underline">Читати →</a>
+        </div>
+      `;
+      feedEl.appendChild(card);
+    });
+
+  } catch (e) {
+    console.error(e);
+    newsEl.innerHTML = '<p class="text-center text-red-400 col-span-full">Помилка завантаження. Спробуйте пізніше.</p>';
+  } finally {
+    loadingEl.classList.add('hidden');
+  }
+}
+
+function escapeHtml(text) {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+function openModal(title, text, url) {
+  modalTitle.innerText = unescape(title);
+  modalText.innerText = unescape(text) || 'Опис відсутній';
+  modalLink.href = url;
+  modal.classList.remove('hidden');
+}
+
+function closeModal() {
+  modal.classList.add('hidden');
+}
+
+// Початкове завантаження
+loadNews();
+
+// Закриття модалки по кліку поза вікном
+modal.addEventListener('click', e => {
+  if (e.target === modal) closeModal();
+});
+</script>
+
+</body>
 </html>

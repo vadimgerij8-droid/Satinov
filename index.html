@@ -326,4 +326,45 @@ document.getElementById('addPost').addEventListener('click', () => {
     countEl.textContent = count;
   });
 });
-</script>
+</script><!-- Вхід користувача -->
+<div class="login-box" id="loginBox">
+  <input type="text" id="usernameInput" placeholder="Введіть своє ім'я">
+  <button id="saveUsername">Почати</button>
+</div>
+
+<style>
+.login-box {display:flex; gap:10px; margin-bottom:20px;}
+.login-box input {padding:8px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.08); color:#fff; outline:none; font-family:'Manrope',sans-serif;}
+.login-box input::placeholder {color:#aaa;}
+.login-box button {padding:8px 12px; border:none; border-radius:12px; background:#fff; color:#000; font-weight:700; cursor:pointer; transition:0.2s;}
+.login-box button:hover {background:#ddd;}
+</style>
+
+<script>
+// Перевіряємо, чи ім'я вже збережене
+let username = localStorage.getItem('fantasyasUsername');
+const loginBox = document.getElementById('loginBox');
+if(username){
+  loginBox.style.display = 'none';
+} 
+
+document.getElementById('saveUsername').addEventListener('click', ()=>{
+  const input = document.getElementById('usernameInput').value.trim();
+  if(!input) return;
+  username = input;
+  localStorage.setItem('fantasyasUsername', username);
+  loginBox.style.display = 'none';
+});
+</script>const post = document.createElement('div');
+post.className = 'post';
+post.innerHTML = `
+  <div class="post-header">
+    <div class="avatar"></div>
+    <div class="username">${username || 'Новий користувач'}</div>
+  </div>
+  <div class="post-content">${text}</div>
+  <div class="post-footer">
+    <button class="like-btn"><span class="heart"></span> <span class="count">0</span></button>
+    <button class="comment-btn"><span class="bubble"></span> <span class="count">0</span></button>
+  </div>
+`;

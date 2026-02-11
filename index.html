@@ -635,4 +635,185 @@ if (username) {
 }
 </script>
 </body>
-</html>
+</html><script>
+const KEY = {
+  USERNAME: 'fantasyasUsername',
+  USER: 'fantasyasUserData',
+  POSTS: 'fantasyas_posts_v4'
+};
+
+let username = localStorage.getItem(KEY.USERNAME);
+let userData = JSON.parse(localStorage.getItem(KEY.USER)) || {
+  avatar: '',
+  bio: '',
+  registered: new Date().toISOString().split('T')[0],
+  favorites: []
+};
+let posts = JSON.parse(localStorage.getItem(KEY.POSTS)) || [];
+
+const feed = document.getElementById('feed');
+const postText = document.getElementById('postText');
+
+function savePosts() {
+  localStorage.setItem(KEY.POSTS, JSON.stringify(posts));
+}
+
+function renderPosts(container = feed, onlyUser = false) {
+  container.innerHTML = '';
+
+  posts
+    .filter(p => !onlyUser || p.username === username)
+    .forEach(post => {
+
+      if (!post.reactions) {
+        post.reactions = { "❤️":0, "🔥":0, "😂":0, "😮":0 };
+      }
+
+      const isLiked = post.likedBy?.includes(username);
+      const isFavorite = userData.favorites?.includes(post.id);
+
+      const postEl = document.createElement('div');
+      postEl.className = 'post';
+
+      postEl.innerHTML = `
+        <div class="post-header">
+          <div class="avatar" style="background-image:url('${getAvatar(post.username)}')"></div>
+          <div class="username">${post.username}</div>
+        </div>
+
+        <div class="post-content" id="content-${post.id}">
+          ${post.text.replace(/\n/g,'<br>')}
+        </div>
+
+        <div class="post-meta">
+          ${new Date(post.created).toLocaleString('uk-UA',{dateStyle:'short',timeStyle:'short'})}
+        </div>
+
+        <div class="post-footer">
+          <button class="like-btn ${isLiked?'liked':''}">
+            ❤️ ${post.likes||0}
+          </button>
+
+          <button class="comment-btn">
+            💬 ${post.comments?.length||0}
+          </button>
+
+          <button class="favorite-btn ${isFavorite?'favorited':''}">
+            ⭐
+          </button>
+
+          ${post.username===username?'<button class="edit-btn">✏️</button>':''}
+        </div>
+
+        <div style="margin-top:10px; display:flex; gap:8px;">
+          ${Object.keys(post.reactions).map(e=>`
+            <span class="emoji-btn" data-e="${e}" style="cursor:pointer;">
+              ${e} ${post.reactions[e]}
+            </span>
+          `).join('')}
+        </div>
+
+        <div class="comments-section"></div>
+      `;
+
+      // LIKE
+      postEl.querySelector('.like-btn').addEventListener('click',()=>{
+        if(!username) return alert('Увійди');
+        if(!post.likedBy) post.likedBy=[];
+        const i = post.likedBy.indexOf(username);
+        if(i===-1){
+          post.likedBy.push(username);
+          post.likes=(post.likes||0)+1;
+        }else{
+          post.likedBy.splice(i,1);
+          post.likes--;
+        }
+        savePosts();
+        renderPosts(container,onlyUser);
+      });
+
+      // FAVORITE
+      postEl.querySelector('.favorite-btn').addEventListener('click',()=>{
+        if(!userData.favorites) userData.favorites=[];
+        const i = userData.favorites.indexOf(post.id);
+        if(i===-1) userData.favorites.push(post.id);
+        else userData.favorites.splice(i,1);
+        localStorage.setItem(KEY.USER,JSON.stringify(userData));
+        renderPosts(container,onlyUser);
+      });
+
+      // REACTIONS
+      postEl.querySelectorAll('.emoji-btn').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+          const e = btn.dataset.e;
+          post.reactions[e]++;
+          savePosts();
+          renderPosts(container,onlyUser);
+        });
+      });
+
+      // EDIT
+      if(post.username===username){
+        postEl.querySelector('.edit-btn').addEventListener('click',()=>{
+          const contentDiv = document.getElementById(`content-${post.id}`);
+          const textarea = document.createElement('textarea');
+          textarea.value = post.text;
+          textarea.style.width='100%';
+          textarea.style.marginTop='10px';
+
+          const saveBtn = document.createElement('button');
+          saveBtn.textContent='Зберегти';
+          saveBtn.style.marginTop='8px';
+
+          contentDiv.replaceWith(textarea);
+          textarea.after(saveBtn);
+
+          saveBtn.addEventListener('click',()=>{
+            post.text = textarea.value.trim();
+            savePosts();
+            renderPosts(container,onlyUser);
+          });
+        });
+      }
+
+      container.appendChild(postEl);
+    });
+}
+
+function getAvatar(uname){
+  if(uname===username) return userData.avatar||'';
+  return '';
+}
+
+// ADD POST
+document.getElementById('addPost').addEventListener('click',()=>{
+  const text = postText.value.trim();
+  if(!text||!username) return;
+
+  posts.unshift({
+    id:Date.now(),
+    username,
+    text,
+    likes:0,
+    likedBy:[],
+    comments:[],
+    reactions:{ "❤️":0,"🔥":0,"😂":0,"😮":0 },
+    created:new Date().toISOString()
+  });
+
+  postText.value='';
+  savePosts();
+  renderPosts();
+});
+
+// PROFILE UPDATE
+function updateProfile(){
+  document.getElementById('profilePosts').innerHTML='';
+  renderPosts(document.getElementById('profilePosts'),true);
+}
+
+// START
+if(username){
+  renderPosts();
+}
+</script>

@@ -1,309 +1,590 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8">
-<title>FANTASYAS</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FANTASYAS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    * {margin:0; padding:0; box-sizing:border-box;}
+    body {
+      font-family:'Manrope',sans-serif; 
+      background:#000; 
+      color:#fff; 
+      min-height:100vh; 
+      overflow-x:hidden;
+      transition: background 0.4s, color 0.4s;
+    }
+    body.light {
+      background: #f8f9fa;
+      color: #111;
+    }
+    body.large-font {
+      font-size: 1.12rem;
+    }
+    .top-bar {
+      position:fixed; top:0; left:0; right:0; height:80px; 
+      display:flex; align-items:center; justify-content:space-between; 
+      padding:0 20px; 
+      background:rgba(0,0,0,0.4); backdrop-filter:blur(10px); 
+      border-bottom:1px solid rgba(255,255,255,0.08); z-index:1000;
+    }
+    body.light .top-bar {background:rgba(255,255,255,0.7); border-bottom:1px solid rgba(0,0,0,0.08);}
+    .site-name {
+      font-size:1.8rem; font-weight:800; 
+      background:linear-gradient(90deg,#fff,#aaa); 
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    }
+    body.light .site-name {background:linear-gradient(90deg,#000,#444); -webkit-text-fill-color:transparent;}
+    .burger {width:30px; height:22px; display:flex; flex-direction:column; justify-content:space-between; cursor:pointer;}
+    .burger span {height:3px; width:100%; background:#fff; border-radius:3px; transition:0.4s;}
+    body.light .burger span {background:#000;}
+    .burger.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
+    .burger.active span:nth-child(2){opacity:0;}
+    .burger.active span:nth-child(3){transform:rotate(-45deg) translate(6px,-6px);}
+    .sidebar {
+      position:fixed; top:0; left:-280px; width:280px; height:100%; 
+      background:#000; padding:120px 40px 40px; 
+      border-right:1px solid rgba(255,255,255,0.06); transition:0.4s; z-index:900;
+    }
+    body.light .sidebar {background:#fff; border-right:1px solid rgba(0,0,0,0.06);}
+    .sidebar.active {left:0;}
+    .sidebar a {
+      display:block; color:#aaa; text-decoration:none; 
+      font-size:1.25rem; font-weight:700; margin:1.4rem 0; 
+      transition:0.3s; cursor:pointer;
+    }
+    body.light .sidebar a {color:#555;}
+    .sidebar a:hover{color:#fff; transform:translateX(8px);}
+    body.light .sidebar a:hover {color:#000;}
+    .main-content {margin-top:100px; padding:20px 25px;}
+    .section {display:none; padding:0 8px;}
+    .section.active {display:block;}
+    .login-box, .new-post, .settings, .profile-edit-form {
+      margin-bottom:20px; display:flex; flex-direction:column; gap:12px;
+      background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); 
+      border-radius:16px; padding:20px;
+    }
+    body.light .login-box, body.light .new-post, body.light .settings, body.light .profile-edit-form {
+      background:rgba(0,0,0,0.03); border:1px solid rgba(0,0,0,0.08);
+    }
+    input, textarea {
+      padding:12px; border-radius:12px; 
+      border:1px solid rgba(255,255,255,0.1); 
+      background:rgba(255,255,255,0.08); color:#fff; 
+      outline:none; font-family:'Manrope',sans-serif; resize:vertical;
+    }
+    body.light input, body.light textarea {
+      background:#fff; color:#000; border:1px solid #ddd;
+    }
+    input::placeholder, textarea::placeholder {color:#aaa;}
+    button {
+      width:fit-content; padding:10px 18px; border:none; border-radius:12px; 
+      background:#fff; color:#000; font-weight:700; cursor:pointer; transition:0.2s;
+    }
+    body.light button {background:#000; color:#fff;}
+    button:hover {opacity:0.9;}
+    .danger-btn {background:#c53030 !important; color:#fff !important;}
+    .danger-btn:hover {background:#a71d2a !important;}
+    .feed {display:flex; flex-direction:column; gap:20px;}
+    .post {
+      background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); 
+      border-radius:16px; padding:18px;
+    }
+    body.light .post {background:rgba(0,0,0,0.03); border:1px solid rgba(0,0,0,0.08);}
+    .post-header {display:flex; align-items:center; gap:12px; margin-bottom:12px;}
+    .avatar {
+      width:48px; height:48px; background:#444; border-radius:50%; 
+      background-size:cover; background-position:center;
+    }
+    body.light .avatar {background:#ccc;}
+    .username {font-weight:700; font-size:1.05rem;}
+    .post-content {font-size:0.95rem; line-height:1.5; margin-bottom:12px;}
+    .post-meta {color:#888; font-size:0.8rem; margin-top:4px;}
+    .post-footer {display:flex; gap:20px; margin-top:12px;}
+    .post-footer button {background:none; border:none; color:#aaa; cursor:pointer; display:flex; align-items:center; gap:6px;}
+    body.light .post-footer button {color:#666;}
+    .post-footer button:hover {color:#fff;}
+    body.light .post-footer button:hover {color:#000;}
+    .heart, .bubble, .star {
+      width:18px; height:18px; display:inline-block; background-size:contain; background-repeat:no-repeat;
+    }
+    .heart {background:url('data:image/svg+xml;utf8,<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21C12 21 4 13.5 4 8.5C4 5.42 6.42 3 9.5 3C11.24 3 12.91 3.81 13.5 5.09C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 13.5 15 21 15 21H12Z"/></svg>') center/contain;}
+    .bubble {background:url('data:image/svg+xml;utf8,<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/></svg>') center/contain;}
+    .star {background:url('data:image/svg+xml;utf8,<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>') center/contain;}
+    .liked .heart {color:#ff3366; fill:#ff3366;}
+    .favorited .star {color:#ffc107; fill:#ffc107;}
+    .comments-section {margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.08);}
+    body.light .comments-section {border-top:1px solid rgba(0,0,0,0.08);}
+    .comment {font-size:0.9rem; margin:8px 0; padding-left:12px; border-left:3px solid #555;}
+    body.light .comment {border-left:3px solid #aaa;}
+    .comment strong {color:#ddd;}
+    body.light .comment strong {color:#333;}
+    .comment-input {display:flex; gap:10px; margin-top:12px;}
+    .comment-input input {flex:1;}
+    .modal {
+      position:fixed; inset:0; background:rgba(0,0,0,0.7); 
+      display:none; align-items:center; justify-content:center; z-index:2000;
+    }
+    .modal.active {display:flex;}
+    .modal-content {
+      background:#111; width:90%; max-width:500px; border-radius:16px; 
+      padding:28px; position:relative; border:1px solid rgba(255,255,255,0.15);
+    }
+    body.light .modal-content {background:#fff; border:1px solid #ddd; color:#000;}
+    .close-modal {position:absolute; top:12px; right:16px; font-size:1.8rem; cursor:pointer; color:#aaa;}
+    body.light .close-modal {color:#555;}
+    .profile-header {display:flex; align-items:center; gap:20px; margin-bottom:30px; flex-wrap:wrap;}
+    .profile-avatar {width:120px; height:120px; border-radius:50%; background:#333; background-size:cover;}
+    body.light .profile-avatar {background:#ddd;}
+    .profile-info h2 {font-size:2rem;}
+    .profile-bio {color:#bbb; margin:12px 0; line-height:1.6;}
+    body.light .profile-bio {color:#444;}
+    .profile-stats {display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:16px; margin:30px 0;}
+    .stat-card {
+      background:rgba(255,255,255,0.06); padding:20px; border-radius:12px; 
+      text-align:center; border:1px solid rgba(255,255,255,0.08);
+    }
+    body.light .stat-card {background:rgba(0,0,0,0.04); border:1px solid rgba(0,0,0,0.1);}
+    .stat-number {font-size:2.2rem; font-weight:800;}
+    .stat-label {color:#aaa; font-size:0.95rem;}
+    body.light .stat-label {color:#666;}
 
-<style>
-:root{
-  --bg:#0f1220;
-  --card:#1b1f3a;
-  --accent:#7b8cff;
-  --text:#ffffff;
-  --muted:#9aa0ff;
-}
-body{
-  margin:0;
-  font-family:system-ui, sans-serif;
-  background:var(--bg);
-  color:var(--text);
-}
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:14px 20px;
-  background:#0b0e1a;
-}
-header h1{margin:0;font-size:22px;color:var(--accent);}
-nav{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-nav button{
-  background:none;
-  border:none;
-  color:var(--text);
-  cursor:pointer;
-  font-size:14px;
-  opacity:.85;
-}
-nav button:hover{opacity:1;color:var(--accent);}
-main{
-  padding:20px;
-  max-width:1100px;
-  margin:auto;
-}
-section{display:none;}
-section.active{display:block;}
-
-.card{
-  background:var(--card);
-  padding:15px;
-  border-radius:14px;
-  margin-bottom:15px;
-}
-input, textarea, select{
-  width:100%;
-  padding:10px;
-  border-radius:10px;
-  border:none;
-  background:#10132b;
-  color:white;
-  margin-bottom:8px;
-}
-button.action{
-  background:var(--accent);
-  border:none;
-  padding:10px 14px;
-  border-radius:12px;
-  color:#000;
-  cursor:pointer;
-}
-button.action.secondary{
-  background:#2a2f66;
-  color:white;
-}
-
-.post{
-  background:#131740;
-  padding:12px;
-  border-radius:12px;
-  margin-bottom:10px;
-}
-.post small{opacity:.6}
-.list-item{
-  padding:10px;
-  background:#131740;
-  border-radius:10px;
-  margin-bottom:6px;
-}
-.badge{
-  font-size:12px;
-  background:#2a2f66;
-  padding:2px 8px;
-  border-radius:20px;
-}
-</style>
+    @media(max-width:900px){
+      .sidebar{width:100%; left:-100%; padding:100px 20px; border-right:none; border-bottom:1px solid rgba(255,255,255,0.06);}
+      .sidebar.active{left:0;}
+    }
+  </style>
 </head>
-
 <body>
 
-<header>
-  <h1>FANTASYAS</h1>
-  <nav>
-    <button onclick="openTab('home')">Головна</button>
-    <button onclick="openTab('profile')">Профіль</button>
-    <button onclick="openTab('settings')">Налаштування</button>
-    <button onclick="openTab('search')">Пошук</button>
-    <button onclick="openTab('messages')">Повідомлення</button>
-    <button onclick="openTab('notifications')">Сповіщення</button>
-    <button onclick="openTab('groups')">Групи</button>
-    <button onclick="openTab('events')">Події</button>
-    <button onclick="openTab('polls')">Опитування</button>
-    <button onclick="openTab('gallery')">Галерея</button>
-    <button onclick="openTab('friends')">Друзі</button>
-    <button onclick="openTab('shop')">Магазин</button>
-    <button onclick="openTab('about')">Про нас</button>
-    <button onclick="openTab('services')">Послуги</button>
-    <button onclick="openTab('portfolio')">Портфоліо</button>
-    <button onclick="openTab('contacts')">Контакти</button>
-  </nav>
-</header>
+<div class="top-bar">
+  <div class="burger" id="burger"><span></span><span></span><span></span></div>
+  <div class="site-name">FANTASYAS</div>
+</div>
 
-<main>
+<nav class="sidebar" id="sidebar">
+  <a data-section="home">Головна</a>
+  <a data-section="profile">Профіль</a>
+  <a data-section="settings">Налаштування</a>
+  <a href="#">Про нас</a>
+  <a href="#">Послуги</a>
+  <a href="#">Портфоліо</a>
+  <a href="#">Контакти</a>
+</nav>
 
-<section id="home" class="active">
-  <div class="card">
-    <h2>Почати</h2>
-    <textarea id="postText" placeholder="Напиши пост з #хештегами або @згадками"></textarea>
-    <button class="action" onclick="addPost()">Опублікувати</button>
+<main class="main-content">
+
+  <!-- ── Головна ── -->
+  <div id="home" class="section active">
+    <div class="login-box" id="loginBox">
+      <input type="text" id="usernameInput" placeholder="Введіть своє ім'я">
+      <button id="saveUsername">Почати</button>
+    </div>
+
+    <div class="new-post" id="newPostBox" style="display:none;">
+      <textarea id="postText" placeholder="Що у тебе на думці?..." rows="4"></textarea>
+      <button id="addPost">Опублікувати</button>
+    </div>
+
+    <div class="feed" id="feed"></div>
   </div>
-  <div id="feed"></div>
-</section>
 
-<section id="profile">
-  <div class="card">
-    <h2>Профіль</h2>
-    <p>Пости: <span id="statPosts">0</span></p>
-    <p>Друзі: <span id="statFriends">0</span></p>
-    <p>Фоловери: <span id="statFollowers">0</span></p>
+  <!-- ── Профіль ── -->
+  <div id="profile" class="section">
+    <div class="profile-header">
+      <div class="profile-avatar" id="profileAvatar"></div>
+      <div>
+        <h2 id="profileUsernameDisplay"></h2>
+        <p class="profile-meta">Зареєстровано: <span id="registerDate"></span></p>
+      </div>
+      <button id="editProfileBtn">Редагувати профіль</button>
+    </div>
+
+    <p class="profile-bio" id="profileBio">Немає опису...</p>
+
+    <div class="profile-stats">
+      <div class="stat-card"><div class="stat-number" id="postCount">0</div><div class="stat-label">постів</div></div>
+      <div class="stat-card"><div class="stat-number" id="likeCount">0</div><div class="stat-label">лайків отримано</div></div>
+      <div class="stat-card"><div class="stat-number" id="commentCount">0</div><div class="stat-label">коментарів</div></div>
+      <div class="stat-card"><div class="stat-number" id="favoriteCount">0</div><div class="stat-label">в обраному</div></div>
+    </div>
+
+    <h3 style="margin:40px 0 20px;">Твої пости</h3>
+    <div id="profilePosts" class="feed"></div>
   </div>
-</section>
 
-<section id="settings">
-  <div class="card">
+  <!-- ── Налаштування ── -->
+  <div id="settings" class="section">
     <h2>Налаштування</h2>
-    <select id="fontSize" onchange="saveSettings()">
-      <option value="normal">Normal</option>
-      <option value="large">Large</option>
-      <option value="xlarge">Extra Large</option>
-    </select>
-    <select id="theme" onchange="saveSettings()">
-      <option value="auto">Auto</option>
-      <option value="dark">Dark</option>
-      <option value="light">Light</option>
-    </select>
-    <button class="action secondary" onclick="resetAccount()">Видалити акаунт</button>
+    <div class="settings">
+      <label>Ім'я користувача</label>
+      <input type="text" id="changeUsername" placeholder="Нове ім'я">
+
+      <label>Посилання на аватар (URL)</label>
+      <input type="url" id="changeAvatar" placeholder="https://example.com/avatar.jpg">
+
+      <label>Про себе / біо</label>
+      <textarea id="changeBio" placeholder="Розкажи про себе..." rows="4"></textarea>
+
+      <div style="margin:20px 0;">
+        <label>Тема:</label><br>
+        <select id="themeSelect">
+          <option value="dark">Темна (за замовчуванням)</option>
+          <option value="light">Світла</option>
+        </select>
+      </div>
+
+      <div style="margin:20px 0;">
+        <label>Розмір тексту:</label><br>
+        <select id="fontSizeSelect">
+          <option value="normal">Звичайний</option>
+          <option value="large">Великий</option>
+        </select>
+      </div>
+
+      <button id="saveSettings">Зберегти зміни</button>
+
+      <hr style="margin:40px 0; border-color:rgba(255,255,255,0.1);">
+
+      <button class="danger-btn" id="logoutBtn">Вийти з акаунту</button>
+      <button class="danger-btn" id="deleteAccountBtn">Видалити акаунт</button>
+      <button class="danger-btn" id="clearAllData">Очистити ВСІ дані сайту</button>
+    </div>
   </div>
-</section>
-
-<section id="search">
-  <div class="card">
-    <h2>Пошук</h2>
-    <input oninput="searchPosts(this.value)" placeholder="Пошук...">
-    <div id="searchResults"></div>
-  </div>
-</section>
-
-<section id="messages">
-  <div class="card">
-    <h2>DM</h2>
-    <textarea id="dmText" placeholder="Повідомлення..."></textarea>
-    <button class="action" onclick="sendDM()">Надіслати</button>
-    <div id="dmList"></div>
-  </div>
-</section>
-
-<section id="notifications">
-  <div class="card">
-    <h2>Сповіщення</h2>
-    <div id="notifyList"></div>
-  </div>
-</section>
-
-<section id="groups">
-  <div class="card">
-    <h2>Групи</h2>
-    <input id="groupName" placeholder="Назва групи">
-    <button class="action" onclick="addGroup()">Створити</button>
-    <div id="groupList"></div>
-  </div>
-</section>
-
-<section id="events">
-  <div class="card">
-    <h2>Події</h2>
-    <input id="eventName" placeholder="Назва події">
-    <button class="action" onclick="addEvent()">Створити</button>
-    <div id="eventList"></div>
-  </div>
-</section>
-
-<section id="polls">
-  <div class="card">
-    <h2>Опитування</h2>
-    <input id="pollQ" placeholder="Питання">
-    <button class="action" onclick="addPoll()">Створити</button>
-    <div id="pollList"></div>
-  </div>
-</section>
-
-<section id="gallery">
-  <div class="card"><h2>Галерея</h2><p>Медіа підтримується</p></div>
-</section>
-
-<section id="friends">
-  <div class="card">
-    <h2>Друзі</h2>
-    <button class="action" onclick="addFriend()">Додати друга</button>
-    <div id="friendList"></div>
-  </div>
-</section>
-
-<section id="shop">
-  <div class="card">
-    <h2>Магазин</h2>
-    <div class="list-item">VIP ⭐ <span class="badge">Симуляція</span></div>
-    <div class="list-item">Скін 🎨 <span class="badge">Симуляція</span></div>
-  </div>
-</section>
-
-<section id="about"><div class="card"><h2>Про нас</h2><p>FANTASYAS — платформа нового покоління.</p></div></section>
-<section id="services"><div class="card"><h2>Послуги</h2></div></section>
-<section id="portfolio"><div class="card"><h2>Портфоліо</h2></div></section>
-<section id="contacts"><div class="card"><h2>Контакти</h2></div></section>
 
 </main>
 
+<!-- Модалка редагування профілю -->
+<div class="modal" id="editProfileModal">
+  <div class="modal-content">
+    <span class="close-modal" id="closeModal">&times;</span>
+    <h2>Редагувати профіль</h2>
+    <div class="profile-edit-form">
+      <label>Аватар (URL)</label>
+      <input type="url" id="editAvatar" placeholder="https://...">
+
+      <label>Біо</label>
+      <textarea id="editBio" rows="5"></textarea>
+
+      <button id="saveProfileEdit">Зберегти</button>
+    </div>
+  </div>
+</div>
+
 <script>
-const $ = id => document.getElementById(id);
-let data = JSON.parse(localStorage.getItem("fantasyas")) || {
- posts:[], dms:[], notifications:[],
- groups:[], events:[], polls:[],
- friends:0, followers:0
+// ────────────────────────────────────────────────
+const KEY = {
+  USERNAME: 'fantasyasUsername',
+  USER: 'fantasyasUserData',
+  POSTS: 'fantasyas_posts_v3'
 };
 
-function save(){localStorage.setItem("fantasyas",JSON.stringify(data));}
+let username = localStorage.getItem(KEY.USERNAME);
+let userData = JSON.parse(localStorage.getItem(KEY.USER)) || {
+  avatar: '',
+  bio: '',
+  registered: new Date().toISOString().split('T')[0],
+  favorites: []
+};
+let posts = JSON.parse(localStorage.getItem(KEY.POSTS)) || [];
 
-function openTab(id){
- document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
- $(id).classList.add("active");
+// Елементи
+const burger = document.getElementById('burger');
+const sidebar = document.getElementById('sidebar');
+const sections = document.querySelectorAll('.section');
+const loginBox = document.getElementById('loginBox');
+const newPostBox = document.getElementById('newPostBox');
+const feed = document.getElementById('feed');
+const postText = document.getElementById('postText');
+const modal = document.getElementById('editProfileModal');
+
+// ── Бургер та навігація ──
+burger.addEventListener('click', () => {
+  burger.classList.toggle('active');
+  sidebar.classList.toggle('active');
+});
+
+function showSection(id) {
+  sections.forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  sidebar.classList.remove('active');
+  burger.classList.remove('active');
+  if (id === 'profile') updateProfile();
 }
 
-function addPost(){
- const t=$("postText").value;
- if(!t) return;
- data.posts.unshift(t);
- data.notifications.unshift("Новий пост");
- $("postText").value="";
- save();render();
+document.querySelectorAll('[data-section]').forEach(el => {
+  el.addEventListener('click', () => showSection(el.dataset.section));
+});
+
+// ── Тема та шрифт ──
+function applyPreferences() {
+  const theme = localStorage.getItem('fantasyasTheme') || 'dark';
+  const font = localStorage.getItem('fantasyasFontSize') || 'normal';
+  document.body.classList.toggle('light', theme === 'light');
+  document.body.classList.toggle('large-font', font === 'large');
+  document.getElementById('themeSelect').value = theme;
+  document.getElementById('fontSizeSelect').value = font;
 }
 
-function render(){
- $("feed").innerHTML=data.posts.map(p=>`<div class="post">${p}</div>`).join("");
- $("statPosts").textContent=data.posts.length;
- $("statFriends").textContent=data.friends;
- $("statFollowers").textContent=data.followers;
- $("notifyList").innerHTML=data.notifications.map(n=>`<div class="list-item">${n}</div>`).join("");
- $("dmList").innerHTML=data.dms.map(d=>`<div class="list-item">${d}</div>`).join("");
- $("groupList").innerHTML=data.groups.map(g=>`<div class="list-item">${g}</div>`).join("");
- $("eventList").innerHTML=data.events.map(e=>`<div class="list-item">${e}</div>`).join("");
- $("pollList").innerHTML=data.polls.map(p=>`<div class="list-item">${p} (0 голосів)</div>`).join("");
- $("friendList").innerHTML=`Друзів: ${data.friends}`;
+applyPreferences();
+
+// ── Авторизація ──
+if (username) {
+  loginBox.style.display = 'none';
+  newPostBox.style.display = 'flex';
+  applyPreferences();
+} else {
+  newPostBox.style.display = 'none';
 }
 
-function searchPosts(q){
- $("searchResults").innerHTML=data.posts.filter(p=>p.includes(q))
- .map(p=>`<div class="list-item">${p}</div>`).join("");
+document.getElementById('saveUsername').addEventListener('click', () => {
+  const val = document.getElementById('usernameInput').value.trim();
+  if (!val) return alert('Введи ім’я');
+  username = val;
+  localStorage.setItem(KEY.USERNAME, username);
+  if (!userData.registered) userData.registered = new Date().toISOString().split('T')[0];
+  localStorage.setItem(KEY.USER, JSON.stringify(userData));
+  loginBox.style.display = 'none';
+  newPostBox.style.display = 'flex';
+  renderPosts();
+});
+
+// ── Додавання поста ──
+document.getElementById('addPost').addEventListener('click', () => {
+  const text = postText.value.trim();
+  if (!text || !username) return;
+  posts.unshift({
+    id: Date.now(),
+    username,
+    text,
+    likes: 0,
+    likedBy: [],
+    comments: [],
+    created: new Date().toISOString()
+  });
+  savePosts();
+  postText.value = '';
+  renderPosts();
+});
+
+// ── Рендер стрічки ──
+function renderPosts(container = feed) {
+  container.innerHTML = '';
+  posts.forEach(post => {
+    const isLiked = post.likedBy?.includes(username);
+    const isFavorite = userData.favorites?.includes(post.id);
+    const postEl = document.createElement('div');
+    postEl.className = 'post';
+    postEl.innerHTML = `
+      <div class="post-header">
+        <div class="avatar" style="background-image:url('${getAvatar(post.username)}')"></div>
+        <div class="username">${post.username}</div>
+      </div>
+      <div class="post-content">${post.text.replace(/\n/g, '<br>')}</div>
+      <div class="post-meta">${new Date(post.created).toLocaleString('uk-UA', {dateStyle:'short', timeStyle:'short'})}</div>
+      <div class="post-footer">
+        <button class="like-btn ${isLiked ? 'liked' : ''}">
+          <span class="heart"></span> ${post.likes || 0}
+        </button>
+        <button class="comment-btn">
+          <span class="bubble"></span> ${post.comments?.length || 0}
+        </button>
+        <button class="favorite-btn ${isFavorite ? 'favorited' : ''}">
+          <span class="star"></span> ${isFavorite ? 'В обраному' : 'Додати в обране'}
+        </button>
+      </div>
+      <div class="comments-section" id="comments-${post.id}"></div>
+      <div class="comment-input">
+        <input type="text" placeholder="Коментар..." class="comment-inp"/>
+        <button class="add-comment-btn">→</button>
+      </div>
+    `;
+
+    // Лайк
+    postEl.querySelector('.like-btn').addEventListener('click', () => {
+      if (!username) return alert('Увійди');
+      if (!post.likedBy) post.likedBy = [];
+      const idx = post.likedBy.indexOf(username);
+      if (idx === -1) {
+        post.likedBy.push(username);
+        post.likes = (post.likes || 0) + 1;
+      } else {
+        post.likedBy.splice(idx, 1);
+        post.likes--;
+      }
+      savePosts();
+      renderPosts(container);
+      if (container !== feed) updateProfile();
+    });
+
+    // Коментар
+    const inp = postEl.querySelector('.comment-inp');
+    const btn = postEl.querySelector('.add-comment-btn');
+    btn.addEventListener('click', () => {
+      const text = inp.value.trim();
+      if (!text || !username) return;
+      if (!post.comments) post.comments = [];
+      post.comments.push({user: username, text, time: Date.now()});
+      inp.value = '';
+      savePosts();
+      renderComments(post.id, postEl.querySelector(`#comments-${post.id}`));
+      renderPosts(container);
+    });
+
+    // Обране
+    postEl.querySelector('.favorite-btn').addEventListener('click', () => {
+      if (!username) return alert('Увійди');
+      if (!userData.favorites) userData.favorites = [];
+      const idx = userData.favorites.indexOf(post.id);
+      if (idx === -1) {
+        userData.favorites.push(post.id);
+      } else {
+        userData.favorites.splice(idx, 1);
+      }
+      localStorage.setItem(KEY.USER, JSON.stringify(userData));
+      renderPosts(container);
+      if (container !== feed) updateProfile();
+    });
+
+    renderComments(post.id, postEl.querySelector(`#comments-${post.id}`));
+    container.prepend(postEl);
+  });
 }
 
-function sendDM(){
- data.dms.push($("dmText").value);
- $("dmText").value="";
- save();render();
+function renderComments(postId, container) {
+  container.innerHTML = '';
+  const post = posts.find(p => p.id === postId);
+  (post?.comments || []).forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'comment';
+    div.innerHTML = `<strong>${c.user}</strong>: ${c.text}`;
+    container.appendChild(div);
+  });
 }
 
-function addGroup(){data.groups.push($("groupName").value);save();render();}
-function addEvent(){data.events.push($("eventName").value);save();render();}
-function addPoll(){data.polls.push($("pollQ").value);save();render();}
-function addFriend(){data.friends++;data.followers++;save();render();}
-
-function saveSettings(){
- document.body.style.fontSize = $("fontSize").value==="xlarge"?"20px":"";
+function getAvatar(uname) {
+  if (uname === username) return userData.avatar || '';
+  return '';
 }
 
-function resetAccount(){
- if(confirm("Точно?")){
- localStorage.removeItem("fantasyas");
- location.reload();
- }
+// ── Профіль ──
+function updateProfile() {
+  if (!username) return;
+
+  document.getElementById('profileUsernameDisplay').textContent = username;
+  document.getElementById('registerDate').textContent = userData.registered || 'невідомо';
+  document.getElementById('profileBio').textContent = userData.bio || 'Немає опису...';
+  document.getElementById('profileAvatar').style.backgroundImage = `url('${userData.avatar || ''}')`;
+
+  let postCount = 0, likeCount = 0, commentCount = 0;
+  posts.forEach(p => {
+    if (p.username === username) {
+      postCount++;
+      likeCount += p.likes || 0;
+      commentCount += p.comments?.length || 0;
+    }
+  });
+
+  document.getElementById('postCount').textContent = postCount;
+  document.getElementById('likeCount').textContent = likeCount;
+  document.getElementById('commentCount').textContent = commentCount;
+  document.getElementById('favoriteCount').textContent = userData.favorites?.length || 0;
+
+  // Твої пости
+  const profilePosts = document.getElementById('profilePosts');
+  profilePosts.innerHTML = '';
+  const myPosts = posts.filter(p => p.username === username);
+  renderPosts(profilePosts); // але тільки мої пости вже відфільтровані в логіці вище
 }
 
-render();
+// ── Налаштування ──
+document.getElementById('saveSettings').addEventListener('click', () => {
+  const newName = document.getElementById('changeUsername').value.trim();
+  const newAvatar = document.getElementById('changeAvatar').value.trim();
+  const newBio = document.getElementById('changeBio').value.trim();
+
+  if (newName && newName !== username) {
+    if (!confirm(`Змінити ім'я на "${newName}"?`)) return;
+    posts.forEach(p => {
+      if (p.username === username) p.username = newName;
+      p.comments?.forEach(c => { if (c.user === username) c.user = newName; });
+    });
+    username = newName;
+    localStorage.setItem(KEY.USERNAME, username);
+  }
+
+  userData.avatar = newAvatar;
+  userData.bio = newBio;
+  localStorage.setItem(KEY.USER, JSON.stringify(userData));
+  localStorage.setItem(KEY.POSTS, JSON.stringify(posts));
+
+  alert('Зміни збережено!');
+  updateProfile();
+  renderPosts();
+});
+
+document.getElementById('themeSelect').addEventListener('change', e => {
+  localStorage.setItem('fantasyasTheme', e.target.value);
+  applyPreferences();
+});
+
+document.getElementById('fontSizeSelect').addEventListener('change', e => {
+  localStorage.setItem('fantasyasFontSize', e.target.value);
+  applyPreferences();
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  if (confirm('Вийти?')) {
+    localStorage.removeItem(KEY.USERNAME);
+    location.reload();
+  }
+});
+
+document.getElementById('deleteAccountBtn').addEventListener('click', () => {
+  if (confirm('Видалити акаунт? Всі твої пости та коментарі будуть видалені!')) {
+    posts = posts.filter(p => p.username !== username);
+    localStorage.removeItem(KEY.USERNAME);
+    localStorage.removeItem(KEY.USER);
+    savePosts();
+    location.reload();
+  }
+});
+
+document.getElementById('clearAllData').addEventListener('click', () => {
+  if (confirm('Очистити ВСІ дані назавжди?')) {
+    localStorage.clear();
+    location.reload();
+  }
+});
+
+// ── Редагування профілю (модалка) ──
+document.getElementById('editProfileBtn').addEventListener('click', () => {
+  document.getElementById('editAvatar').value = userData.avatar || '';
+  document.getElementById('editBio').value = userData.bio || '';
+  modal.classList.add('active');
+});
+
+document.getElementById('closeModal').addEventListener('click', () => modal.classList.remove('active'));
+document.getElementById('saveProfileEdit').addEventListener('click', () => {
+  userData.avatar = document.getElementById('editAvatar').value.trim();
+  userData.bio = document.getElementById('editBio').value.trim();
+  localStorage.setItem(KEY.USER, JSON.stringify(userData));
+  modal.classList.remove('active');
+  updateProfile();
+  alert('Профіль оновлено!');
+});
+
+// ── Збереження постів ──
+function savePosts() {
+  localStorage.setItem(KEY.POSTS, JSON.stringify(posts));
+}
+
+// Початок
+if (username) {
+  renderPosts();
+  updateProfile();
+}
 </script>
-
 </body>
 </html>

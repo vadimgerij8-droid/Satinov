@@ -193,4 +193,75 @@ document.getElementById("searchInput").addEventListener("input", function() {
 </script>
 
 </body>
-</html>
+</html><!-- Стрічка постів -->
+<div class="feed">
+  <div class="post">
+    <div class="post-header">
+      <div class="avatar"></div>
+      <div class="username">User123</div>
+    </div>
+    <div class="post-content">
+      Привіт! Це твій перший пост у FANTASYAS.
+    </div>
+    <div class="post-footer">
+      <button class="like-btn"><span class="heart"></span> <span class="count">0</span></button>
+      <button class="comment-btn"><span class="bubble"></span> <span class="count">0</span></button>
+    </div>
+  </div>
+
+  <div class="post">
+    <div class="post-header">
+      <div class="avatar"></div>
+      <div class="username">CreativeUser</div>
+    </div>
+    <div class="post-content">
+      Ще один приклад поста в стрічці.
+    </div>
+    <div class="post-footer">
+      <button class="like-btn"><span class="heart"></span> <span class="count">0</span></button>
+      <button class="comment-btn"><span class="bubble"></span> <span class="count">0</span></button>
+    </div>
+  </div>
+</div>
+
+<style>
+.feed {display:flex; flex-direction:column; gap:20px;}
+.post {background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:15px;}
+.post-header {display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+.avatar {width:35px; height:35px; background:#555; border-radius:50%;}
+.username {font-weight:700; font-size:0.95rem;}
+.post-content {font-size:0.9rem; margin-bottom:10px;}
+.post-footer {display:flex; gap:15px;}
+.post-footer button {display:flex; align-items:center; gap:5px; background:none; border:none; color:#aaa; font-size:0.9rem; cursor:pointer; transition:color 0.2s;}
+.post-footer button:hover {color:#fff;}
+.heart {width:16px; height:16px; display:inline-block; background:url('data:image/svg+xml;utf8,<svg fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21C12 21 4 13.5 4 8.5C4 5.42 6.42 3 9.5 3C11.24 3 12.91 3.81 13.5 5.09C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 13.5 15 21 15 21H12Z"/></svg>') no-repeat center/contain; transition:transform 0.3s;}
+.like-btn.liked .heart {transform:scale(1.5);}
+.bubble {width:16px; height:16px; display:inline-block; background:url('data:image/svg+xml;utf8,<svg fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/></svg>') no-repeat center/contain; transition:transform 0.3s;}
+.comment-btn.liked .bubble {transform:scale(1.2);}
+@media (max-width:900px){.post{padding:12px;}}
+</style>
+
+<script>
+// Лайки
+document.querySelectorAll('.like-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    let countEl = btn.querySelector('.count');
+    let count = parseInt(countEl.textContent);
+    if(btn.classList.contains('liked')){count--; btn.classList.remove('liked');}
+    else{count++; btn.classList.add('liked');}
+    countEl.textContent = count;
+  });
+});
+
+// Коментарі
+document.querySelectorAll('.comment-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    let countEl = btn.querySelector('.count');
+    let count = parseInt(countEl.textContent);
+    count++;
+    btn.classList.add('liked');
+    setTimeout(()=>btn.classList.remove('liked'),300);
+    countEl.textContent = count;
+  });
+});
+</script>

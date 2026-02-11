@@ -11,43 +11,22 @@
     .top-bar {position:fixed; top:0; left:0; right:0; height:80px; display:flex; align-items:center; justify-content:space-between; padding:0 20px; background:rgba(0,0,0,0.4); backdrop-filter:blur(10px); border-bottom:1px solid rgba(255,255,255,0.08); z-index:1000;}
     .site-name {font-size:1.8rem; font-weight:800; background:linear-gradient(90deg,#fff,#aaa); -webkit-background-clip:text; -webkit-text-fill-color:transparent;}
     .burger {width:30px; height:22px; display:flex; flex-direction:column; justify-content:space-between; cursor:pointer;}
-    .burger span {height:3px; width:100%; background:#fff; border-radius:3px; transition:0.4s;}
-    .burger.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
-    .burger.active span:nth-child(2){opacity:0;}
-    .burger.active span:nth-child(3){transform:rotate(-45deg) translate(6px,-6px);}
-    .sidebar {position:fixed; top:0; left:-280px; width:280px; height:100%; background:#000; padding:120px 40px 40px; border-right:1px solid rgba(255,255,255,0.06); transition:0.4s; z-index:900;}
+    .burger span {height:3px; width:100%; background:#fff; border-radius:3px;}
+    .sidebar {position:fixed; top:0; left:-280px; width:280px; height:100%; background:#000; padding:120px 40px 40px; border-right:1px solid rgba(255,255,255,0.06); transition:0.4s;}
     .sidebar.active {left:0;}
-    .sidebar a {display:block; color:#aaa; text-decoration:none; font-size:1.25rem; font-weight:700; margin:1.4rem 0; transition:0.3s;}
-    .sidebar a:hover{color:#fff; transform:translateX(8px);}
+    .sidebar a {display:block; color:#aaa; text-decoration:none; font-size:1.25rem; font-weight:700; margin:1.4rem 0;}
     .main-content {margin-top:100px; padding:20px 25px;}
-    .login-box, .new-post {margin-bottom:20px; display:flex; flex-direction:column; gap:10px;}
-    .login-box input, .new-post textarea {padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.08); color:#fff; outline:none; font-family:'Manrope',sans-serif;}
-    .login-box input::placeholder, .new-post textarea::placeholder {color:#aaa;}
-    .login-box button, .new-post button {width:120px; padding:8px 12px; border:none; border-radius:12px; background:#fff; color:#000; font-weight:700; cursor:pointer; transition:0.2s;}
-    .login-box button:hover, .new-post button:hover {background:#ddd;}
-    .feed {display:flex; flex-direction:column; gap:20px;}
-    .post {background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:15px;}
-    .post-header {display:flex; align-items:center; gap:10px; margin-bottom:10px;}
-    .avatar {width:35px; height:35px; background:#555; border-radius:50%;}
-    .username {font-weight:700; font-size:0.95rem;}
-    .post-content {font-size:0.9rem; margin-bottom:10px;}
-    .post-footer {display:flex; gap:15px;}
-    .post-footer button {display:flex; align-items:center; gap:5px; background:none; border:none; color:#aaa; font-size:0.9rem; cursor:pointer; transition:color 0.2s;}
-    .post-footer button:hover{color:#fff;}
-    .heart{width:16px; height:16px; display:inline-block; background:url('data:image/svg+xml;utf8,<svg fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21C12 21 4 13.5 4 8.5C4 5.42 6.42 3 9.5 3C11.24 3 12.91 3.81 13.5 5.09C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 13.5 15 21 15 21H12Z"/></svg>') no-repeat center/contain;}
-    .bubble{width:16px; height:16px; display:inline-block; background:url('data:image/svg+xml;utf8,<svg fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/></svg>') no-repeat center/contain;}
-    .like-btn.liked .heart{transform:scale(1.5);}
-    .comment-btn.liked .bubble{transform:scale(1.2);}
-
-    /* ─── Додано для коментарів ─── */
-    .comments-section {margin-top:12px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.08);}
-    .comment {font-size:0.85rem; margin:6px 0; padding-left:8px; border-left:2px solid #444;}
-    .comment-input {display:flex; gap:8px; margin-top:10px;}
-    .comment-input input {flex:1; padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.06); color:#fff;}
-    .comment-input button {padding:8px 14px; background:#333; color:#ddd; border:none; border-radius:10px; cursor:pointer;}
-    .comment-input button:hover {background:#555;}
-
-    @media(max-width:900px){.sidebar{width:100%; height:auto; padding:100px 20px; border-right:none; border-bottom:1px solid rgba(255,255,255,0.06); left:-100%;}.sidebar.active{left:0;}}
+    .login-box,.new-post{margin-bottom:20px; display:flex; flex-direction:column; gap:10px;}
+    input,textarea{padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.08); color:#fff;}
+    button{width:120px; padding:8px 12px; border:none; border-radius:12px; background:#fff; color:#000; font-weight:700; cursor:pointer;}
+    .feed{display:flex; flex-direction:column; gap:20px;}
+    .post{background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:15px;}
+    .post-header{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+    .avatar{width:35px; height:35px; background:#555; border-radius:50%;}
+    .username{font-weight:700;}
+    .post-footer{display:flex; gap:15px;}
+    .post-footer button{background:none; border:none; color:#aaa; cursor:pointer;}
+    .comment{font-size:0.85rem; margin:6px 0; padding-left:8px; border-left:2px solid #444;}
   </style>
 </head>
 <body>
@@ -59,178 +38,130 @@
 
 <nav class="sidebar" id="sidebar">
   <a href="#">Головна</a>
-  <a href="#">Про нас</a>
-  <a href="#">Послуги</a>
-  <a href="#">Портфоліо</a>
-  <a href="#">Контакти</a>
 </nav>
 
 <main class="main-content">
 
-  <div class="login-box" id="loginBox">
-    <input type="text" id="usernameInput" placeholder="Введіть своє ім'я">
-    <button id="saveUsername">Почати</button>
-  </div>
+<div class="login-box" id="loginBox">
+  <input type="text" id="usernameInput" placeholder="Введіть своє ім'я">
+  <button id="saveUsername">Почати</button>
+</div>
 
-  <div class="new-post" id="newPostBox">
-    <textarea id="postText" placeholder="Напиши свій пост..." rows="3"></textarea>
-    <button id="addPost">Додати пост</button>
+<div id="profileBox" style="display:none" class="post">
+  <div class="post-header">
+    <div class="avatar"></div>
+    <div class="username" id="profileName"></div>
   </div>
+  <div style="font-size:0.85rem;color:#aaa;">Карма: <span id="profileKarma">0</span></div>
+  <textarea id="profileBio" placeholder="Про себе..."></textarea>
+  <button id="saveProfile">Зберегти профіль</button>
+</div>
 
-  <div class="feed" id="feed"></div>
+<div id="settingsBox" style="display:none" class="post">
+  <div class="username">Налаштування</div>
+  <button id="logoutBtn" style="margin-top:10px;">Вийти</button>
+</div>
+
+<div class="new-post">
+  <textarea id="postText" placeholder="Новий пост..."></textarea>
+  <button id="addPost">Опублікувати</button>
+</div>
+
+<div class="feed" id="feed"></div>
 
 </main>
 
 <script>
-// ────────────────────────────────────────────────
-const KEY_POSTS    = 'fantasyas_posts_v2';
-const KEY_USERNAME = 'fantasyasUsername';
+const burger=document.getElementById('burger');
+const sidebar=document.getElementById('sidebar');
+burger.onclick=()=>sidebar.classList.toggle('active');
 
-let username = localStorage.getItem(KEY_USERNAME);
-let posts = JSON.parse(localStorage.getItem(KEY_POSTS)) || [];
+let username=localStorage.getItem('username');
+let posts=JSON.parse(localStorage.getItem('posts'))||[];
+let users=JSON.parse(localStorage.getItem('users'))||{};
 
-// Елементи
-const burger     = document.getElementById('burger');
-const sidebar    = document.getElementById('sidebar');
-const loginBox   = document.getElementById('loginBox');
-const newPostBox = document.getElementById('newPostBox');
-const feed       = document.getElementById('feed');
-const postText   = document.getElementById('postText');
-
-// Бургер
-burger.addEventListener('click', () => {
-  burger.classList.toggle('active');
-  sidebar.classList.toggle('active');
-});
-
-// Авторизація
-if (username) {
-  loginBox.style.display = 'none';
-  newPostBox.style.display = 'flex';
-} else {
-  newPostBox.style.display = 'none';
+function savePosts(){localStorage.setItem('posts',JSON.stringify(posts))}
+function saveUsers(){localStorage.setItem('users',JSON.stringify(users))}
+function getUser(name){
+  if(!users[name]) users[name]={bio:'',karma:0};
+  return users[name];
 }
 
-document.getElementById('saveUsername').addEventListener('click', () => {
-  const val = document.getElementById('usernameInput').value.trim();
-  if (!val) return;
-  username = val;
-  localStorage.setItem(KEY_USERNAME, username);
-  loginBox.style.display = 'none';
-  newPostBox.style.display = 'flex';
-  renderPosts();
-});
+const feed=document.getElementById('feed');
 
-// Збереження
-function savePosts() {
-  localStorage.setItem(KEY_POSTS, JSON.stringify(posts));
-}
-
-// Рендер
-function renderPosts() {
-  feed.innerHTML = '';
-
-  posts.forEach((post, postIndex) => {
-    const postEl = document.createElement('div');
-    postEl.className = 'post';
-    postEl.innerHTML = `
+function renderPosts(){
+  feed.innerHTML='';
+  posts.forEach((post,i)=>{
+    const el=document.createElement('div');
+    el.className='post';
+    el.innerHTML=`
       <div class="post-header">
         <div class="avatar"></div>
         <div class="username">${post.username}</div>
       </div>
-      <div class="post-content">${post.text.replace(/\n/g, '<br>')}</div>
+      <div>${post.text}</div>
       <div class="post-footer">
-        <button class="like-btn ${post.likedBy?.includes(username) ? 'liked' : ''}">
-          <span class="heart"></span> <span class="count">${post.likes || 0}</span>
-        </button>
-        <button class="comment-btn">
-          <span class="bubble"></span> <span class="count">${post.comments?.length || 0}</span>
-        </button>
+        <button class="like">❤️ ${post.likes}</button>
       </div>
-      <div class="comments-section" id="comments-${postIndex}"></div>
-      <div class="comment-input">
-        <input type="text" placeholder="Напиши коментар..." class="comment-inp"/>
-        <button class="add-comment-btn">→</button>
-      </div>
+      <div class="comments"></div>
     `;
-
-    // Лайк
-    const likeBtn = postEl.querySelector('.like-btn');
-    likeBtn.addEventListener('click', () => {
-      if (!username) return alert("Спочатку увійдіть");
-      if (!post.likedBy) post.likedBy = [];
-      const idx = post.likedBy.indexOf(username);
-      if (idx === -1) {
-        post.likedBy.push(username);
-        post.likes = (post.likes || 0) + 1;
-      } else {
-        post.likedBy.splice(idx, 1);
-        post.likes = Math.max(0, (post.likes || 1) - 1);
-      }
+    el.querySelector('.like').onclick=()=>{
+      post.likes++;
+      getUser(post.username).karma++;
+      saveUsers();
       savePosts();
       renderPosts();
-    });
-
-    // Додавання коментаря
-    const commentInp = postEl.querySelector('.comment-inp');
-    const addCommentBtn = postEl.querySelector('.add-comment-btn');
-
-    addCommentBtn.addEventListener('click', () => {
-      const text = commentInp.value.trim();
-      if (!text || !username) return;
-      if (!post.comments) post.comments = [];
-      post.comments.push({ user: username, text, time: Date.now() });
-      commentInp.value = '';
-      savePosts();
-      renderComments(postIndex, postEl.querySelector(`#comments-${postIndex}`));
-      postEl.querySelector('.count').textContent = post.comments.length;
-    });
-
-    // Рендер коментарів для цього поста
-    function renderComments(idx, container) {
-      container.innerHTML = '';
-      (posts[idx].comments || []).forEach(c => {
-        const div = document.createElement('div');
-        div.className = 'comment';
-        div.innerHTML = `<strong>${c.user}</strong>: ${c.text}`;
-        container.appendChild(div);
-      });
-    }
-
-    renderComments(postIndex, postEl.querySelector(`#comments-${postIndex}`));
-
-    feed.prepend(postEl);
+      profileKarma.textContent=getUser(username).karma;
+    };
+    feed.prepend(el);
   });
 }
 
-// Додавання поста
-document.getElementById('addPost').addEventListener('click', () => {
-  const text = postText.value.trim();
-  if (!text || !username) return;
-
-  posts.unshift({
-    username,
-    text,
-    likes: 0,
-    likedBy: [],
-    comments: []
-  });
-
+document.getElementById('addPost').onclick=()=>{
+  if(!username) return;
+  const text=postText.value.trim();
+  if(!text) return;
+  posts.unshift({username,text,likes:0});
   savePosts();
-  postText.value = '';
+  postText.value='';
   renderPosts();
-});
+};
 
-// Початковий рендер
+saveUsername.onclick=()=>{
+  username=usernameInput.value.trim();
+  if(!username) return;
+  localStorage.setItem('username',username);
+  getUser(username);
+  saveUsers();
+  loginBox.style.display='none';
+  profileBox.style.display='block';
+  settingsBox.style.display='block';
+  profileName.textContent=username;
+  profileBio.value=getUser(username).bio;
+  profileKarma.textContent=getUser(username).karma;
+};
+
+saveProfile.onclick=()=>{
+  users[username].bio=profileBio.value;
+  saveUsers();
+};
+
+logoutBtn.onclick=()=>{
+  localStorage.removeItem('username');
+  location.reload();
+};
+
+if(username){
+  loginBox.style.display='none';
+  profileBox.style.display='block';
+  settingsBox.style.display='block';
+  profileName.textContent=username;
+  profileBio.value=getUser(username).bio;
+  profileKarma.textContent=getUser(username).karma;
+}
+
 renderPosts();
-
-// Закриття сайдбару після кліку по пункту
-document.querySelectorAll('.sidebar a').forEach(a => {
-  a.addEventListener('click', () => {
-    sidebar.classList.remove('active');
-    burger.classList.remove('active');
-  });
-});
 </script>
+
 </body>
 </html>

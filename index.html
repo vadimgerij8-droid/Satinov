@@ -333,4 +333,321 @@ function renderPosts(){
 }
 </script>
 </body>
-</html>
+</html><script>
+const KEY = {
+  USERNAME: 'fantasyasUsername',
+  USER: 'fantasyasUserData',
+  POSTS: 'fantasyas_posts_v4'
+};
+
+let username = localStorage.getItem(KEY.USERNAME);
+let userData = JSON.parse(localStorage.getItem(KEY.USER)) || {
+  avatar: '',
+  bio: '',
+  registered: new Date().toISOString().split('T')[0],
+  favorites: []
+};
+let posts = JSON.parse(localStorage.getItem(KEY.POSTS)) || [];
+
+const burger = document.getElementById('burger');
+const sidebar = document.getElementById('sidebar');
+const backdrop = document.getElementById('backdrop');
+const sections = document.querySelectorAll('.section');
+const loginBox = document.getElementById('loginBox');
+const newPostBox = document.getElementById('newPostBox');
+const feed = document.getElementById('feed');
+const postText = document.getElementById('postText');
+const modal = document.getElementById('editProfileModal');
+
+// Бургер та навігація
+burger.addEventListener('click', () => {
+  burger.classList.toggle('active');
+  sidebar.classList.toggle('active');
+  backdrop.classList.toggle('active');
+});
+
+backdrop.addEventListener('click', () => {
+  burger.classList.remove('active');
+  sidebar.classList.remove('active');
+  backdrop.classList.remove('active');
+});
+
+function showSection(id) {
+  sections.forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  sidebar.classList.remove('active');
+  burger.classList.remove('active');
+  backdrop.classList.remove('active');
+  if (id === 'profile') updateProfile();
+}
+
+document.querySelectorAll('[data-section]').forEach(el => {
+  el.addEventListener('click', () => showSection(el.dataset.section));
+});
+
+// Тема та шрифт
+function applyPreferences() {
+  const theme = localStorage.getItem('fantasyasTheme') || 'dark';
+  const font = localStorage.getItem('fantasyasFontSize') || 'normal';
+  document.body.classList.toggle('light', theme === 'light');
+  document.body.classList.toggle('large-font', font === 'large');
+  document.getElementById('themeSelect').value = theme;
+  document.getElementById('fontSizeSelect').value = font;
+}
+
+applyPreferences();
+
+// Авторизація
+if (username) {
+  loginBox.style.display = 'none';
+  newPostBox.style.display = 'flex';
+} else {
+  newPostBox.style.display = 'none';
+}
+
+document.getElementById('saveUsername').addEventListener('click', () => {
+  const val = document.getElementById('usernameInput').value.trim();
+  if (!val) return alert('Введи ім’я');
+  username = val;
+  localStorage.setItem(KEY.USERNAME, username);
+  if (!userData.registered) userData.registered = new Date().toISOString().split('T')[0];
+  localStorage.setItem(KEY.USER, JSON.stringify(userData));
+  loginBox.style.display = 'none';
+  newPostBox.style.display = 'flex';
+  renderPosts();
+});
+
+// Додавання поста
+document.getElementById('addPost').addEventListener('click', () => {
+  const text = postText.value.trim();
+  if (!text || !username) return;
+  posts.unshift({
+    id: Date.now(),
+    username,
+    text,
+    likes: 0,
+    likedBy: [],
+    comments: [],
+    reactions: { "❤️":0, "🔥":0, "😂":0, "😮":0 },
+    created: new Date().toISOString()
+  });
+  savePosts();
+  postText.value = '';
+  renderPosts();
+});
+
+// Обробка аватарки
+function handleAvatarUpload(inputEl, isModal = false) {
+  inputEl.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Зображення занадто велике (максимум ~2 МБ)');
+      e.target.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      userData.avatar = ev.target.result;
+      localStorage.setItem(KEY.USER, JSON.stringify(userData));
+      updateProfile();
+      renderPosts();
+      if (isModal) modal.classList.remove('active');
+      alert('Аватар оновлено!');
+      e.target.value = '';
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+handleAvatarUpload(document.getElementById('avatarFileInput'));
+handleAvatarUpload(document.getElementById('editAvatarFile'), true);
+
+// Рендер постів
+function renderPosts(container = feed, onlyUser = false) {
+  container.innerHTML = '';
+  posts.filter(p => !onlyUser || p.username === username).forEach(post => {
+    const isLiked = post.likedBy?.includes(username);
+    const isFavorite = userData.favorites?.includes(post.id);
+
+    const postEl = document.createElement('div');
+    postEl.className = 'post';
+    postEl.style.position = 'relative';
+    postEl.innerHTML = `
+      <div class="post-header">
+        <div class="avatar" style="background-image:url('${getAvatar(post.username)}')"></div>
+        <div class="username">${post.username}</div>
+      </div>
+      <div class="post-content" id="content-${post.id}">${post.text.replace(/\n/g, '<br>')}</div>
+      <div class="post-meta">${new Date(post.created).toLocaleString('uk-UA', {dateStyle:'short', timeStyle:'short'})}</div>
+      <div class="post-footer">
+        <button class="like-btn ${isLiked ? 'liked' : ''}">❤️ ${post.likes || 0}</button>
+        <button class="comment-btn">💬 ${post.comments?.length || 0}</button>
+        <button class="favorite-btn ${isFavorite ? 'favorited' : ''}">⭐</button>
+        ${post.username === username ? '<button class="edit-btn">✏️</button>' : ''}
+        <button class="emoji-menu-btn">😃</button>
+      </div>
+      <div class="emoji-picker" style="display:none;">
+        <span class="emoji">❤️</span>
+        <span class="emoji">🔥</span>
+        <span class="emoji">😂</span>
+        <span class="emoji">😮</span>
+        <span class="emoji">🥳</span>
+        <span class="emoji">😢</span>
+      </div>
+      <div class="reactions-container">
+        ${Object.keys(post.reactions).map(e => `<span class="emoji-btn">${e} ${post.reactions[e]}</span>`).join('')}
+      </div>
+      <div class="comments-section" id="comments-${post.id}"></div>
+      <div class="comment-input">
+        <input type="text" placeholder="Коментар..." class="comment-inp"/>
+        <button class="add-comment-btn">→</button>
+      </div>
+    `;
+
+    // Лайк
+    postEl.querySelector('.like-btn').addEventListener('click', () => {
+      if (!username) return alert('Увійди');
+      if (!post.likedBy) post.likedBy = [];
+      const idx = post.likedBy.indexOf(username);
+      if (idx === -1) {
+        post.likedBy.push(username);
+        post.likes = (post.likes || 0) + 1;
+      } else {
+        post.likedBy.splice(idx, 1);
+        post.likes--;
+      }
+      savePosts();
+      renderPosts(container, onlyUser);
+      if (container !== feed) updateProfile();
+    });
+
+    // Фаворит
+    postEl.querySelector('.favorite-btn').addEventListener('click', () => {
+      if (!username) return alert('Увійди');
+      if (!userData.favorites) userData.favorites = [];
+      const idx = userData.favorites.indexOf(post.id);
+      if (idx === -1) userData.favorites.push(post.id);
+      else userData.favorites.splice(idx, 1);
+      localStorage.setItem(KEY.USER, JSON.stringify(userData));
+      renderPosts(container, onlyUser);
+      if (container !== feed) updateProfile();
+    });
+
+    // Меню емодзі
+    const emojiBtn = postEl.querySelector('.emoji-menu-btn');
+    const picker = postEl.querySelector('.emoji-picker');
+    emojiBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      picker.style.display = picker.style.display === 'flex' ? 'none' : 'flex';
+    });
+    picker.querySelectorAll('.emoji').forEach(em => {
+      em.addEventListener('click', () => {
+        const emoji = em.textContent;
+        if (!post.reactions[emoji]) post.reactions[emoji] = 0;
+        post.reactions[emoji]++;
+        savePosts();
+        renderPosts(container, onlyUser);
+      });
+    });
+    document.addEventListener('click', () => picker.style.display = 'none');
+
+    // Реакції емодзі
+    postEl.querySelectorAll('.emoji-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const emoji = btn.textContent.split(' ')[0];
+        post.reactions[emoji]++;
+        savePosts();
+        renderPosts(container, onlyUser);
+      });
+    });
+
+    // Коментарі
+    const inp = postEl.querySelector('.comment-inp');
+    const btn = postEl.querySelector('.add-comment-btn');
+    btn.addEventListener('click', () => {
+      const text = inp.value.trim();
+      if (!text || !username) return;
+      if (!post.comments) post.comments = [];
+      post.comments.push({user: username, text, time: Date.now()});
+      inp.value = '';
+      savePosts();
+      renderComments(post.id, postEl.querySelector(`#comments-${post.id}`));
+      renderPosts(container, onlyUser);
+    });
+
+    // Редагування поста
+    if (post.username === username) {
+      postEl.querySelector('.edit-btn').addEventListener('click', () => {
+        const contentDiv = document.getElementById(`content-${post.id}`);
+        const textarea = document.createElement('textarea');
+        textarea.value = post.text;
+        textarea.style.width = '100%';
+        textarea.style.marginTop = '10px';
+        const saveBtn = document.createElement('button');
+        saveBtn.textContent = 'Зберегти';
+        saveBtn.style.marginTop = '8px';
+        contentDiv.replaceWith(textarea);
+        textarea.after(saveBtn);
+        saveBtn.addEventListener('click', () => {
+          post.text = textarea.value.trim();
+          savePosts();
+          renderPosts(container, onlyUser);
+        });
+      });
+    }
+
+    renderComments(post.id, postEl.querySelector(`#comments-${post.id}`));
+    container.appendChild(postEl);
+  });
+}
+
+function renderComments(postId, container) {
+  container.innerHTML = '';
+  const post = posts.find(p => p.id === postId);
+  (post?.comments || []).forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'comment';
+    div.innerHTML = `<strong>${c.user}</strong>: ${c.text}`;
+    container.appendChild(div);
+  });
+}
+
+function getAvatar(uname) {
+  if (uname === username) return userData.avatar || '';
+  return '';
+}
+
+// Оновлення профілю
+function updateProfile() {
+  if (!username) return;
+  document.getElementById('profileUsernameDisplay').textContent = username;
+  document.getElementById('registerDate').textContent = userData.registered || 'невідомо';
+  document.getElementById('profileBio').textContent = userData.bio || 'Немає опису...';
+  const avatarEl = document.getElementById('profileAvatar');
+  avatarEl.style.backgroundImage = userData.avatar ? `url('${userData.avatar}')` : '';
+  let postCount = 0, likeCount = 0, commentCount = 0;
+  posts.forEach(p => {
+    if (p.username === username) {
+      postCount++;
+      likeCount += p.likes || 0;
+      commentCount += p.comments?.length || 0;
+    }
+  });
+  document.getElementById('postCount').textContent = postCount;
+  document.getElementById('likeCount').textContent = likeCount;
+  document.getElementById('commentCount').textContent = commentCount;
+  document.getElementById('favoriteCount').textContent = userData.favorites?.length || 0;
+  renderPosts(document.getElementById('profilePosts'), true);
+}
+
+function savePosts() {
+  localStorage.setItem(KEY.POSTS, JSON.stringify(posts));
+}
+
+// Початок
+if (username) {
+  renderPosts();
+  updateProfile();
+}
+</script>

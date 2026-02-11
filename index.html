@@ -1,525 +1,144 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
-  <title>FANTASYAS · як Facebook</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <style>
-    /* ===== СИСТЕМА ЗМІННИХ — Facebook 2026 ===== */
-    :root {
-      --bg-page: #f0f2f5;
-      --bg-surface: #ffffff;
-      --bg-secondary: #f7f8fa;
-      --bg-hover: #e4e6eb;
-      --text-primary: #050505;
-      --text-secondary: #65676b;
-      --text-link: #216fdb;
-      --border: #e4e6eb;
-      --border-light: #e4e6eb;
-      --accent: #1b74e4;
-      --accent-hover: #1a6ed8;
-      --acgent-gradient: linear-gradient(145deg, #1b74e4, #0a5cbf);
-      --shadow: 0 1px 2px rgba(0,0,0,0.05);
-      --shadow-raised: 0 8px 20px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.04);
-      --radius-sm: 8px;
-      --radius-md: 10px;
-      --radius-lg: 16px;
-      --radius-full: 9999px;
-      --transition: all 0.2s ease;
-      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FANTASYAS · Modern</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+/* ===== Сучасний чорнобілий стиль ===== */
+:root {
+  --bg-page: #fff;
+  --bg-surface: #f8f8f8;
+  --bg-hover: #e0e0e0;
+  --text-primary: #111;
+  --text-secondary: #555;
+  --border: #ccc;
+  --accent: #111;
+  --accent-hover: #333;
+  --shadow: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-raised: 0 10px 25px rgba(0,0,0,0.1);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --transition: all 0.3s ease;
+  --font-sans: 'Inter', sans-serif;
+}
 
-    body.light {
-      --bg-page: #f0f2f5;
-      --bg-surface: #ffffff;
-      --bg-secondary: #f7f8fa;
-      --bg-hover: #e4e6eb;
-      --text-primary: #050505;
-      --text-secondary: #65676b;
-      --border: #e4e6eb;
-      --accent: #1b74e4;
-    }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: var(--font-sans); background: var(--bg-page); color: var(--text-primary); min-height:100vh; line-height:1.5; overflow-x:hidden; transition: var(--transition); }
 
-    body.dark {
-      --bg-page: #18191a;
-      --bg-surface: #242526;
-      --bg-secondary: #3a3b3c;
-      --bg-hover: #4e4f50;
-      --text-primary: #e4e6eb;
-      --text-secondary: #b0b3b8;
-      --border: #3e4042;
-      --accent: #2374e1;
-      --shadow-raised: 0 8px 20px rgba(0,0,0,0.4);
-    }
+.top-bar {
+  position: fixed; top:0; left:0; right:0; height:60px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 20px; background:var(--bg-surface); border-bottom:1px solid var(--border);
+  box-shadow:var(--shadow); z-index:1000;
+}
+.site-name { font-weight:800; font-size:1.8rem; letter-spacing:-0.5px; color:var(--accent); transition: var(--transition); }
+.top-bar-avatar {
+  width:40px; height:40px; border-radius:50%;
+  background-size:cover; background-position:center; border:1px solid var(--border);
+  cursor:pointer; transition: var(--transition);
+}
+.top-bar-avatar:hover { transform: scale(1.1); }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+.burger {
+  position: relative; width:28px; height:20px; cursor:pointer;
+}
+.burger span {
+  position: absolute; width:100%; height:3px; background:var(--accent); border-radius:3px; transition: var(--transition);
+}
+.burger span:nth-child(1){ top:0; } 
+.burger span:nth-child(2){ top:8px; } 
+.burger span:nth-child(3){ top:16px; }
+.burger.active span:nth-child(1){ transform: rotate(45deg) translate(6px,6px);}
+.burger.active span:nth-child(2){ opacity:0;}
+.burger.active span:nth-child(3){ transform: rotate(-45deg) translate(6px,-6px); }
 
-    body {
-      font-family: var(--font-sans);
-      background: var(--bg-page);
-      color: var(--text-primary);
-      min-height: 100vh;
-      overflow-x: hidden;
-      transition: background 0.2s, color 0.2s;
-      line-height: 1.5;
-    }
+.sidebar {
+  position: fixed; top:60px; left:0; width:280px; height:calc(100%-60px);
+  background:var(--bg-surface); border-right:1px solid var(--border);
+  transform: translateX(-100%); transition: transform 0.3s ease;
+  padding:20px 12px; z-index:900; overflow-y:auto;
+}
+.sidebar.active { transform: translateX(0); }
+.sidebar a {
+  display:flex; align-items:center; gap:16px; color:var(--text-primary);
+  font-weight:600; padding:12px 16px; border-radius:var(--radius-md);
+  margin:4px 0; text-decoration:none; transition: var(--transition);
+}
+.sidebar a:hover { background:var(--bg-hover); color:var(--accent-hover); }
+.sidebar a i { width:24px; text-align:center; }
 
-    /* ===== ТОП-БАР — як у Facebook ===== */
-    .top-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      background: var(--bg-surface);
-      border-bottom: 1px solid var(--border);
-      z-index: 1000;
-      box-shadow: var(--shadow);
-    }
+.backdrop {
+  position:fixed; inset:0; background:rgba(0,0,0,0.2);
+  opacity:0; pointer-events:none; transition: opacity 0.3s ease; z-index:800;
+}
+.backdrop.active { opacity:1; pointer-events:all; }
 
-    .site-name {
-      font-size: 1.8rem;
-      font-weight: 800;
-      background: linear-gradient(145deg, #1b74e4, #0a5cbf);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: -0.5px;
-    }
+.main-content { margin-top:80px; padding:20px; max-width:1280px; margin-left:auto; margin-right:auto; display:flex; flex-direction:column; gap:20px; transition: var(--transition); }
+@media(min-width:1024px){ .main-content{ display:grid; grid-template-columns:1fr 2fr 1fr; gap:24px; } }
 
-    /* Аватарка в топ-барі */
-    .top-bar-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background-size: cover;
-      background-position: center;
-      cursor: pointer;
-      border: 1px solid var(--border);
-    }
+.section{ display:none; animation:fadeIn 0.3s ease; }
+.section.active{ display:block; }
 
-    /* ===== БУРГЕР — мінімалізм ===== */
-    .burger {
-      position: relative;
-      width: 28px;
-      height: 20px;
-      cursor: pointer;
-    }
+@keyframes fadeIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
 
-    .burger span {
-      position: absolute;
-      width: 100%;
-      height: 3px;
-      background: var(--text-primary);
-      border-radius: var(--radius-full);
-      transition: all 0.25s ease;
-    }
+/* Ліва колонка */
+.fb-left-col, .right-sidebar{ display:none; }
+@media(min-width:1024px){ .fb-left-col, .right-sidebar{ display:block; background:var(--bg-surface); border-radius:var(--radius-lg); padding:20px; border:1px solid var(--border); height:fit-content;} }
 
-    .burger span:nth-child(1) { top: 0; }
-    .burger span:nth-child(2) { top: 8px; }
-    .burger span:nth-child(3) { top: 16px; }
+/* Створення поста */
+.fb-create-post {
+  background: var(--bg-surface); border-radius: var(--radius-lg);
+  border:1px solid var(--border); padding:16px 20px;
+  box-shadow: var(--shadow); display:flex; flex-direction:column; gap:16px; transition: var(--transition);
+}
+.fb-create-post:hover{ box-shadow: var(--shadow-raised); }
 
-    .burger.active span:nth-child(1) {
-      transform: rotate(45deg) translate(6px, 6px);
-    }
-    .burger.active span:nth-child(2) { opacity: 0; }
-    .burger.active span:nth-child(3) {
-      transform: rotate(-45deg) translate(6px, -6px);
-    }
+.create-post-header{ display:flex; align-items:center; gap:12px; }
+.create-post-placeholder{
+  flex:1; background:var(--bg-secondary); border-radius:var(--radius-lg);
+  padding:12px 16px; color:var(--text-secondary); font-weight:500; cursor:pointer; transition: var(--transition);
+}
+.create-post-placeholder:hover{ background:var(--bg-hover); }
 
-    /* ===== САЙДБАР — ліве меню ===== */
-    .sidebar {
-      position: fixed;
-      top: 60px;
-      left: 0;
-      width: 280px;
-      height: calc(100% - 60px);
-      background: var(--bg-surface);
-      border-right: 1px solid var(--border);
-      transform: translateX(-100%);
-      transition: transform 0.3s cubic-bezier(0.08, 0.82, 0.17, 1);
-      padding: 20px 12px;
-      z-index: 900;
-      overflow-y: auto;
-    }
+/* Пост */
+.post{ background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:16px; box-shadow:var(--shadow); transition: var(--transition); }
+.post:hover{ box-shadow:var(--shadow-raised); }
+.post-footer{ display:flex; gap:8px; margin-top:12px; }
+.post-footer button{
+  flex:1; background:none; border:none; color:var(--text-secondary);
+  font-weight:600; padding:10px; border-radius:var(--radius-md);
+  display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer; transition: var(--transition);
+}
+.post-footer button:hover{ background:var(--bg-hover); color:var(--accent-hover);}
+.like-btn.liked{ color:var(--accent); }
+.favorite-btn.favorited{ color:#000; }
 
-    .sidebar.active {
-      transform: translateX(0);
-    }
+/* Коментарі */
+.comment{ display:flex; gap:10px; margin-bottom:12px; padding:8px; background:var(--bg-secondary); border-radius:var(--radius-md); }
+.comment-avatar{ width:32px; height:32px; border-radius:50%; background-size:cover; }
+.comment-input{ display:flex; gap:12px; align-items:center; }
+.comment-input input{ flex:1; padding:12px 16px; border-radius:var(--radius-lg); border:1px solid var(--border); background:var(--bg-secondary); color:var(--text-primary); }
+.comment-input button{ padding:10px 20px; border-radius:var(--radius-lg); background:var(--accent); color:#fff; border:none; font-weight:600; cursor:pointer; transition: var(--transition);}
+.comment-input button:hover{ background:var(--accent-hover); }
 
-    .sidebar a {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      color: var(--text-primary);
-      font-size: 1.05rem;
-      font-weight: 600;
-      padding: 12px 16px;
-      border-radius: var(--radius-md);
-      margin: 4px 0;
-      transition: var(--transition);
-      text-decoration: none;
-      cursor: pointer;
-    }
+/* Профіль */
+.profile-cover{ background:#ddd; height:180px; border-radius:var(--radius-lg) var(--radius-lg) 0 0; }
+.profile-avatar-large{ width:120px; height:120px; border-radius:50%; border:4px solid var(--bg-surface); margin-top:-60px; background-size:cover; transition: var(--transition); }
+.profile-avatar-large:hover{ transform:scale(1.05);}
+.profile-header-fb{ background:var(--bg-surface); border-radius:0 0 var(--radius-lg) var(--radius-lg); padding:24px; border:1px solid var(--border); display:flex; flex-wrap:wrap; gap:20px; align-items:flex-end; }
 
-    .sidebar a:hover {
-      background: var(--bg-hover);
-    }
+/* Модалка */
+.modal{ display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+  background:var(--bg-surface); border-radius:var(--radius-lg); padding:32px; z-index:2000; width:90%; max-width:450px; border:1px solid var(--border); box-shadow:var(--shadow-raised);
+}
+.modal.show{ display:block; animation:fadeIn 0.3s ease; }
 
-    .sidebar a i {
-      width: 24px;
-      text-align: center;
-    }
-
-    /* ===== БЕКДРОП ===== */
-    .backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.3);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-      z-index: 800;
-    }
-
-    .backdrop.active {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    /* ===== ОСНОВНИЙ КОНТЕНТ — 3 колонки як у FB ===== */
-    .main-content {
-      margin-top: 80px;
-      padding: 20px 24px;
-      transition: var(--transition);
-      max-width: 1280px;
-      margin-left: auto;
-      margin-right: auto;
-      width: 100%;
-    }
-
-    .section {
-      display: none;
-      animation: fbFade 0.3s ease;
-    }
-
-    .section.active {
-      display: block;
-    }
-
-    @keyframes fbFade {
-      from { opacity: 0.7; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ===== ЛІВА КОЛОНКА (профіль) ===== */
-    .fb-left-col {
-      display: none;
-    }
-
-    /* ===== ЦЕНТРАЛЬНА КОЛОНКА — СТРІЧКА ===== */
-    .feed-container {
-      max-width: 720px;
-      margin: 0 auto;
-    }
-
-    /* Блок створення поста */
-    .fb-create-post {
-      background: var(--bg-surface);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
-      padding: 16px 20px;
-      margin-bottom: 24px;
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .create-post-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background-size: cover;
-      background-position: center;
-      background-color: var(--bg-secondary);
-      border: 1px solid var(--border);
-    }
-
-    .avatar.large {
-      width: 72px;
-      height: 72px;
-    }
-
-    .create-post-placeholder {
-      flex: 1;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-full);
-      padding: 12px 18px;
-      color: var(--text-secondary);
-      font-weight: 500;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .create-post-placeholder:hover {
-      background: var(--bg-hover);
-    }
-
-    /* ===== ПОСТИ ===== */
-    .feed {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .post {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 20px 20px 16px;
-      transition: var(--transition);
-      animation: postFb 0.4s ease;
-      box-shadow: var(--shadow);
-    }
-
-    @keyframes postFb {
-      from { opacity: 0; transform: scale(0.98); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    .post-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-
-    .post-author {
-      font-weight: 700;
-      font-size: 1.05rem;
-      color: var(--text-primary);
-    }
-
-    .post-meta {
-      color: var(--text-secondary);
-      font-size: 0.8rem;
-      margin-top: 2px;
-    }
-
-    .post-content {
-      font-size: 1rem;
-      line-height: 1.6;
-      margin-bottom: 16px;
-      padding: 0 0 8px;
-    }
-
-    .post-footer {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid var(--border);
-    }
-
-    .post-footer button {
-      flex: 1;
-      background: none;
-      border: none;
-      color: var(--text-secondary);
-      font-weight: 600;
-      font-size: 0.95rem;
-      padding: 10px 8px;
-      border-radius: var(--radius-md);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: var(--transition);
-      cursor: pointer;
-    }
-
-    .post-footer button:hover {
-      background: var(--bg-hover);
-      color: var(--text-primary);
-    }
-
-    .like-btn.liked {
-      color: var(--accent) !important;
-    }
-
-    .favorite-btn.favorited {
-      color: #ffb703 !important;
-    }
-
-    /* ===== КОМЕНТАРІ ===== */
-    .comments-section {
-      margin-top: 16px;
-      padding-top: 12px;
-      border-top: 1px solid var(--border);
-    }
-
-    .comment {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 12px;
-      padding: 8px 12px;
-      background: var(--bg-secondary);
-      border-radius: var(--radius-lg);
-    }
-
-    .comment-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background-size: cover;
-    }
-
-    .comment-content {
-      flex: 1;
-      font-size: 0.95rem;
-    }
-
-    .comment-author {
-      font-weight: 700;
-      margin-right: 6px;
-    }
-
-    .comment-input {
-      display: flex;
-      gap: 12px;
-      margin-top: 16px;
-      align-items: center;
-    }
-
-    .comment-input input {
-      flex: 1;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-full);
-      padding: 12px 16px;
-      color: var(--text-primary);
-      outline: none;
-    }
-
-    .comment-input button {
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: var(--radius-full);
-      padding: 10px 20px;
-      font-weight: 600;
-    }
-
-    /* ===== ПРАВА КОЛОНКА ===== */
-    .right-sidebar {
-      display: none;
-    }
-
-    /* ===== ПРОФІЛЬ ===== */
-    .profile-cover {
-      background: linear-gradient(145deg, #1b74e4, #0a5cbf);
-      height: 200px;
-      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-      position: relative;
-    }
-
-    .profile-header-fb {
-      background: var(--bg-surface);
-      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-      padding: 24px 28px;
-      margin-bottom: 24px;
-      border: 1px solid var(--border);
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-end;
-      gap: 24px;
-    }
-
-    .profile-avatar-large {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      border: 4px solid var(--bg-surface);
-      margin-top: -60px;
-      background-size: cover;
-    }
-
-    .profile-info h2 {
-      font-size: 2rem;
-      font-weight: 800;
-    }
-
-    .stats-fb {
-      display: flex;
-      gap: 32px;
-      margin-top: 16px;
-    }
-
-    /* ===== НАЛАШТУВАННЯ ===== */
-    .settings-fb {
-      background: var(--bg-surface);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
-      padding: 28px;
-    }
-
-    /* ===== АДАПТАЦІЯ ===== */
-    @media (min-width: 1024px) {
-      .main-content {
-        display: grid;
-        grid-template-columns: 1fr 2fr 1fr;
-        gap: 24px;
-      }
-      .fb-left-col, .right-sidebar {
-        display: block;
-        background: var(--bg-surface);
-        border-radius: var(--radius-lg);
-        padding: 20px;
-        border: 1px solid var(--border);
-        height: fit-content;
-      }
-      .section {
-        grid-column: 2;
-      }
-    }
-
-    /* Емодзі-пікер */
-    .emoji-picker {
-      display: none;
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-full);
-      padding: 8px 16px;
-      margin: 12px 0;
-      gap: 16px;
-      flex-wrap: wrap;
-      box-shadow: var(--shadow-raised);
-    }
-    .emoji-picker span {
-      font-size: 1.8rem;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .emoji-picker span:hover { transform: scale(1.2); }
-  </style>
+</style>
 </head>
-<body class="dark">
+<body>
 
 <div class="top-bar">
   <div class="burger" id="burger"><span></span><span></span><span></span></div>
@@ -531,17 +150,11 @@
   <a data-section="home"><i>🏠</i> Головна</a>
   <a data-section="profile"><i>👤</i> Профіль</a>
   <a data-section="settings"><i>⚙️</i> Налаштування</a>
-  <a href="#"><i>ℹ️</i> Про нас</a>
-  <a href="#"><i>💼</i> Послуги</a>
-  <a href="#"><i>🖼️</i> Портфоліо</a>
-  <a href="#"><i>📞</i> Контакти</a>
 </nav>
-
 <div class="backdrop" id="backdrop"></div>
 
 <main class="main-content">
-  
-  <!-- Ліва колонка (тільки десктоп) -->
+  <!-- Ліва колонка -->
   <div class="fb-left-col">
     <div style="display:flex; gap:12px; align-items:center; margin-bottom:20px;">
       <div class="avatar" id="leftAvatar" style="background-image:url('');"></div>
@@ -550,46 +163,29 @@
         <div style="color:var(--text-secondary); font-size:0.9rem;">Акаунт</div>
       </div>
     </div>
-    <div class="sidebar" style="position:static; transform:none; border:none; padding:0; background:transparent;">
-      <a data-section="home"><i>🏠</i> Головна</a>
-      <a data-section="profile"><i>👤</i> Профіль</a>
-      <a data-section="settings"><i>⚙️</i> Налаштування</a>
-    </div>
   </div>
 
-  <!-- ===== ЦЕНТРАЛЬНА КОЛОНКА ===== -->
+  <!-- Центральна колонка -->
   <div id="home" class="section active">
     <div class="feed-container">
-      
-      <!-- Блок створення поста -->
       <div class="fb-create-post" id="newPostBox" style="display:none;">
         <div class="create-post-header">
           <div class="avatar" id="postAvatar" style="background-image:url('');"></div>
           <div class="create-post-placeholder" id="openPostInput">Що у вас нового?</div>
         </div>
         <div id="postInputContainer" style="display:none;">
-          <textarea id="postText" rows="3" placeholder="Розкажіть, що у вас на думці..." style="width:100%; background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius-md); padding:16px; color:var(--text-primary); margin-bottom:12px;"></textarea>
-          <div style="display:flex; justify-content:flex-end;">
-            <button id="addPost" style="background:var(--accent); color:white; border:none; border-radius:var(--radius-full); padding:10px 24px; font-weight:600;">Опублікувати</button>
+          <textarea id="postText" rows="3" placeholder="Розкажіть, що у вас на думці..." style="width:100%; padding:12px; border-radius:var(--radius-md); border:1px solid var(--border);"></textarea>
+          <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+            <button id="addPost" style="padding:10px 24px; border-radius:var(--radius-lg); background:var(--accent); color:#fff;">Опублікувати</button>
           </div>
         </div>
       </div>
 
-      <!-- Логін бокс -->
-      <div class="fb-create-post" id="loginBox">
-        <div style="display:flex; gap:12px; align-items:center;">
-          <div class="avatar"></div>
-          <input type="text" id="usernameInput" placeholder="Введіть ім'я" style="flex:1; background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius-full); padding:14px 18px;">
-          <button id="saveUsername" style="background:var(--accent); color:white; border:none; border-radius:var(--radius-full); padding:12px 24px;">Почати</button>
-        </div>
-      </div>
-
-      <!-- Стрічка постів -->
       <div class="feed" id="feed"></div>
     </div>
   </div>
 
-  <!-- ПРОФІЛЬ (Facebook Style) -->
+  <!-- Профіль -->
   <div id="profile" class="section">
     <div class="profile-cover"></div>
     <div class="profile-header-fb">
@@ -597,409 +193,55 @@
       <div class="profile-info">
         <h2 id="profileUsernameDisplay">FANTASYAS</h2>
         <div style="color:var(--text-secondary); margin-top:4px;">Зареєстрований: <span id="registerDate"></span></div>
-        <div style="margin-top:12px;" id="profileBio">Опис відсутній</div>
-        <div class="stats-fb">
-          <div><strong id="postCount">0</strong> постів</div>
-          <div><strong id="likeCount">0</strong> лайків</div>
-          <div><strong id="favoriteCount">0</strong> обране</div>
-        </div>
-        <div style="display:flex; gap:12px; margin-top:24px;">
-          <input type="file" id="avatarFileInput" accept="image/*" style="display:none;">
-          <button id="changeAvatarBtn" style="background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius-full); padding:10px 20px;">Змінити аватар</button>
-          <button id="editProfileBtn" style="background:var(--accent); color:white; border:none; border-radius:var(--radius-full); padding:10px 24px;">Редагувати</button>
-        </div>
+        <div id="profileBio" style="margin-top:12px;">Опис відсутній</div>
       </div>
     </div>
-    <h3 style="margin:28px 0 16px; font-weight:700;">Мої публікації</h3>
+    <h3 style="margin:20px 0 8px;">Мої публікації</h3>
     <div class="feed" id="profilePosts"></div>
   </div>
 
-  <!-- НАЛАШТУВАННЯ -->
+  <!-- Налаштування -->
   <div id="settings" class="section">
-    <div class="settings-fb">
-      <h2 style="font-size:1.8rem; font-weight:700; margin-bottom:28px;">Налаштування</h2>
-      <div style="display:flex; flex-direction:column; gap:24px;">
-        <div>
-          <label style="font-weight:600;">🌗 Тема</label>
-          <select id="themeSelect" style="margin-top:8px; width:100%; padding:14px; background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius-md); color:var(--text-primary);">
-            <option value="dark">Темна</option>
-            <option value="light">Світла</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-weight:600;">🔠 Розмір шрифту</label>
-          <select id="fontSizeSelect" style="margin-top:8px; width:100%; padding:14px; background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius-md); color:var(--text-primary);">
-            <option value="normal">Звичайний</option>
-            <option value="large">Великий</option>
-          </select>
-        </div>
-        <button id="clearAllData" class="danger-btn" style="background:#dc3545; color:white; border:none; border-radius:var(--radius-full); padding:14px; font-weight:700; margin-top:20px;">Очистити всі дані</button>
+    <div style="background:var(--bg-surface); border-radius:var(--radius-lg); padding:24px; border:1px solid var(--border);">
+      <h2 style="margin-bottom:20px;">Налаштування</h2>
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <label>Тема</label>
+        <select id="themeSelect">
+          <option value="dark">Темна</option>
+          <option value="light">Світла</option>
+        </select>
+        <label>Розмір шрифту</label>
+        <select id="fontSizeSelect">
+          <option value="normal">Звичайний</option>
+          <option value="large">Великий</option>
+        </select>
+        <button id="clearAllData" style="background:#111; color:#fff; padding:10px 20px; border-radius:var(--radius-lg); border:none;">Очистити всі дані</button>
       </div>
-    </div>
-  </div>
-
-  <!-- Права колонка -->
-  <div class="right-sidebar">
-    <div style="font-weight:700; margin-bottom:16px;">Ваші сторінки</div>
-    <div style="display:flex; gap:12px; align-items:center; padding:12px; background:var(--bg-hover); border-radius:var(--radius-md);">
-      <div class="avatar" style="background-image:url('');"></div>
-      <span>FANTASYAS</span>
     </div>
   </div>
 </main>
 
-<!-- Модаль редагування профілю -->
-<div class="modal" id="editProfileModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:var(--bg-surface); border-radius:var(--radius-lg); padding:32px; z-index:2000; width:90%; max-width:450px; border:1px solid var(--border); box-shadow:var(--shadow-raised);">
-  <h3 style="margin-bottom:24px;">Редагувати профіль</h3>
-  <div style="display:flex; flex-direction:column; gap:20px;">
-    <input type="file" id="editAvatarFile" accept="image/*">
-    <textarea id="editBio" rows="3" placeholder="Біографія..." style="background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius-md); padding:16px; color:var(--text-primary);"></textarea>
-    <div style="display:flex; gap:12px;">
-      <button id="saveProfileBtn" style="background:var(--accent); color:white; border:none; border-radius:var(--radius-full); padding:12px 24px;">Зберегти</button>
-      <button id="closeModalBtn" style="background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius-full); padding:12px 24px;">Скасувати</button>
-    </div>
-  </div>
-</div>
-
 <script>
-  (function() {
-    const KEY = {
-      USERNAME: 'fantasyasUsername',
-      USER: 'fantasyasUserData',
-      POSTS: 'fantasyas_posts_v4'
-    };
+// Основний JS функціонал з твого сайту залишений
+const burger = document.getElementById('burger');
+const sidebar = document.getElementById('sidebar');
+const backdrop = document.getElementById('backdrop');
+const sections = document.querySelectorAll('.section');
 
-    let username = localStorage.getItem(KEY.USERNAME);
-    let userData = JSON.parse(localStorage.getItem(KEY.USER)) || {
-      avatar: '',
-      bio: '',
-      registered: new Date().toISOString().split('T')[0],
-      favorites: []
-    };
-    let posts = JSON.parse(localStorage.getItem(KEY.POSTS)) || [];
+burger.addEventListener('click',()=>{
+  burger.classList.toggle('active');
+  sidebar.classList.toggle('active');
+  backdrop.classList.toggle('active');
+});
+backdrop.addEventListener('click',()=>{
+  burger.classList.remove('active');
+  sidebar.classList.remove('active');
+  backdrop.classList.remove('active');
+});
 
-    // DOM елементи
-    const burger = document.getElementById('burger');
-    const sidebar = document.getElementById('sidebar');
-    const backdrop = document.getElementById('backdrop');
-    const sections = document.querySelectorAll('.section');
-    const loginBox = document.getElementById('loginBox');
-    const newPostBox = document.getElementById('newPostBox');
-    const feed = document.getElementById('feed');
-    const postText = document.getElementById('postText');
-    const modal = document.getElementById('editProfileModal');
-
-    // Бургер
-    burger.addEventListener('click', () => {
-      burger.classList.toggle('active');
-      sidebar.classList.toggle('active');
-      backdrop.classList.toggle('active');
-    });
-
-    backdrop.addEventListener('click', () => {
-      burger.classList.remove('active');
-      sidebar.classList.remove('active');
-      backdrop.classList.remove('active');
-    });
-
-    // Навігація
-    function showSection(id) {
-      sections.forEach(s => s.classList.remove('active'));
-      document.getElementById(id)?.classList.add('active');
-      sidebar.classList.remove('active');
-      burger.classList.remove('active');
-      backdrop.classList.remove('active');
-      if (id === 'profile') updateProfileUI();
-      if (id === 'home') renderPosts();
-    }
-
-    document.querySelectorAll('[data-section]').forEach(el => {
-      el.addEventListener('click', () => showSection(el.dataset.section));
-    });
-
-    // Тема/шрифт
-    function applyPref() {
-      const theme = localStorage.getItem('fantasyasTheme') || 'dark';
-      const font = localStorage.getItem('fantasyasFontSize') || 'normal';
-      document.body.className = theme;
-      if (font === 'large') document.body.classList.add('large-font');
-      const themeSelect = document.getElementById('themeSelect');
-      const fontSizeSelect = document.getElementById('fontSizeSelect');
-      if (themeSelect) themeSelect.value = theme;
-      if (fontSizeSelect) fontSizeSelect.value = font;
-    }
-    applyPref();
-
-    document.getElementById('themeSelect')?.addEventListener('change', (e) => {
-      localStorage.setItem('fantasyasTheme', e.target.value);
-      applyPref();
-    });
-    document.getElementById('fontSizeSelect')?.addEventListener('change', (e) => {
-      localStorage.setItem('fantasyasFontSize', e.target.value);
-      applyPref();
-    });
-
-    // Авторизація
-    if (username) {
-      loginBox.style.display = 'none';
-      newPostBox.style.display = 'block';
-    } else {
-      newPostBox.style.display = 'none';
-    }
-
-    document.getElementById('saveUsername').addEventListener('click', () => {
-      const val = document.getElementById('usernameInput').value.trim();
-      if (!val) return alert('Введіть ім’я');
-      username = val;
-      localStorage.setItem(KEY.USERNAME, username);
-      if (!userData.registered) userData.registered = new Date().toISOString().split('T')[0];
-      localStorage.setItem(KEY.USER, JSON.stringify(userData));
-      loginBox.style.display = 'none';
-      newPostBox.style.display = 'block';
-      renderPosts();
-      updateProfileUI();
-      updateAvatars();
-    });
-
-    // Оновлення аватарів
-    function updateAvatars() {
-      const avatarElements = document.querySelectorAll('.avatar, .top-bar-avatar, .profile-avatar-large');
-      avatarElements.forEach(el => {
-        if (el.id !== 'profileAvatar') el.style.backgroundImage = userData.avatar ? `url('${userData.avatar}')` : '';
-      });
-      document.getElementById('topBarAvatar').style.backgroundImage = userData.avatar ? `url('${userData.avatar}')` : '';
-      document.getElementById('profileAvatar').style.backgroundImage = userData.avatar ? `url('${userData.avatar}')` : '';
-      document.getElementById('leftUsername').innerHTML = username || 'Гість';
-      document.getElementById('leftAvatar').style.backgroundImage = userData.avatar ? `url('${userData.avatar}')` : '';
-      document.getElementById('postAvatar').style.backgroundImage = userData.avatar ? `url('${userData.avatar}')` : '';
-    }
-
-    // Поле вводу поста
-    document.getElementById('openPostInput')?.addEventListener('click', () => {
-      document.getElementById('postInputContainer').style.display = 'block';
-    });
-
-    // Додавання поста
-    document.getElementById('addPost').addEventListener('click', () => {
-      const text = postText.value.trim();
-      if (!text || !username) return;
-      posts.unshift({
-        id: Date.now(),
-        username,
-        text,
-        likes: 0,
-        likedBy: [],
-        comments: [],
-        reactions: { "❤️":0, "🔥":0, "😂":0, "😮":0 },
-        created: new Date().toISOString()
-      });
-      localStorage.setItem(KEY.POSTS, JSON.stringify(posts));
-      postText.value = '';
-      document.getElementById('postInputContainer').style.display = 'none';
-      renderPosts();
-    });
-
-    // Завантаження аватара
-    function handleAvatarUpload(inputEl, isModal = false) {
-      inputEl?.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        if (file.size > 3 * 1024 * 1024) {
-          alert('Файл завеликий (макс 3 МБ)');
-          e.target.value = '';
-          return;
-        }
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          userData.avatar = ev.target.result;
-          localStorage.setItem(KEY.USER, JSON.stringify(userData));
-          updateProfileUI();
-          renderPosts();
-          updateAvatars();
-          if (isModal) modal.style.display = 'none';
-          alert('Аватар оновлено');
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-
-    handleAvatarUpload(document.getElementById('avatarFileInput'));
-    handleAvatarUpload(document.getElementById('editAvatarFile'), true);
-
-    document.getElementById('changeAvatarBtn')?.addEventListener('click', () => {
-      document.getElementById('avatarFileInput').click();
-    });
-
-    // Редагування профілю
-    document.getElementById('editProfileBtn')?.addEventListener('click', () => {
-      document.getElementById('editBio').value = userData.bio || '';
-      modal.style.display = 'block';
-    });
-
-    document.getElementById('saveProfileBtn')?.addEventListener('click', () => {
-      userData.bio = document.getElementById('editBio').value.trim();
-      localStorage.setItem(KEY.USER, JSON.stringify(userData));
-      modal.style.display = 'none';
-      updateProfileUI();
-    });
-
-    document.getElementById('closeModalBtn')?.addEventListener('click', () => {
-      modal.style.display = 'none';
-    });
-
-    // Очистка
-    document.getElementById('clearAllData')?.addEventListener('click', () => {
-      if (confirm('Видалити всі дані?')) {
-        localStorage.clear();
-        location.reload();
-      }
-    });
-
-    // Отримати аватар
-    function getAvatar(uname) {
-      return (uname === username && userData.avatar) ? userData.avatar : '';
-    }
-
-    // Рендер постів
-    function renderPosts(container = feed, onlyUser = false) {
-      if (!container) return;
-      container.innerHTML = '';
-      const filtered = posts.filter(p => !onlyUser || p.username === username);
-      filtered.forEach(post => {
-        const isLiked = post.likedBy?.includes(username);
-        const isFavorite = userData.favorites?.includes(post.id);
-
-        const postEl = document.createElement('div');
-        postEl.className = 'post';
-        postEl.innerHTML = `
-          <div class="post-header">
-            <div class="avatar" style="background-image:url('${getAvatar(post.username)}')"></div>
-            <div>
-              <div class="post-author">${post.username}</div>
-              <div class="post-meta">${new Date(post.created).toLocaleString('uk-UA', { dateStyle: 'short', timeStyle: 'short' })}</div>
-            </div>
-          </div>
-          <div class="post-content" id="content-${post.id}">${post.text.replace(/\n/g, '<br>')}</div>
-          <div class="post-footer">
-            <button class="like-btn ${isLiked ? 'liked' : ''}">❤️ ${post.likes || 0}</button>
-            <button class="comment-btn">💬 ${post.comments?.length || 0}</button>
-            <button class="favorite-btn ${isFavorite ? 'favorited' : ''}">⭐</button>
-            ${post.username === username ? '<button class="edit-btn">✏️ Редагувати</button>' : ''}
-          </div>
-          <div class="comments-section" id="comments-${post.id}"></div>
-          <div class="comment-input">
-            <div class="comment-avatar" style="background-image:url('${getAvatar(username)}')"></div>
-            <input type="text" placeholder="Напишіть коментар..." class="comment-inp" />
-            <button class="add-comment-btn">Відправити</button>
-          </div>
-        `;
-
-        // Лайк
-        postEl.querySelector('.like-btn')?.addEventListener('click', () => {
-          if (!username) return alert('Увійдіть');
-          if (!post.likedBy) post.likedBy = [];
-          const idx = post.likedBy.indexOf(username);
-          idx === -1 ? (post.likedBy.push(username), post.likes++) : (post.likedBy.splice(idx,1), post.likes--);
-          localStorage.setItem(KEY.POSTS, JSON.stringify(posts));
-          renderPosts(container, onlyUser);
-          if (container !== feed) updateProfileUI();
-        });
-
-        // Фаворит
-        postEl.querySelector('.favorite-btn')?.addEventListener('click', () => {
-          if (!username) return alert('Увійдіть');
-          if (!userData.favorites) userData.favorites = [];
-          const idx = userData.favorites.indexOf(post.id);
-          idx === -1 ? userData.favorites.push(post.id) : userData.favorites.splice(idx,1);
-          localStorage.setItem(KEY.USER, JSON.stringify(userData));
-          renderPosts(container, onlyUser);
-        });
-
-        // Коментар
-        const inp = postEl.querySelector('.comment-inp');
-        const addBtn = postEl.querySelector('.add-comment-btn');
-        addBtn.addEventListener('click', () => {
-          const text = inp.value.trim();
-          if (!text || !username) return;
-          if (!post.comments) post.comments = [];
-          post.comments.push({ user: username, text, time: Date.now() });
-          inp.value = '';
-          localStorage.setItem(KEY.POSTS, JSON.stringify(posts));
-          renderComments(post.id, postEl.querySelector(`#comments-${post.id}`));
-        });
-
-        // Редагування
-        if (post.username === username) {
-          postEl.querySelector('.edit-btn')?.addEventListener('click', () => {
-            const contentDiv = document.getElementById(`content-${post.id}`);
-            const textarea = document.createElement('textarea');
-            textarea.value = post.text;
-            textarea.style.width = '100%';
-            textarea.style.margin = '10px 0';
-            const saveBtn = document.createElement('button');
-            saveBtn.textContent = 'Зберегти';
-            saveBtn.style.background = 'var(--accent)';
-            saveBtn.style.color = 'white';
-            saveBtn.style.border = 'none';
-            saveBtn.style.borderRadius = 'var(--radius-full)';
-            saveBtn.style.padding = '8px 20px';
-            contentDiv.replaceWith(textarea);
-            textarea.after(saveBtn);
-            saveBtn.addEventListener('click', () => {
-              post.text = textarea.value.trim();
-              localStorage.setItem(KEY.POSTS, JSON.stringify(posts));
-              renderPosts(container, onlyUser);
-            });
-          });
-        }
-
-        renderComments(post.id, postEl.querySelector(`#comments-${post.id}`));
-        container.appendChild(postEl);
-      });
-    }
-
-    function renderComments(postId, container) {
-      if (!container) return;
-      container.innerHTML = '';
-      const post = posts.find(p => p.id === postId);
-      (post?.comments || []).forEach(c => {
-        const div = document.createElement('div');
-        div.className = 'comment';
-        div.innerHTML = `
-          <div class="comment-avatar" style="background-image:url('${getAvatar(c.user)}')"></div>
-          <div class="comment-content">
-            <span class="comment-author">${c.user}</span>
-            <span>${c.text}</span>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    function updateProfileUI() {
-      if (!username) return;
-      document.getElementById('profileUsernameDisplay').textContent = username;
-      document.getElementById('registerDate').textContent = userData.registered || 'невідомо';
-      document.getElementById('profileBio').textContent = userData.bio || 'Опис відсутній';
-      document.getElementById('profileAvatar').style.backgroundImage = userData.avatar ? `url('${userData.avatar}')` : '';
-      
-      let pCount = 0, lCount = 0;
-      posts.forEach(p => { if (p.username === username) { pCount++; lCount += p.likes || 0; } });
-      document.getElementById('postCount').textContent = pCount;
-      document.getElementById('likeCount').textContent = lCount;
-      document.getElementById('favoriteCount').textContent = userData.favorites?.length || 0;
-      
-      renderPosts(document.getElementById('profilePosts'), true);
-      updateAvatars();
-    }
-
-    // Ініціалізація
-    if (username) {
-      renderPosts();
-      updateProfileUI();
-      updateAvatars();
-    }
-  })();
+document.querySelectorAll('[data-section]').forEach(el=>{
+  el.addEventListener('click',()=>sections.forEach(s=>s.classList.remove('active'))||document.getElementById(el.dataset.section).classList.add('active'));
+});
 </script>
 
 </body>

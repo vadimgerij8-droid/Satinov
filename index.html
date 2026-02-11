@@ -118,67 +118,7 @@ body {
 
 <body>
 
-<div class="top-bar">
-  <div class="burger" onclick="toggleMenu()">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-  <div class="site-name">FANTASYAS</div>
-</div>
 
-<nav class="sidebar" id="menu">
-  <a href="#">Головна</a>
-  <a href="#">Про нас</a>
-  <a href="#">Послуги</a>
-  <a href="#">Портфоліо</a>
-  <a href="#">Контакти</a>
-</nav>
-
-<main class="main-content">
-</main>
-
-<script>
-function toggleMenu() {
-  document.getElementById("menu").classList.toggle("active");
-  document.querySelector(".burger").classList.toggle("active");
-}
-</script>
-
-</body>
-</html><!-- Верхня панель з бургером, назвою і пошуком -->
-<div class="top-bar">
-  <div class="burger" onclick="toggleMenu()">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-  <div class="site-name" style="margin-left: 15px;">FANTASYAS</div>
-  <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Пошук...">
-  </div>
-</div>
-
-<style>
-.top-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between; /* бургер ліворуч, пошук праворуч */
-  padding: 0 20px;
-}
-
-/* Пошук */
-.search-box {
-  position: relative;
-}
-
-.search-box input {
-  padding: 8px 12px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 20px;
-  color: #fff;
-  outline: none;
   width: 140px;
   transition: 0.3s;
   font-size: 0.9rem;

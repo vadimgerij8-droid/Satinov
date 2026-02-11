@@ -143,4 +143,42 @@ document.getElementById('addPost').addEventListener('click', ()=>{
 </script>
 
 </body>
-</html>
+</html><script>
+// Блоки контенту
+const feedBlock = document.getElementById('feed');
+const newPostBox = document.getElementById('newPostBox');
+const loginBoxEl = document.getElementById('loginBox');
+
+// Функція показати головну
+function showHome() {
+  loginBoxEl.style.display = username ? 'none' : 'flex';
+  newPostBox.style.display = username ? 'flex' : 'none';
+  feedBlock.style.display = 'flex';
+}
+
+// Ховаємо всі блоки (для інших пунктів меню, поки пусто)
+function hideAll() {
+  loginBoxEl.style.display = 'none';
+  newPostBox.style.display = 'none';
+  feedBlock.style.display = 'none';
+}
+
+// Додаємо події на меню
+const sidebarLinks = document.querySelectorAll('.sidebar a');
+sidebarLinks.forEach(link=>{
+  link.addEventListener('click', e=>{
+    const text = e.target.textContent.trim();
+    if(text === 'Головна'){
+      showHome();
+    } else {
+      hideAll(); // інші пункти поки ховають стрічку
+    }
+    // Закрити меню після кліку на мобілці
+    sidebar.classList.remove('active');
+    burger.classList.remove('active');
+  });
+});
+
+// Показуємо головну відразу при завантаженні
+showHome();
+</script>

@@ -1,161 +1,149 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FANTASYAS</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-  
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: 'Manrope', system-ui, sans-serif;
-      background: #000;
-      color: #fff;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FANTASYAS</title>
 
-    .top-bar {
-      position: fixed;
-      top: 0;
-      right: 0;
-      left: 0;
-      height: 80px;
-      padding: 0 40px;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      z-index: 1000;
-      background: rgba(0,0,0,0.4);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-    }
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 
-    .site-name {
-      font-size: 1.8rem;
-      font-weight: 800;
-      letter-spacing: -1px;
-      background: linear-gradient(90deg, #fff, #ccc);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      width: 280px;
-      padding: 120px 40px 40px;
-      background: #000;
-      border-right: 1px solid rgba(255,255,255,0.06);
-      overflow-y: auto;
-      z-index: 900;
-    }
+body {
+  font-family: 'Manrope', sans-serif;
+  background: #000;
+  color: #fff;
+  overflow-x: hidden;
+}
 
-    .sidebar a {
-      display: block;
-      color: #aaa;
-      text-decoration: none;
-      font-size: 1.25rem;
-      font-weight: 700;
-      margin: 1.4rem 0;
-      transition: all 0.3s ease;
-      opacity: 0;
-      transform: translateX(-30px);
-      animation: slideIn 0.8s forwards;
-    }
+/* Верхня панель */
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 25px;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  z-index: 1000;
+}
 
-    .sidebar a:nth-child(1) { animation-delay: 0.1s; }
-    .sidebar a:nth-child(2) { animation-delay: 0.2s; }
-    .sidebar a:nth-child(3) { animation-delay: 0.3s; }
-    .sidebar a:nth-child(4) { animation-delay: 0.4s; }
-    .sidebar a:nth-child(5) { animation-delay: 0.5s; }
+.site-name {
+  font-size: 1.8rem;
+  font-weight: 800;
+  background: linear-gradient(90deg,#fff,#aaa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 
-    .sidebar a:hover {
-      color: #fff;
-      transform: translateX(8px);
-    }
+/* Бургер */
+.burger {
+  width: 30px;
+  height: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+}
 
-    .main-content {
-      margin-left: 280px;
-      padding: 140px 60px 60px;
-    }
+.burger span {
+  height: 3px;
+  width: 100%;
+  background: #fff;
+  border-radius: 3px;
+  transition: 0.4s;
+}
 
-    h1 {
-      font-size: 5.5rem;
-      font-weight: 800;
-      letter-spacing: -3px;
-      line-height: 0.95;
-      margin-bottom: 1.5rem;
-      opacity: 0;
-      animation: fadeInUp 1.2s forwards 0.6s;
-    }
+/* Меню */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -280px;
+  width: 280px;
+  height: 100vh;
+  background: #000;
+  padding: 120px 40px;
+  transition: 0.5s ease;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  z-index: 999;
+}
 
-    p.intro {
-      font-size: 1.5rem;
-      font-weight: 500;
-      color: #ccc;
-      max-width: 700px;
-      opacity: 0;
-      animation: fadeInUp 1.2s forwards 0.9s;
-    }
+.sidebar a {
+  display: block;
+  color: #aaa;
+  text-decoration: none;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 1.6rem 0;
+  transition: 0.3s;
+}
 
-    @keyframes slideIn {
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
+.sidebar a:hover {
+  color: #fff;
+  transform: translateX(8px);
+}
 
-    @keyframes fadeInUp {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+/* Активний стан */
+.sidebar.active {
+  left: 0;
+}
 
-    @media (max-width: 900px) {
-      .sidebar {
-        position: relative;
-        width: 100%;
-        height: auto;
-        padding: 100px 30px 30px;
-        border-right: none;
-        border-bottom: 1px solid rgba(255,255,255,0.06);
-      }
-      .main-content {
-        margin-left: 0;
-        padding: 40px 25px;
-      }
-      h1 { font-size: 3.8rem; }
-    }
-  </style>
+/* Анімація бургера */
+.burger.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px,5px);
+}
+.burger.active span:nth-child(2) {
+  opacity: 0;
+}
+.burger.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(6px,-6px);
+}
+
+/* Контент */
+.main-content {
+  padding: 140px 30px;
+}
+</style>
 </head>
+
 <body>
 
-  <div class="top-bar">
-    <div class="site-name">FANTASYAS</div>
+<div class="top-bar">
+  <div class="burger" onclick="toggleMenu()">
+    <span></span>
+    <span></span>
+    <span></span>
   </div>
+  <div class="site-name">FANTASYAS</div>
+</div>
 
-  <nav class="sidebar">
-    <a href="#">Головна</a>
-    <a href="#">Про нас</a>
-    <a href="#">Послуги</a>
-    <a href="#">Портфоліо</a>
-    <a href="#">Контакти</a>
-  </nav>
+<nav class="sidebar" id="menu">
+  <a href="#">Головна</a>
+  <a href="#">Про нас</a>
+  <a href="#">Послуги</a>
+  <a href="#">Портфоліо</a>
+  <a href="#">Контакти</a>
+</nav>
 
-  <main class="main-content">
-  </main>
+<main class="main-content">
+</main>
+
+<script>
+function toggleMenu() {
+  document.getElementById("menu").classList.toggle("active");
+  document.querySelector(".burger").classList.toggle("active");
+}
+</script>
 
 </body>
 </html>

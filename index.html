@@ -6,225 +6,25 @@
 <title>FANTASYAS</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Manrope', sans-serif;
-  background: #000;
-  color: #fff;
-  overflow-x: hidden;
-  min-height: 100vh;
-}
-
-/* Верхня панель */
-.top-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 80px;
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  background: rgba(0,0,0,0.4);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  z-index: 1000;
-}
-
-.site-name {
-  font-size: 1.8rem;
-  font-weight: 800;
-  background: linear-gradient(90deg,#fff,#aaa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-left: 15px;
-}
-
-/* Бургер */
-.burger {
-  width: 30px;
-  height: 22px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  cursor: pointer;
-}
-
-.burger span {
-  height: 3px;
-  width: 100%;
-  background: #fff;
-  border-radius: 3px;
-  transition: 0.4s;
-}
-
-/* Анімація бургера */
-.burger.active span:nth-child(1) {
-  transform: rotate(45deg) translate(5px,5px);
-}
-.burger.active span:nth-child(2) {
-  opacity: 0;
-}
-.burger.active span:nth-child(3) {
-  transform: rotate(-45deg) translate(6px,-6px);
-}
-
-/* Меню */
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: -280px;
-  width: 280px;
-  height: 100vh;
-  background: #000;
-  padding: 100px 30px 30px;
-  transition: 0.5s ease;
-  border-right: 1px solid rgba(255,255,255,0.06);
-  z-index: 999;
-  overflow-y: auto;
-}
-
-/* Пошук всередині меню */
-.sidebar .search-box {
-  margin-bottom: 20px;
-}
-
-.sidebar .search-box input {
-  width: 100%;
-  padding: 8px 12px;
-  border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.08);
-  color: #fff;
-  outline: none;
-  font-size: 0.95rem;
-  transition: 0.3s;
-}
-
-.sidebar .search-box input::placeholder {
-  color: #aaa;
-}
-
-.sidebar .search-box input:focus {
-  background: rgba(255,255,255,0.15);
-  border-color: #fff;
-}
-
-/* Пункти меню */
-.sidebar a {
-  display: block;
-  color: #aaa;
-  text-decoration: none;
-  font-size: 1.3rem;
-  font-weight: 700;
-  margin: 1.6rem 0;
-  transition: 0.3s;
-}
-
-.sidebar a:hover {
-  color: #fff;
-  transform: translateX(8px);
-}
-
-/* Активний стан */
-.sidebar.active {
-  left: 0;
-}
-
-/* Контент */
-.main-content {
-  padding: 140px 30px;
-}
-</style>
-</head>
-<body>
-
-<!-- Верхня панель -->
-<div class="top-bar">
-  <div class="burger" onclick="toggleMenu()">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-  <div class="site-name">FANTASYAS</div>
-</div>
-
-<!-- Анімоване меню з пошуком -->
-<nav class="sidebar" id="menu">
-  <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Пошук...">
-  </div>
-  <a href="#">Головна</a>
-  <a href="#">Про нас</a>
-  <a href="#">Послуги</a>
-  <a href="#">Портфоліо</a>
-  <a href="#">Контакти</a>
-</nav>
-
-<!-- Основний контент -->
-<main class="main-content">
-</main>
-
-<script>
-// Бургер меню
-function toggleMenu() {
-  document.getElementById("menu").classList.toggle("active");
-  document.querySelector(".burger").classList.toggle("active");
-}
-
-// Пошук по меню
-document.getElementById("searchInput").addEventListener("input", function() {
-  let value = this.value.toLowerCase();
-  let links = document.querySelectorAll(".sidebar a");
-
-  links.forEach(link => {
-    if(link.textContent.toLowerCase().includes(value)) {
-      link.style.display = "block";
-    } else {
-      link.style.display = "none";
-    }
-  });
-});
-</script>
-
-</body>
-</html><!-- Стрічка постів -->
-<div class="feed">
-  <div class="post">
-    <div class="post-header">
-      <div class="avatar"></div>
-      <div class="username">User123</div>
-    </div>
-    <div class="post-content">
-      Привіт! Це твій перший пост у FANTASYAS.
-    </div>
-    <div class="post-footer">
-      <button class="like-btn"><span class="heart"></span> <span class="count">0</span></button>
-      <button class="comment-btn"><span class="bubble"></span> <span class="count">0</span></button>
-    </div>
-  </div>
-
-  <div class="post">
-    <div class="post-header">
-      <div class="avatar"></div>
-      <div class="username">CreativeUser</div>
-    </div>
-    <div class="post-content">
-      Ще один приклад поста в стрічці.
-    </div>
-    <div class="post-footer">
-      <button class="like-btn"><span class="heart"></span> <span class="count">0</span></button>
-      <button class="comment-btn"><span class="bubble"></span> <span class="count">0</span></button>
-    </div>
-  </div>
-</div>
-
-<style>
+* {margin:0; padding:0; box-sizing:border-box;}
+body {font-family:'Manrope',sans-serif; background:#000; color:#fff; min-height:100vh; overflow-x:hidden;}
+.top-bar {position:fixed; top:0; left:0; right:0; height:80px; display:flex; align-items:center; justify-content:space-between; padding:0 20px; background:rgba(0,0,0,0.4); backdrop-filter:blur(10px); border-bottom:1px solid rgba(255,255,255,0.08); z-index:1000;}
+.site-name {font-size:1.8rem; font-weight:800; background:linear-gradient(90deg,#fff,#aaa); -webkit-background-clip:text; -webkit-text-fill-color:transparent;}
+.burger {width:30px; height:22px; display:flex; flex-direction:column; justify-content:space-between; cursor:pointer;}
+.burger span {height:3px; width:100%; background:#fff; border-radius:3px; transition:0.4s;}
+.burger.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
+.burger.active span:nth-child(2){opacity:0;}
+.burger.active span:nth-child(3){transform:rotate(-45deg) translate(6px,-6px);}
+.sidebar {position:fixed; top:0; left:-280px; width:280px; height:100%; background:#000; padding:120px 40px 40px; border-right:1px solid rgba(255,255,255,0.06); transition:0.4s; z-index:900;}
+.sidebar.active {left:0;}
+.sidebar a {display:block; color:#aaa; text-decoration:none; font-size:1.25rem; font-weight:700; margin:1.4rem 0; transition:0.3s;}
+.sidebar a:hover{color:#fff; transform:translateX(8px);}
+.main-content {margin-top:100px; padding:20px 25px;}
+.login-box, .new-post {margin-bottom:20px; display:flex; flex-direction:column; gap:10px;}
+.login-box input, .new-post textarea {padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.08); color:#fff; outline:none; font-family:'Manrope',sans-serif;}
+.login-box input::placeholder, .new-post textarea::placeholder {color:#aaa;}
+.login-box button, .new-post button {width:120px; padding:8px 12px; border:none; border-radius:12px; background:#fff; color:#000; font-weight:700; cursor:pointer; transition:0.2s;}
+.login-box button:hover, .new-post button:hover {background:#ddd;}
 .feed {display:flex; flex-direction:column; gap:20px;}
 .post {background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:15px;}
 .post-header {display:flex; align-items:center; gap:10px; margin-bottom:10px;}
@@ -233,66 +33,82 @@ document.getElementById("searchInput").addEventListener("input", function() {
 .post-content {font-size:0.9rem; margin-bottom:10px;}
 .post-footer {display:flex; gap:15px;}
 .post-footer button {display:flex; align-items:center; gap:5px; background:none; border:none; color:#aaa; font-size:0.9rem; cursor:pointer; transition:color 0.2s;}
-.post-footer button:hover {color:#fff;}
-.heart {width:16px; height:16px; display:inline-block; background:url('data:image/svg+xml;utf8,<svg fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21C12 21 4 13.5 4 8.5C4 5.42 6.42 3 9.5 3C11.24 3 12.91 3.81 13.5 5.09C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 13.5 15 21 15 21H12Z"/></svg>') no-repeat center/contain; transition:transform 0.3s;}
-.like-btn.liked .heart {transform:scale(1.5);}
-.bubble {width:16px; height:16px; display:inline-block; background:url('data:image/svg+xml;utf8,<svg fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/></svg>') no-repeat center/contain; transition:transform 0.3s;}
-.comment-btn.liked .bubble {transform:scale(1.2);}
-@media (max-width:900px){.post{padding:12px;}}
+.post-footer button:hover{color:#fff;}
+.heart{width:16px; height:16px; display:inline-block; background:url('data:image/svg+xml;utf8,<svg fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21C12 21 4 13.5 4 8.5C4 5.42 6.42 3 9.5 3C11.24 3 12.91 3.81 13.5 5.09C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 13.5 15 21 15 21H12Z"/></svg>') no-repeat center/contain;}
+.bubble{width:16px; height:16px; display:inline-block; background:url('data:image/svg+xml;utf8,<svg fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/></svg>') no-repeat center/contain;}
+.like-btn.liked .heart{transform:scale(1.5);}
+.comment-btn.liked .bubble{transform:scale(1.2);}
+@media(max-width:900px){.sidebar{width:100%; height:auto; padding:100px 20px; border-right:none; border-bottom:1px solid rgba(255,255,255,0.06); left:-100%;}.sidebar.active{left:0;}}
 </style>
+</head>
+<body>
 
-<script>
-// Лайки
-document.querySelectorAll('.like-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    let countEl = btn.querySelector('.count');
-    let count = parseInt(countEl.textContent);
-    if(btn.classList.contains('liked')){count--; btn.classList.remove('liked');}
-    else{count++; btn.classList.add('liked');}
-    countEl.textContent = count;
-  });
-});
-
-// Коментарі
-document.querySelectorAll('.comment-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    let countEl = btn.querySelector('.count');
-    let count = parseInt(countEl.textContent);
-    count++;
-    btn.classList.add('liked');
-    setTimeout(()=>btn.classList.remove('liked'),300);
-    countEl.textContent = count;
-  });
-});
-</script><!-- Форма для нового поста -->
-<div class="new-post">
-  <textarea id="postText" placeholder="Напиши свій пост..." rows="3"></textarea>
-  <button id="addPost">Додати пост</button>
+<div class="top-bar">
+  <div class="burger" id="burger"><span></span><span></span><span></span></div>
+  <div class="site-name">FANTASYAS</div>
 </div>
 
-<style>
-.new-post {margin-bottom:20px; display:flex; flex-direction:column; gap:10px;}
-.new-post textarea {width:100%; padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.08); color:#fff; outline:none; resize:none; font-family:'Manrope',sans-serif;}
-.new-post textarea::placeholder {color:#aaa;}
-.new-post button {width:120px; padding:8px 12px; border:none; border-radius:12px; background:#fff; color:#000; font-weight:700; cursor:pointer; transition:0.2s;}
-.new-post button:hover {background:#ddd;}
-</style>
+<nav class="sidebar" id="sidebar">
+  <a href="#">Головна</a>
+  <a href="#">Про нас</a>
+  <a href="#">Послуги</a>
+  <a href="#">Портфоліо</a>
+  <a href="#">Контакти</a>
+</nav>
+
+<main class="main-content">
+
+  <!-- Вхід користувача -->
+  <div class="login-box" id="loginBox">
+    <input type="text" id="usernameInput" placeholder="Введіть своє ім'я">
+    <button id="saveUsername">Почати</button>
+  </div>
+
+  <!-- Форма для нового поста -->
+  <div class="new-post" id="newPostBox">
+    <textarea id="postText" placeholder="Напиши свій пост..." rows="3"></textarea>
+    <button id="addPost">Додати пост</button>
+  </div>
+
+  <!-- Стрічка постів -->
+  <div class="feed" id="feed"></div>
+
+</main>
 
 <script>
-// Додавання нового поста
-document.getElementById('addPost').addEventListener('click', () => {
+// Бургер меню
+const burger = document.getElementById('burger');
+const sidebar = document.getElementById('sidebar');
+burger.addEventListener('click', ()=>{
+  burger.classList.toggle('active');
+  sidebar.classList.toggle('active');
+});
+
+// Користувач
+let username = localStorage.getItem('fantasyasUsername');
+const loginBox = document.getElementById('loginBox');
+if(username){loginBox.style.display='none';}
+document.getElementById('saveUsername').addEventListener('click', ()=>{
+  const input = document.getElementById('usernameInput').value.trim();
+  if(!input) return;
+  username = input;
+  localStorage.setItem('fantasyasUsername', username);
+  loginBox.style.display='none';
+});
+
+// Додавання поста
+const feed = document.getElementById('feed');
+const newPostBox = document.getElementById('newPostBox');
+document.getElementById('addPost').addEventListener('click', ()=>{
   const text = document.getElementById('postText').value.trim();
-  if(!text) return; // нічого не робимо, якщо порожньо
+  if(!text) return;
 
-  const feed = document.getElementById('feed');
-
-  // Створюємо новий пост
   const post = document.createElement('div');
   post.className = 'post';
   post.innerHTML = `
     <div class="post-header">
       <div class="avatar"></div>
-      <div class="username">Новий користувач</div>
+      <div class="username">${username || 'Новий користувач'}</div>
     </div>
     <div class="post-content">${text}</div>
     <div class="post-footer">
@@ -300,13 +116,10 @@ document.getElementById('addPost').addEventListener('click', () => {
       <button class="comment-btn"><span class="bubble"></span> <span class="count">0</span></button>
     </div>
   `;
+  feed.prepend(post);
+  document.getElementById('postText').value='';
 
-  feed.prepend(post); // додаємо зверху
-
-  // Очищаємо textarea
-  document.getElementById('postText').value = '';
-
-  // Додаємо функціонал для лайків і коментарів
+  // Лайки
   const likeBtn = post.querySelector('.like-btn');
   likeBtn.addEventListener('click', ()=>{
     const countEl = likeBtn.querySelector('.count');
@@ -316,6 +129,7 @@ document.getElementById('addPost').addEventListener('click', () => {
     countEl.textContent = count;
   });
 
+  // Коментарі
   const commentBtn = post.querySelector('.comment-btn');
   commentBtn.addEventListener('click', ()=>{
     const countEl = commentBtn.querySelector('.count');
@@ -326,45 +140,7 @@ document.getElementById('addPost').addEventListener('click', () => {
     countEl.textContent = count;
   });
 });
-</script><!-- Вхід користувача -->
-<div class="login-box" id="loginBox">
-  <input type="text" id="usernameInput" placeholder="Введіть своє ім'я">
-  <button id="saveUsername">Почати</button>
-</div>
+</script>
 
-<style>
-.login-box {display:flex; gap:10px; margin-bottom:20px;}
-.login-box input {padding:8px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.08); color:#fff; outline:none; font-family:'Manrope',sans-serif;}
-.login-box input::placeholder {color:#aaa;}
-.login-box button {padding:8px 12px; border:none; border-radius:12px; background:#fff; color:#000; font-weight:700; cursor:pointer; transition:0.2s;}
-.login-box button:hover {background:#ddd;}
-</style>
-
-<script>
-// Перевіряємо, чи ім'я вже збережене
-let username = localStorage.getItem('fantasyasUsername');
-const loginBox = document.getElementById('loginBox');
-if(username){
-  loginBox.style.display = 'none';
-} 
-
-document.getElementById('saveUsername').addEventListener('click', ()=>{
-  const input = document.getElementById('usernameInput').value.trim();
-  if(!input) return;
-  username = input;
-  localStorage.setItem('fantasyasUsername', username);
-  loginBox.style.display = 'none';
-});
-</script>const post = document.createElement('div');
-post.className = 'post';
-post.innerHTML = `
-  <div class="post-header">
-    <div class="avatar"></div>
-    <div class="username">${username || 'Новий користувач'}</div>
-  </div>
-  <div class="post-content">${text}</div>
-  <div class="post-footer">
-    <button class="like-btn"><span class="heart"></span> <span class="count">0</span></button>
-    <button class="comment-btn"><span class="bubble"></span> <span class="count">0</span></button>
-  </div>
-`;
+</body>
+</html>

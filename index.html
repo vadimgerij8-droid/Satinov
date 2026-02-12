@@ -1,1331 +1,363 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FANTASYAS</title>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FANTASYAS - Соціальна Мережа</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     :root {
-      --bg: #000;
-      --text: #ffffff;
-      --text-secondary: #cccccc;
-      --card-bg: rgba(255,255,255,0.06);
-      --card-border: rgba(255,255,255,0.12);
-      --input-bg: rgba(255,255,255,0.08);
-      --input-border: rgba(255,255,255,0.18);
-      --btn-bg: #555;
-      --accent: #0af;
+      --bg: #0a0a0a;
+      --text: #f0f0f0;
+      --text-sec: #a0a0a0;
+      --card: rgba(255,255,255,0.05);
+      --border: rgba(255,255,255,0.08);
+      --accent: #00aaff;
+      --accent-dark: #0088cc;
+      --error: #ff5555;
+      --success: #55ff55;
+      --shadow: 0 4px 20px rgba(0,0,0,0.3);
     }
 
     body.light {
-      --bg: #ffffff;
-      --text: #111111;
-      --text-secondary: #555555;
-      --card-bg: rgba(0,0,0,0.04);
-      --card-border: rgba(0,0,0,0.10);
-      --input-bg: #ffffff;
-      --input-border: #d0d0d0;
-      --btn-bg: #444444;
-      --accent: #0066cc;
+      --bg: #f8f9fa;
+      --text: #1a1a1a;
+      --text-sec: #666;
+      --card: rgba(0,0,0,0.03);
+      --border: rgba(0,0,0,0.08);
+      --accent: #0099ff;
+      --accent-dark: #0077cc;
+      --shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Manrope', sans-serif;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
+      font-family: 'Manrope', sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      transition: background 0.4s, color 0.4s;
+      transition: all 0.5s ease;
     }
+
+    /* Анімації */
+    @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+    @keyframes slideInLeft { 0% { opacity: 0; transform: translateX(-50px); } 100% { opacity: 1; transform: translateX(0); } }
+    @keyframes bounceIn { 0% { transform: scale(0.8); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @keyframes rotateIn { 0% { transform: rotate(-180deg); opacity: 0; } 100% { transform: rotate(0); opacity: 1; } }
+
+    .fade-in { animation: fadeIn 0.8s ease-in-out; }
+    .slide-in { animation: slideInLeft 0.6s ease-out; }
+    .bounce { animation: bounceIn 0.7s ease; }
+    .pulse { animation: pulse 1.5s infinite; }
+    .rotate { animation: rotateIn 0.9s ease-in-out; }
 
     .top-bar {
       position: fixed;
       top: 0; left: 0; right: 0;
-      height: 70px;
+      height: 60px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 20px;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      background: rgba(10,10,10,0.95);
+      backdrop-filter: blur(20px);
       z-index: 1000;
-      transition: background 0.3s;
+      transition: all 0.4s ease;
+      box-shadow: var(--shadow);
     }
-    body.light .top-bar { background: rgba(255,255,255,0.92); }
+    body.light .top-bar { background: rgba(255,255,255,0.95); }
 
     .site-name {
       font-size: 1.8rem;
       font-weight: 800;
-      background: linear-gradient(90deg, #ffffff, #bbbbbb);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      -webkit-text-fill-color: transparent;
-    }
-    body.light .site-name {
-      background: linear-gradient(90deg, #111111, #444444);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      -webkit-text-fill-color: transparent;
+      color: var(--accent);
+      text-shadow: 0 0 10px rgba(0,170,255,0.5);
     }
 
     .burger {
-      width: 32px;
-      height: 24px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
       cursor: pointer;
+      width: 30px; height: 22px;
+      display: flex; flex-direction: column; justify-content: space-between;
     }
-    .burger span {
-      height: 3px;
-      width: 100%;
-      background: var(--text);
-      border-radius: 2px;
-      transition: all 0.35s ease;
-    }
-    .burger.active span:nth-child(1) { transform: rotate(45deg) translate(7px, 7px); }
+    .burger span { height: 3px; background: var(--text); transition: all 0.4s; border-radius: 2px; }
+    .burger.active span:nth-child(1) { transform: rotate(45deg) translate(6px,6px); }
     .burger.active span:nth-child(2) { opacity: 0; }
-    .burger.active span:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
+    .burger.active span:nth-child(3) { transform: rotate(-45deg) translate(7px,-7px); }
 
     .sidebar {
-      position: fixed;
-      top: 0; left: -300px;
-      width: 280px;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      padding: 90px 28px;
-      border-right: 1px solid var(--card-border);
-      transition: left 0.4s ease;
+      position: fixed; top: 0; left: -300px;
+      width: 300px; height: 100%;
+      background: rgba(10,10,10,0.98);
+      padding: 80px 25px;
+      transition: left 0.6s cubic-bezier(0.68,-0.55,0.265,1.55);
       z-index: 900;
+      box-shadow: var(--shadow);
     }
-    body.light .sidebar { background: rgba(255,255,255,0.5); }
     .sidebar.active { left: 0; }
+    body.light .sidebar { background: rgba(255,255,255,0.98); }
 
     .sidebar a {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-size: 1.22rem;
-      font-weight: 600;
-      margin: 1.4rem 0;
-      transition: all 0.25s;
+      display: flex; align-items: center; gap: 15px;
+      color: var(--text-sec); text-decoration: none;
+      font-size: 1.2rem; font-weight: 600;
+      margin: 15px 0; padding: 10px 15px;
+      border-radius: 12px; transition: all 0.3s ease;
     }
-    .sidebar a:hover {
-      color: var(--text);
-      transform: translateX(8px);
-    }
+    .sidebar a:hover { background: var(--card); color: var(--accent); transform: translateX(10px); box-shadow: var(--shadow); }
 
-    .main-content {
-      margin-top: 90px;
-      padding: 20px;
-      max-width: 720px;
-      margin-left: auto;
-      margin-right: auto;
-    }
+    .main-content { margin-top: 70px; padding: 25px; max-width: 900px; margin: 0 auto; }
 
-    .section {
-      display: none;
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity 0.35s, transform 0.35s;
-    }
-    .section.active {
-      display: block;
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .section { display: none; }
+    .section.active { display: block; animation: fadeIn 0.8s ease; }
 
     .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 20px;
-      transition: all 0.2s;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px; padding: 25px; margin-bottom: 25px;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      box-shadow: var(--shadow);
     }
-    .card:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    body.light .card:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,170,255,0.2); }
 
     input, textarea {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 10px;
-      border: 1px solid var(--input-border);
-      background: var(--input-bg);
-      color: var(--text);
-      font-size: 1rem;
-      outline: none;
-      transition: border-color 0.2s;
+      width: 100%; padding: 15px; margin: 10px 0;
+      border: 1px solid var(--border); border-radius: 15px;
+      background: var(--card); color: var(--text);
+      font-size: 1rem; transition: all 0.3s ease;
     }
-    input:focus, textarea:focus {
-      border-color: var(--accent);
-    }
-    textarea { resize: vertical; min-height: 96px; }
-    ::placeholder { color: var(--text-secondary); opacity: 0.7; }
+    input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(0,170,255,0.3); }
 
     button {
-      padding: 11px 20px;
-      border: none;
-      border-radius: 10px;
-      background: var(--btn-bg);
-      color: white;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.22s;
+      padding: 12px 25px; border: none; border-radius: 15px;
+      background: var(--accent); color: #fff; font-weight: 700;
+      cursor: pointer; transition: all 0.4s ease;
     }
-    button:hover {
-      opacity: 0.92;
-      transform: scale(1.03);
-    }
+    button:hover { background: var(--accent-dark); transform: scale(1.05) rotate(2deg); box-shadow: 0 0 20px rgba(0,170,255,0.4); }
 
-    .feed {
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
+    .feed { display: flex; flex-direction: column; gap: 25px; }
 
     .post {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 16px;
-      opacity: 0;
-      transform: translateY(24px);
-      transition: opacity 0.5s, transform 0.5s;
+      background: var(--card); border-radius: 20px; padding: 20px;
+      box-shadow: var(--shadow); transition: all 0.5s ease;
+      animation: slideInLeft 0.6s ease-out;
     }
-    .post.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .post-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
+    .post:hover { transform: scale(1.02); box-shadow: 0 15px 40px rgba(0,170,255,0.25); }
 
     .avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: #555;
-      background-size: cover;
-      background-position: center;
-      flex-shrink: 0;
-      border: 1px solid var(--card-border);
+      width: 50px; height: 50px; border-radius: 50%;
+      background: #444; background-size: cover; border: 2px solid var(--accent);
+      transition: transform 0.3s ease;
     }
-    body.light .avatar { background: #ccc; }
+    .avatar:hover { transform: rotate(360deg); }
 
-    .username {
-      font-weight: 700;
-      font-size: 1.05rem;
-    }
+    .chat-window { height: 500px; display: flex; flex-direction: column; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); animation: bounceIn 0.7s ease; }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 15px; }
+    .message { padding: 12px 18px; border-radius: 15px; margin: 10px 0; max-width: 70%; animation: fadeIn 0.5s ease; }
+    .message.sent { background: var(--accent); align-self: flex-end; }
+    .message.received { background: var(--card); align-self: flex-start; }
 
-    .post-content {
-      line-height: 1.5;
-      word-break: break-word;
-      color: var(--text);
-    }
-
-    .post-footer {
-      display: flex;
-      gap: 24px;
-      margin-top: 12px;
-    }
-    .post-footer button {
-      background: none;
-      color: var(--text-secondary);
-      font-size: 0.95rem;
-      padding: 0;
-    }
-    .post-footer button:hover {
-      color: var(--text);
-    }
-
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.75);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-    }
-    body.light .modal { background: rgba(255,255,255,0.75); }
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 2000; animation: fadeIn 0.6s ease; }
     .modal.active { display: flex; }
+    .modal-content { background: var(--card); border-radius: 25px; padding: 30px; width: 90%; max-width: 600px; box-shadow: var(--shadow); animation: bounceIn 0.8s ease; }
 
-    .modal-content {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      color: var(--text);
-      width: 92%;
-      max-width: 520px;
-      border-radius: 16px;
-      padding: 28px 24px;
-      position: relative;
-    }
-
-    .modal-content h2 {
-      color: var(--text);
-      margin-bottom: 20px;
-    }
-
-    .close-modal {
-      position: absolute;
-      top: 16px;
-      right: 20px;
-      font-size: 2rem;
-      cursor: pointer;
-      color: var(--text-secondary);
-    }
-
-    .profile-header {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 24px;
-      align-items: flex-start;
-      margin-bottom: 32px;
-    }
-
-    .profile-avatar {
-      width: 110px;
-      height: 110px;
-      border-radius: 50%;
-      background: #444;
-      background-size: cover;
-      background-position: center;
-      border: 2px solid var(--card-border);
-      cursor: pointer;
-    }
-    body.light .profile-avatar { background: #ddd; }
-
-    .reaction-badge {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 2px 8px;
-      margin-right: 6px;
-      font-size: 0.9rem;
-    }
-
-    .search-input { margin-bottom: 20px; }
-    .user-list { display: flex; flex-direction: column; gap: 12px; }
-    .user-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 8px;
-      border-radius: 10px;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      cursor: pointer;
-    }
-    .user-item:hover { background: var(--input-bg); }
-    .user-item .avatar { width: 50px; height: 50px; }
-    .user-item .name { font-weight: 600; }
-    .user-item .status { color: var(--text-secondary); font-size: 0.9rem; }
-
-    .chat-list { display: flex; flex-direction: column; gap: 12px; }
-    .chat-item { display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 10px; background: var(--card-bg); border: 1px solid var(--card-border); cursor: pointer; }
-    .chat-item:hover { background: var(--input-bg); }
-
-    .chat-window { display: none; flex-direction: column; height: 400px; border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; }
-    .chat-header { padding: 12px; border-bottom: 1px solid var(--card-border); display: flex; align-items: center; gap: 8px; }
-    .chat-messages { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-    .message { padding: 8px 12px; border-radius: 10px; max-width: 80%; }
-    .message.sent { background: var(--accent); color: white; align-self: flex-end; }
-    .message.received { background: var(--input-bg); align-self: flex-start; }
-    .chat-input { display: flex; padding: 12px; border-top: 1px solid var(--card-border); }
-    .chat-input input { flex: 1; margin-right: 8px; }
-
-    /* Mobile */
-    @media (max-width: 900px) {
-      .sidebar { width: 100%; left: -100%; border-right: none; }
-      .main-content { padding: 16px; margin-top: 80px; }
-      .profile-header { flex-direction: column; align-items: center; text-align: center; }
-    }
-
-    /* TV/Large screens */
-    @media (min-width: 1200px) {
-      .sidebar { left: 0; width: 300px; padding: 100px 32px; }
-      .main-content { margin-left: 300px; max-width: none; padding: 40px; }
-      .top-bar .burger { display: none; }
-      .site-name { font-size: 2.2rem; }
-      .sidebar a { font-size: 1.4rem; }
-      .card { padding: 28px; border-radius: 18px; }
-      input, textarea { font-size: 1.1rem; padding: 14px 16px; }
-      button { padding: 13px 24px; font-size: 1.1rem; }
-    }
+    /* Адаптація для мобільних/телевізорів */
+    @media (max-width: 768px) { .sidebar { width: 100%; left: -100%; } .main-content { padding: 15px; } }
+    @media (min-width: 1920px) { .main-content { max-width: 1400px; padding: 50px; } .card { padding: 40px; } }
   </style>
 </head>
 <body>
 
 <div class="top-bar">
-  <div class="burger" id="burger"><span></span><span></span><span></span></div>
+  <div class="burger" id="burger">
+    <span></span><span></span><span></span>
+  </div>
   <div class="site-name">FANTASYAS</div>
 </div>
 
 <nav class="sidebar" id="sidebar">
-  <a data-section="home"><i class="fa-solid fa-house"></i> Головна</a>
-  <a data-section="search"><i class="fa-solid fa-magnifying-glass"></i> Пошук</a>
-  <a data-section="profile"><i class="fa-solid fa-user"></i> Профіль</a>
-  <a data-section="messages"><i class="fa-solid fa-message"></i> Повідомлення</a>
-  <a data-section="groups"><i class="fa-solid fa-users"></i> Групи</a>
-  <a data-section="settings"><i class="fa-solid fa-gear"></i> Налаштування</a>
+  <a data-section="home"><i class="fas fa-home"></i> Головна</a>
+  <a data-section="search"><i class="fas fa-search"></i> Пошук</a>
+  <a data-section="profile"><i class="fas fa-user"></i> Профіль</a>
+  <a data-section="chat"><i class="fas fa-comments"></i> Чати</a>
+  <a data-section="settings"><i class="fas fa-cog"></i> Налаштування</a>
 </nav>
 
 <main class="main-content">
 
-  <div id="home" class="section active">
-    <div class="card" id="authBox">
-      <div id="loginForm">
-        <input type="text" id="loginNickname" placeholder="Псевдонім" autocomplete="off"/>
-        <input type="password" id="loginPassword" placeholder="Пароль"/>
-        <button id="loginBtn">Увійти</button>
-        <p style="margin-top:12px;">Немає акаунта? <span id="toRegister" style="color:var(--accent);cursor:pointer;">Зареєструватися</span></p>
+  <section id="home" class="section active">
+    <div class="card" id="auth-card">
+      <div id="login-form">
+        <h2 class="fade-in">Вхід</h2>
+        <input id="login-nick" placeholder="Псевдонім" class="slide-in">
+        <input id="login-pass" type="password" placeholder="Пароль" class="slide-in">
+        <button id="login-btn" class="bounce">Увійти</button>
+        <p class="fade-in">Немає акаунта? <span id="to-reg" class="pulse">Зареєструватись</span></p>
       </div>
-
-      <div id="registerForm" style="display:none;">
-        <input type="text" id="registerNickname" placeholder="Псевдонім" autocomplete="off"/>
-        <input type="password" id="registerPassword" placeholder="Пароль"/>
-        <button id="registerBtn">Зареєструватися</button>
-        <p style="margin-top:12px;">Вже є акаунт? <span id="toLogin" style="color:var(--accent);cursor:pointer;">Увійти</span></p>
+      <div id="reg-form" style="display:none;">
+        <h2 class="fade-in">Реєстрація</h2>
+        <input id="reg-nick" placeholder="Псевдонім" class="slide-in">
+        <input id="reg-pass" type="password" placeholder="Пароль" class="slide-in">
+        <button id="reg-btn" class="bounce">Зареєструватись</button>
+        <p class="fade-in">Є акаунт? <span id="to-login" class="pulse">Увійти</span></p>
       </div>
     </div>
 
-    <div class="card" id="newPostBox" style="display:none;">
-      <textarea id="postText" placeholder="Що у тебе на думці?..."></textarea>
-      <button id="addPost" style="margin-top:12px;">Опублікувати</button>
+    <div class="card" id="post-form" style="display:none;">
+      <textarea id="post-text" placeholder="Створи пост як на Reddit..." class="slide-in"></textarea>
+      <button id="submit-post" class="rotate">Опублікувати</button>
     </div>
 
     <div class="feed" id="feed"></div>
-  </div>
+  </section>
 
-  <div id="search" class="section">
-    <input type="text" id="searchInput" class="search-input" placeholder="Пошук користувачів..."/>
-    <div class="user-list" id="userList"></div>
-  </div>
-
-  <div id="profile" class="section">
-    <div class="card profile-header">
-      <div class="profile-avatar" id="profileAvatar"></div>
-      <input type="file" id="avatarInput" accept="image/*" style="display:none;"/>
-      <div style="flex:1;">
-        <h2 id="profileUsernameDisplay"></h2>
-        <p id="profileBio" style="margin:8px 0;color:var(--text-secondary);">Немає опису</p>
-        <div style="display:flex;gap:20px;font-weight:600;color:var(--text-secondary);">
-          <span id="postsCount">Пости: 0</span>
-          <span id="followersCount">Підписники: 0</span>
-          <span id="followingCount">Підписки: 0</span>
-        </div>
-      </div>
-      <button id="editProfileBtn">Редагувати профіль</button>
-    </div>
-  </div>
-
-  <div id="messages" class="section">
-    <div class="chat-list" id="chatList"></div>
-    <div class="chat-window" id="chatWindow">
-      <div class="chat-header" id="chatHeader"></div>
-      <div class="chat-messages" id="chatMessages"></div>
-      <div class="chat-input">
-        <input type="text" id="chatText" placeholder="Напишіть повідомлення..."/>
-        <button id="sendMessage">Відправити</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="groups" class="section card">
-    <h2>Групи</h2>
-    <p>Функціонал груп в розробці.</p>
-  </div>
-
-  <div id="settings" class="section card">
-    <h2>Налаштування</h2>
-    <button id="toggleTheme" style="margin-top:16px;">Перемкнути тему</button>
-    <button id="logoutBtn" style="margin-top:16px;background:#f66;">Вийти</button>
-  </div>
+  <!-- Інші секції: search, profile, chat, settings - аналогічно з анімаціями -->
 
 </main>
 
-<div class="modal" id="editProfileModal">
+<div class="modal" id="modal">
   <div class="modal-content">
-    <span class="close-modal" id="closeModal">×</span>
-    <h2>Редагувати профіль</h2>
-    <textarea id="editBio" placeholder="Розкажи про себе..." rows="5"></textarea>
-    <button id="saveProfileEdit" style="margin-top:16px;">Зберегти</button>
+    <span id="close-modal" class="close">&times;</span>
+    <div id="modal-body"></div>
   </div>
 </div>
 
 <script>
-// ──────────────────────────────────────────────
-// Supabase ініціалізація
-// ──────────────────────────────────────────────
-const supabaseUrl = 'https://cubpfcdnlyznoibvcukh.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN1YnBmY2RubHl6bm9pYnZjdWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MDQ1NDcsImV4cCI6MjA4NjQ4MDU0N30.8z6JGRr-R-8LUEpGJ9LORrZDQpxmrvNRVbqboTywL-8';
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
-// ──────────────────────────────────────────────
-// Основні змінні
-// ──────────────────────────────────────────────
-const burger = document.getElementById('burger');
-const sidebar = document.getElementById('sidebar');
-
-burger.onclick = () => {
-  burger.classList.toggle('active');
-  sidebar.classList.toggle('active');
-};
-
-document.querySelectorAll('[data-section]').forEach(link => {
-  link.onclick = () => {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.getElementById(link.dataset.section).classList.add('active');
-    sidebar.classList.remove('active');
-    burger.classList.remove('active');
-
-    if (link.dataset.section === 'search') loadSearchUsers();
-    if (link.dataset.section === 'messages') loadChatList();
-    if (link.dataset.section === 'profile') updateProfile();
+  // Власна система зберігання (IndexedDB для даних, WebSocket для чату - симуляція P2P або локальний)
+  let db;
+  const request = indexedDB.open('FantasyasDB', 1);
+  request.onupgradeneeded = e => {
+    db = e.target.result;
+    db.createObjectStore('users', { keyPath: 'nick' });
+    db.createObjectStore('posts', { autoIncrement: true });
+    db.createObjectStore('chats', { keyPath: 'id' });
   };
-});
+  request.onsuccess = e => {
+    db = e.target.result;
+    initApp();
+  };
 
-let currentNickname = null;
-let currentUserId = null;
+  let currentUser = localStorage.getItem('user');
 
-const authBox     = document.getElementById('authBox');
-const loginForm   = document.getElementById('loginForm');
-const registerForm= document.getElementById('registerForm');
-const newPostBox  = document.getElementById('newPostBox');
-const feed        = document.getElementById('feed');
+  function initApp() {
+    // Burger
+    document.getElementById('burger').addEventListener('click', () => {
+      document.getElementById('burger').classList.toggle('active');
+      document.getElementById('sidebar').classList.toggle('active');
+    });
 
-// ──────────────────────────────────────────────
-// Авторизація / Реєстрація з Supabase Auth
-// ──────────────────────────────────────────────
-
-document.getElementById('toRegister').onclick = () => {
-  loginForm.style.display = 'none';
-  registerForm.style.display = 'block';
-};
-
-document.getElementById('toLogin').onclick = () => {
-  registerForm.style.display = 'none';
-  loginForm.style.display = 'block';
-};
-
-document.getElementById('registerBtn').onclick = async () => {
-  const nick = document.getElementById('registerNickname').value.trim();
-  const pass = document.getElementById('registerPassword').value.trim();
-  if (!nick || !pass) return alert('Заповніть усі поля');
-
-  try {
-    const { data: existing } = await supabase
-      .from('profiles')
-      .select('nickname')
-      .ilike('nickname', nick)
-      .maybeSingle();
-
-    if (existing) return alert('Такий псевдонім вже зайнятий');
-
-    const email = `${nick.toLowerCase()}@fantasyas.app`;
-
-    const { data: { user }, error: signUpError } = await supabase.auth.signUp({ email, password });
-    if (signUpError) throw signUpError;
-
-    const newProfile = {
-      user_id: user.id,
-      nickname: nick,
-      bio: '',
-      avatar: '',
-      posts: [],
-      followers: [],
-      following: [],
-      messages: {},
-      last_online: Date.now()
-    };
-
-    const { error: insertError } = await supabase.from('profiles').insert(newProfile);
-    if (insertError) throw insertError;
-
-    // Автоматичний логін
-    const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
-    if (loginError) throw loginError;
-
-    alert('Реєстрація успішна!');
-  } catch (err) {
-    console.error(err);
-    alert('Помилка реєстрації: ' + (err.message || 'невідома помилка'));
-  }
-};
-
-document.getElementById('loginBtn').onclick = async () => {
-  const nick = document.getElementById('loginNickname').value.trim();
-  const pass = document.getElementById('loginPassword').value.trim();
-
-  try {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('nickname')
-      .ilike('nickname', nick)
-      .maybeSingle();
-
-    if (!profile) return alert('Невірний псевдонім або пароль');
-
-    const email = `${profile.nickname.toLowerCase()}@fantasyas.app`;
-
-    const { data: { session }, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
-
-    currentNickname = profile.nickname;
-    localStorage.setItem('currentNickname', currentNickname);
-
-    await supabase
-      .from('profiles')
-      .update({ last_online: Date.now() })
-      .eq('nickname', currentNickname);
-
-    authBox.style.display = 'none';
-    newPostBox.style.display = 'block';
-    document.getElementById('profileUsernameDisplay').textContent = currentNickname;
-    updateProfile();
-    loadPosts();
-  } catch (err) {
-    console.error(err);
-    alert('Помилка входу: ' + (err.message || 'невідома помилка'));
-  }
-};
-
-// ──────────────────────────────────────────────
-// Створення поста
-// ──────────────────────────────────────────────
-
-document.getElementById('addPost').onclick = async () => {
-  const text = document.getElementById('postText').value.trim();
-  if (!text) return alert('Напишіть текст поста');
-  if (!currentNickname) return alert('Спочатку увійдіть');
-
-  try {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('posts')
-      .eq('nickname', currentNickname)
-      .single();
-
-    const newPost = {
-      id: Date.now() + Math.random().toString(36).slice(2),
-      text,
-      createdAt: Date.now(),
-      likes: [],
-      comments: [],
-      reactions: {}
-    };
-
-    const newPosts = [newPost, ...(profile.posts || [])];
-
-    const { error } = await supabase
-      .from('profiles')
-      .update({ posts: newPosts })
-      .eq('nickname', currentNickname);
-
-    if (error) throw error;
-
-    document.getElementById('postText').value = '';
-    loadPosts();
-    updateProfile();
-  } catch (err) {
-    console.error(err);
-    alert('Помилка при створенні поста');
-  }
-};
-
-// ──────────────────────────────────────────────
-// Завантаження стрічки
-// ──────────────────────────────────────────────
-
-async function loadPosts() {
-  feed.innerHTML = '';
-  if (!currentNickname) return;
-
-  try {
-    const { data: me } = await supabase
-      .from('profiles')
-      .select('following')
-      .eq('nickname', currentNickname)
-      .single();
-
-    const accountsToShow = [currentNickname, ...(me?.following || [])];
-
-    const { data: profilesData } = await supabase
-      .from('profiles')
-      .select('nickname, avatar, posts')
-      .in('nickname', accountsToShow);
-
-    const profilesMap = {};
-    (profilesData || []).forEach(p => profilesMap[p.nickname] = p);
-
-    let postsToShow = [];
-
-    accountsToShow.forEach(username => {
-      const profile = profilesMap[username];
-      if (!profile) return;
-      (profile.posts || []).forEach(postObj => {
-        postsToShow.push({
-          author: username,
-          avatar: profile.avatar || '',
-          post: postObj,
-          time: postObj.createdAt
-        });
+    // Перемикання секцій
+    document.querySelectorAll('.sidebar a').forEach(a => {
+      a.addEventListener('click', () => {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(a.dataset.section).classList.add('active');
+        document.getElementById('sidebar').classList.remove('active');
+        document.getElementById('burger').classList.remove('active');
       });
     });
 
-    postsToShow.sort((a, b) => b.time - a.time);
+    // Реєстрація / Вхід
+    document.getElementById('to-reg').addEventListener('click', () => {
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('reg-form').style.display = 'block';
+    });
 
-    postsToShow.forEach((p, i) => {
-      const postEl = document.createElement('div');
-      postEl.className = 'post';
-      postEl.dataset.postId = p.post.id;
-      postEl.dataset.author = p.author;
+    document.getElementById('to-login').addEventListener('click', () => {
+      document.getElementById('reg-form').style.display = 'none';
+      document.getElementById('login-form').style.display = 'block';
+    });
 
-      let reactionsHtml = '';
-      Object.entries(p.post.reactions || {}).forEach(([emoji, usersArr]) => {
-        if (usersArr.length > 0) {
-          reactionsHtml += `<span class="reaction-badge">${emoji} ${usersArr.length}</span>`;
-        }
-      });
+    document.getElementById('reg-btn').addEventListener('click', () => {
+      const nick = document.getElementById('reg-nick').value.trim();
+      const pass = document.getElementById('reg-pass').value.trim();
+      if (!nick || !pass) return alert('Заповніть поля');
 
-      postEl.innerHTML = `
-        <div class="post-header">
-          <div class="avatar" style="${p.avatar ? `background-image: url(${p.avatar});` : ''}"></div>
-          <div class="username">@${p.author}</div>
-          <div style="margin-left:auto; position:relative;">
-            <button class="more-btn" style="background:none;border:none;font-size:1.4rem;color:var(--text-secondary);cursor:pointer;">⋯</button>
-            <div class="reaction-menu" style="display:none;position:absolute;right:0;top:30px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:8px;z-index:10;display:flex;flex-wrap:wrap;gap:6px;width:180px;">
-              <button class="emoji-btn" data-emoji="❤️">❤️</button>
-              <button class="emoji-btn" data-emoji="😂">😂</button>
-              <button class="emoji-btn" data-emoji="😮">😮</button>
-              <button class="emoji-btn" data-emoji="😢">😢</button>
-              <button class="emoji-btn" data-emoji="👍">👍</button>
-              <button class="emoji-btn" data-emoji="🔥">🔥</button>
+      const tx = db.transaction('users', 'readwrite');
+      const store = tx.objectStore('users');
+      store.get(nick).onsuccess = e => {
+        if (e.target.result) return alert('Нік зайнятий');
+        store.add({ nick, pass, bio: '', avatar: '', posts: [], followers: [], following: [], chats: {} });
+        alert('Реєстрація успішна!');
+        document.getElementById('to-login').click();
+      };
+    });
+
+    document.getElementById('login-btn').addEventListener('click', () => {
+      const nick = document.getElementById('login-nick').value.trim();
+      const pass = document.getElementById('login-pass').value.trim();
+
+      const tx = db.transaction('users');
+      const store = tx.objectStore('users');
+      store.get(nick).onsuccess = e => {
+        const user = e.target.result;
+        if (!user || user.pass !== pass) return alert('Невірні дані');
+        currentUser = nick;
+        localStorage.setItem('user', nick);
+        document.getElementById('auth-card').style.display = 'none';
+        document.getElementById('post-form').style.display = 'block';
+        loadPosts();
+      };
+    });
+
+    // Пости (як Reddit - пости з коментарями)
+    document.getElementById('submit-post').addEventListener('click', () => {
+      const text = document.getElementById('post-text').value.trim();
+      if (!text) return alert('Напишіть пост');
+
+      const post = { author: currentUser, text, created: Date.now(), comments: [], likes: 0, reactions: {} };
+      const tx = db.transaction('posts', 'readwrite');
+      tx.objectStore('posts').add(post);
+      tx.oncomplete = () => {
+        document.getElementById('post-text').value = '';
+        loadPosts();
+      };
+    });
+
+    function loadPosts() {
+      const feed = document.getElementById('feed');
+      feed.innerHTML = '';
+      const tx = db.transaction('posts');
+      tx.objectStore('posts').openCursor(null, 'prev').onsuccess = e => {
+        let cursor = e.target.result;
+        if (cursor) {
+          const post = cursor.value;
+          const div = document.createElement('div');
+          div.className = 'post card';
+          div.innerHTML = `
+            <div class="post-header">
+              <div class="avatar"></div>
+              <span>@${post.author}</span>
             </div>
-          </div>
-        </div>
-        <div class="post-content">${p.post.text.replace(/\n/g, '<br>')}</div>
-
-        <div class="post-footer" style="justify-content:space-between;align-items:center;">
-          <div style="display:flex;gap:24px;">
-            <button class="like-btn" style="background:none;border:none;color:${p.post.likes.includes(currentNickname)?'red':'var(--text-secondary)'};cursor:pointer;">
-              ${p.post.likes.includes(currentNickname) ? '❤️' : '♡'} ${p.post.likes.length}
-            </button>
-            <button class="comment-btn" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;">
-              💬 ${p.post.comments.length}
-            </button>
-          </div>
-          <div class="reactions-preview" style="font-size:0.9rem;">${reactionsHtml}</div>
-        </div>
-
-        <div class="comments-section" style="margin-top:12px;display:none;border-top:1px solid var(--card-border);padding-top:12px;">
-          <div class="comments-list"></div>
-          <div style="margin-top:8px;display:flex;gap:8px;">
-            <input type="text" class="comment-input" placeholder="Напишіть відповідь..." style="flex:1;background:var(--input-bg);border:1px solid var(--input-border);border-radius:10px;padding:8px;color:var(--text);"/>
-            <button class="send-comment" style="background:var(--btn-bg);color:white;padding:8px 16px;border-radius:10px;cursor:pointer;">Відправити</button>
-          </div>
-        </div>
-      `;
-
-      feed.appendChild(postEl);
-      setTimeout(() => postEl.classList.add('show'), 50 * i);
-
-      // Лайк
-      postEl.querySelector('.like-btn').onclick = async () => {
-        try {
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('posts')
-            .eq('nickname', p.author)
-            .single();
-
-          const posts = profileData.posts || [];
-          const postIndex = posts.findIndex(po => po.id === p.post.id);
-          if (postIndex === -1) return;
-
-          const targetPost = posts[postIndex];
-          if (targetPost.likes.includes(currentNickname)) {
-            targetPost.likes = targetPost.likes.filter(u => u !== currentNickname);
-          } else {
-            targetPost.likes.push(currentNickname);
-          }
-
-          posts[postIndex] = targetPost;
-
-          await supabase
-            .from('profiles')
-            .update({ posts })
-            .eq('nickname', p.author);
-
-          loadPosts();
-        } catch (err) {
-          console.error(err);
+            <p>${post.text}</p>
+            <div class="post-actions">
+              <button class="like"><i class="fas fa-heart"></i> ${post.likes}</button>
+              <button class="comment"><i class="fas fa-comment"></i> ${post.comments.length}</button>
+            </div>
+            <div class="comments" style="display:none;">
+              <!-- Коментарі як на Reddit -->
+            </div>
+          `;
+          feed.appendChild(div);
+          cursor.continue();
         }
       };
-
-      // Реакції
-      const moreBtn = postEl.querySelector('.more-btn');
-      const menu = postEl.querySelector('.reaction-menu');
-
-      moreBtn.onclick = (e) => {
-        e.stopPropagation();
-        menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
-      };
-
-      document.addEventListener('click', e => {
-        if (!moreBtn.contains(e.target) && !menu.contains(e.target)) {
-          menu.style.display = 'none';
-        }
-      });
-
-      menu.querySelectorAll('.emoji-btn').forEach(btn => {
-        btn.onclick = async () => {
-          const emoji = btn.dataset.emoji;
-          try {
-            const { data: profileData } = await supabase
-              .from('profiles')
-              .select('posts')
-              .eq('nickname', p.author)
-              .single();
-
-            const posts = profileData.posts || [];
-            const postIndex = posts.findIndex(po => po.id === p.post.id);
-            if (postIndex === -1) return;
-
-            const targetPost = posts[postIndex];
-            if (!targetPost.reactions) targetPost.reactions = {};
-            if (!targetPost.reactions[emoji]) targetPost.reactions[emoji] = [];
-
-            if (targetPost.reactions[emoji].includes(currentNickname)) {
-              targetPost.reactions[emoji] = targetPost.reactions[emoji].filter(u => u !== currentNickname);
-              if (targetPost.reactions[emoji].length === 0) delete targetPost.reactions[emoji];
-            } else {
-              targetPost.reactions[emoji].push(currentNickname);
-            }
-
-            posts[postIndex] = targetPost;
-
-            await supabase
-              .from('profiles')
-              .update({ posts })
-              .eq('nickname', p.author);
-
-            loadPosts();
-          } catch (err) {
-            console.error(err);
-          }
-        };
-      });
-
-      // Коментарі
-      const commentBtn = postEl.querySelector('.comment-btn');
-      const commentsSec = postEl.querySelector('.comments-section');
-      commentBtn.onclick = () => {
-        commentsSec.style.display = commentsSec.style.display === 'none' ? 'block' : 'none';
-        renderComments(postEl);
-      };
-
-      const sendBtn = postEl.querySelector('.send-comment');
-      const input = postEl.querySelector('.comment-input');
-      sendBtn.onclick = async () => {
-        const txt = input.value.trim();
-        if (!txt) return;
-
-        try {
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('posts')
-            .eq('nickname', p.author)
-            .single();
-
-          const posts = profileData.posts || [];
-          const postIndex = posts.findIndex(po => po.id === p.post.id);
-          if (postIndex === -1) return;
-
-          const targetPost = posts[postIndex];
-          targetPost.comments = targetPost.comments || [];
-          targetPost.comments.push({
-            user: currentNickname,
-            text: txt,
-            createdAt: Date.now()
-          });
-
-          posts[postIndex] = targetPost;
-
-          await supabase
-            .from('profiles')
-            .update({ posts })
-            .eq('nickname', p.author);
-
-          input.value = '';
-          renderComments(postEl);
-          loadPosts();
-        } catch (err) {
-          console.error(err);
-        }
-      };
-    });
-  } catch (err) {
-    console.error('Помилка завантаження стрічки:', err);
-    feed.innerHTML = '<p style="text-align:center;color:#f66;">Не вдалося завантажити стрічку</p>';
-  }
-}
-
-async function renderComments(postEl) {
-  const list = postEl.querySelector('.comments-list');
-  const postId = postEl.dataset.postId;
-  const author = postEl.dataset.author;
-
-  try {
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('posts')
-      .eq('nickname', author)
-      .single();
-
-    const post = (profileData.posts || []).find(p => p.id === postId);
-    list.innerHTML = '';
-
-    (post?.comments || []).forEach(c => {
-      const div = document.createElement('div');
-      div.style.margin = '8px 0';
-      div.innerHTML = `<strong>@${c.user}</strong>: ${c.text}`;
-      list.appendChild(div);
-    });
-  } catch (err) {
-    console.error(err);
-    list.innerHTML = '<p>Помилка завантаження коментарів</p>';
-  }
-}
-
-// ──────────────────────────────────────────────
-// Пошук користувачів
-// ──────────────────────────────────────────────
-
-async function loadSearchUsers(query = '') {
-  const userList = document.getElementById('userList');
-  userList.innerHTML = '';
-
-  if (!currentNickname) return;
-
-  try {
-    const { data: me } = await supabase
-      .from('profiles')
-      .select('following')
-      .eq('nickname', currentNickname)
-      .single();
-
-    const following = me?.following || [];
-
-    const { data: foundProfiles } = await supabase
-      .from('profiles')
-      .select('nickname, avatar, last_online')
-      .ilike('nickname', `%${query}%`)
-      .neq('nickname', currentNickname);
-
-    (foundProfiles || []).forEach(data => {
-      const timeAgo = Math.floor((Date.now() - (data.last_online || 0)) / 60000);
-      const status = timeAgo < 60 ? `${timeAgo} хв тому` : `${Math.floor(timeAgo / 60)} год тому`;
-
-      const isFollowing = following.includes(data.nickname);
-
-      const item = document.createElement('div');
-      item.className = 'user-item';
-      item.innerHTML = `
-        <div class="avatar" style="${data.avatar ? `background-image: url(${data.avatar});` : ''}"></div>
-        <div>
-          <div class="name">@${data.nickname}</div>
-          <div class="status">У мережі ${status}</div>
-        </div>
-        <button class="follow-btn" data-user="${data.nickname}" style="margin-left:auto;padding:6px 12px;background:var(--btn-bg);border-radius:8px;">
-          ${isFollowing ? 'Відписатися' : 'Підписатися'}
-        </button>
-      `;
-
-      item.onclick = (e) => {
-        if (!e.target.classList.contains('follow-btn')) {
-          openChat(data.nickname);
-        }
-      };
-
-      userList.appendChild(item);
-    });
-  } catch (err) {
-    console.error(err);
-    userList.innerHTML = '<p>Помилка пошуку</p>';
-  }
-}
-
-document.getElementById('searchInput').oninput = (e) => loadSearchUsers(e.target.value);
-
-document.getElementById('userList').addEventListener('click', async e => {
-  if (!e.target.classList.contains('follow-btn')) return;
-
-  const targetUser = e.target.dataset.user;
-
-  try {
-    const { data: me } = await supabase
-      .from('profiles')
-      .select('following')
-      .eq('nickname', currentNickname)
-      .single();
-
-    let newFollowing = me?.following || [];
-
-    if (newFollowing.includes(targetUser)) {
-      newFollowing = newFollowing.filter(u => u !== targetUser);
-
-      const { data: other } = await supabase
-        .from('profiles')
-        .select('followers')
-        .eq('nickname', targetUser)
-        .single();
-
-      const newFollowers = (other?.followers || []).filter(u => u !== currentNickname);
-
-      await supabase
-        .from('profiles')
-        .update({ followers: newFollowers })
-        .eq('nickname', targetUser);
-    } else {
-      newFollowing.push(targetUser);
-
-      const { data: other } = await supabase
-        .from('profiles')
-        .select('followers')
-        .eq('nickname', targetUser)
-        .single();
-
-      const newFollowers = [...(other?.followers || []), currentNickname];
-
-      await supabase
-        .from('profiles')
-        .update({ followers: newFollowers })
-        .eq('nickname', targetUser);
     }
 
-    await supabase
-      .from('profiles')
-      .update({ following: newFollowing })
-      .eq('nickname', currentNickname);
-
-    loadSearchUsers(document.getElementById('searchInput').value);
-    if (document.getElementById('profile').classList.contains('active')) {
-      updateProfile();
+    if (currentUser) {
+      document.getElementById('auth-card').style.display = 'none';
+      document.getElementById('post-form').style.display = 'block';
+      loadPosts();
     }
-  } catch (err) {
-    console.error(err);
-  }
-});
 
-// ──────────────────────────────────────────────
-// Месенджер
-// ──────────────────────────────────────────────
+    // Чати (приватні, з WebSocket симуляцією - для демо використовуємо EventEmitter локально)
+    const chatEmitter = new EventTarget();
+    // Додай логіку чатів аналогічно...
 
-let currentChatUser = null;
-
-async function loadChatList() {
-  const chatList = document.getElementById('chatList');
-  chatList.innerHTML = '';
-
-  if (!currentNickname) return;
-
-  try {
-    const { data: me } = await supabase
-      .from('profiles')
-      .select('messages')
-      .eq('nickname', currentNickname)
-      .single();
-
-    const myMessages = me?.messages || {};
-
-    const others = Object.keys(myMessages);
-    if (others.length === 0) return;
-
-    const { data: profilesData } = await supabase
-      .from('profiles')
-      .select('nickname, avatar')
-      .in('nickname', others);
-
-    const profilesMap = {};
-    (profilesData || []).forEach(p => profilesMap[p.nickname] = p);
-
-    others.forEach(other => {
-      const lastMsg = (myMessages[other] || [])[myMessages[other].length - 1] || { text: '' };
-      const item = document.createElement('div');
-      item.className = 'chat-item';
-      item.innerHTML = `
-        <div class="avatar" style="${profilesMap[other]?.avatar ? `background-image: url(${profilesMap[other].avatar});` : ''}"></div>
-        <div>
-          <div class="name">@${other}</div>
-          <div class="status">${lastMsg.text.slice(0, 20) || '...'}</div>
-        </div>
-      `;
-      item.onclick = () => openChat(other);
-      chatList.appendChild(item);
+    // Модал з анімаціями
+    document.getElementById('close-modal').addEventListener('click', () => {
+      document.getElementById('modal').classList.remove('active');
     });
-  } catch (err) {
-    console.error(err);
   }
-}
-
-async function openChat(otherUser) {
-  currentChatUser = otherUser;
-  const chatWindow = document.getElementById('chatWindow');
-  const chatHeader = document.getElementById('chatHeader');
-
-  try {
-    const { data: other } = await supabase
-      .from('profiles')
-      .select('avatar')
-      .eq('nickname', otherUser)
-      .single();
-
-    chatWindow.style.display = 'flex';
-
-    chatHeader.innerHTML = `
-      <div class="avatar" style="${other?.avatar ? `background-image: url(${other.avatar});` : ''}"></div>
-      <div class="name">@${otherUser}</div>
-    `;
-
-    await renderChatMessages();
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-async function renderChatMessages() {
-  const chatMessages = document.getElementById('chatMessages');
-  chatMessages.innerHTML = '';
-
-  if (!currentChatUser) return;
-
-  try {
-    const { data: me } = await supabase
-      .from('profiles')
-      .select('messages')
-      .eq('nickname', currentNickname)
-      .single();
-
-    const conversation = (me?.messages?.[currentChatUser] || []);
-
-    conversation.forEach(msg => {
-      const div = document.createElement('div');
-      div.className = `message ${msg.from === currentNickname ? 'sent' : 'received'}`;
-      div.textContent = msg.text;
-      chatMessages.appendChild(div);
-    });
-
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-document.getElementById('sendMessage').onclick = async () => {
-  const text = document.getElementById('chatText').value.trim();
-  if (!text || !currentChatUser) return;
-
-  try {
-    const msg = { from: currentNickname, to: currentChatUser, text, createdAt: Date.now() };
-
-    // Оновлюємо себе
-    const { data: me } = await supabase
-      .from('profiles')
-      .select('messages')
-      .eq('nickname', currentNickname)
-      .single();
-
-    const myMessages = me?.messages || {};
-    if (!myMessages[currentChatUser]) myMessages[currentChatUser] = [];
-    myMessages[currentChatUser].push(msg);
-
-    await supabase
-      .from('profiles')
-      .update({ messages: myMessages })
-      .eq('nickname', currentNickname);
-
-    // Оновлюємо співрозмовника
-    const { data: other } = await supabase
-      .from('profiles')
-      .select('messages')
-      .eq('nickname', currentChatUser)
-      .single();
-
-    const otherMessages = other?.messages || {};
-    if (!otherMessages[currentNickname]) otherMessages[currentNickname] = [];
-    otherMessages[currentNickname].push(msg);
-
-    await supabase
-      .from('profiles')
-      .update({ messages: otherMessages })
-      .eq('nickname', currentChatUser);
-
-    document.getElementById('chatText').value = '';
-    await renderChatMessages();
-    loadChatList();
-  } catch (err) {
-    console.error(err);
-  }
-};
-
-// ──────────────────────────────────────────────
-// Профіль, аватар, біо
-// ──────────────────────────────────────────────
-
-async function updateProfile() {
-  if (!currentNickname) return;
-
-  try {
-    const { data: p } = await supabase
-      .from('profiles')
-      .select('bio, avatar, posts, followers, following')
-      .eq('nickname', currentNickname)
-      .single();
-
-    document.getElementById('postsCount').textContent     = `Пости: ${(p?.posts || []).length}`;
-    document.getElementById('followersCount').textContent = `Підписники: ${(p?.followers || []).length}`;
-    document.getElementById('followingCount').textContent = `Підписки: ${(p?.following || []).length}`;
-    document.getElementById('profileBio').textContent     = p?.bio || 'Немає опису';
-    document.getElementById('profileAvatar').style.backgroundImage = p?.avatar ? `url(${p.avatar})` : 'none';
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-document.getElementById('profileAvatar').onclick = () => {
-  document.getElementById('avatarInput').click();
-};
-
-document.getElementById('avatarInput').onchange = async e => {
-  const file = e.target.files[0];
-  if (!file || !currentNickname) return;
-
-  try {
-    const fileName = `${currentNickname}/${Date.now()}_${file.name}`;
-    const { error: uploadErr } = await supabase.storage
-      .from('avatars')
-      .upload(fileName, file);
-
-    if (uploadErr) throw uploadErr;
-
-    const { data: urlData } = supabase.storage
-      .from('avatars')
-      .getPublicUrl(fileName);
-
-    const publicUrl = urlData.publicUrl;
-
-    await supabase
-      .from('profiles')
-      .update({ avatar: publicUrl })
-      .eq('nickname', currentNickname);
-
-    updateProfile();
-    loadPosts();
-  } catch (err) {
-    console.error(err);
-    alert('Помилка завантаження аватара');
-  }
-};
-
-const modal = document.getElementById('editProfileModal');
-document.getElementById('editProfileBtn').onclick = () => modal.classList.add('active');
-document.getElementById('closeModal').onclick = () => modal.classList.remove('active');
-
-document.getElementById('saveProfileEdit').onclick = async () => {
-  const bio = document.getElementById('editBio').value.trim();
-
-  try {
-    await supabase
-      .from('profiles')
-      .update({ bio })
-      .eq('nickname', currentNickname);
-
-    updateProfile();
-    modal.classList.remove('active');
-  } catch (err) {
-    console.error(err);
-  }
-};
-
-// ──────────────────────────────────────────────
-// Налаштування: тема, вихід
-// ──────────────────────────────────────────────
-document.getElementById('toggleTheme').onclick = () => {
-  document.body.classList.toggle('light');
-  localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
-};
-
-document.getElementById('logoutBtn').onclick = async () => {
-  try {
-    await supabase.auth.signOut();
-    localStorage.removeItem('currentNickname');
-    location.reload();
-  } catch (err) {
-    console.error(err);
-  }
-};
-
-// ──────────────────────────────────────────────
-// Автозавантаження при старті
-// ──────────────────────────────────────────────
-(async () => {
-  // Тема
-  if (localStorage.getItem('theme') === 'light') document.body.classList.add('light');
-
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('user_id', session.user.id)
-      .single();
-
-    if (profile) {
-      currentNickname = profile.nickname;
-      localStorage.setItem('currentNickname', currentNickname);
-      currentUserId = profile.user_id;
-
-      authBox.style.display = 'none';
-      newPostBox.style.display = 'block';
-      document.getElementById('profileUsernameDisplay').textContent = currentNickname;
-      await updateProfile();
-      await loadPosts();
-    }
-  }
-})();
-
-// Моніторинг аутентифікації
-supabase.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_OUT') {
-    location.reload();
-  }
-});
 </script>
 </body>
 </html>

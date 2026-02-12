@@ -66,11 +66,16 @@
       font-weight: 800;
       background: linear-gradient(90deg, #ffffff, #bbbbbb);
       -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
       background-clip: text;
+      color: transparent;
+      -webkit-text-fill-color: transparent;
     }
     body.light .site-name {
-      background: linear-gradient(90deg, #000000, #444444);
+      background: linear-gradient(90deg, #111111, #444444);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      -webkit-text-fill-color: transparent;
     }
 
     .burger {
@@ -220,6 +225,7 @@
       flex-shrink: 0;
       border: 1px solid var(--card-border);
     }
+    body.light .avatar { background: #ccc; }
 
     .username {
       font-weight: 700;
@@ -256,18 +262,24 @@
       justify-content: center;
       z-index: 2000;
     }
+    body.light .modal { background: rgba(255,255,255,0.75); }
     .modal.active { display: flex; }
 
     .modal-content {
-      background: #111;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text);
       width: 92%;
       max-width: 520px;
       border-radius: 16px;
-      padding: 28px;
+      padding: 28px 24px;
       position: relative;
-      border: 1px solid var(--card-border);
     }
-    body.light .modal-content { background: #fff; }
+
+    .modal-content h2 {
+      color: var(--text);
+      margin-bottom: 20px;
+    }
 
     .close-modal {
       position: absolute;
@@ -292,12 +304,16 @@
       border-radius: 50%;
       background: #444;
       background-size: cover;
+      background-position: center;
       border: 2px solid var(--card-border);
+      cursor: pointer;
     }
+    body.light .profile-avatar { background: #ddd; }
 
     @media (max-width: 900px) {
       .sidebar { width: 100%; left: -100%; border-right: none; }
-      .main-content { padding: 16px; }
+      .main-content { padding: 16px; margin-top: 80px; }
+      .profile-header { flex-direction: column; align-items: center; text-align: center; }
     }
   </style>
 </head>
@@ -346,6 +362,7 @@
   <div id="profile" class="section">
     <div class="card profile-header">
       <div class="profile-avatar" id="profileAvatar"></div>
+      <input type="file" id="avatarInput" accept="image/*" style="display:none;"/>
       <div style="flex:1;">
         <h2 id="profileUsernameDisplay"></h2>
         <p id="profileBio" style="margin:8px 0;color:var(--text-secondary);">Немає опису</p>
@@ -417,7 +434,7 @@ document.getElementById('registerBtn').onclick = () => {
   if (!nick || !pass) return alert('Заповніть усі поля');
   if (users[nick]) return alert('Такий псевдонім вже зайнятий');
 
-  users[nick] = { password: pass, bio: '', posts: [], followers: [], following: [] };
+  users[nick] = { password: pass, bio: '', avatar: '', posts: [], followers: [], following: [] };
   localStorage.setItem('users', JSON.stringify(users));
   alert('Реєстрація успішна! Тепер увійдіть.');
   registerForm.style.display = 'none';
@@ -441,9 +458,10 @@ document.getElementById('loginBtn').onclick = () => {
 
 document.getElementById('addPost').onclick = () => {
   const text = document.getElementById('postText').value.trim();
-  if (!text || !currentUser) return;
+  if (!text) return alert('Напишіть текст поста');
+  if (!currentUser) return alert('Спочатку увійдіть');
 
-  users[currentUser].posts.unshift(text); // нові зверху
+  users[currentUser].posts.unshift(text);
   localStorage.setItem('users', JSON.stringify(users));
   document.getElementById('postText').value = '';
   loadPosts();
@@ -456,13 +474,13 @@ const feed = document.getElementById('feed');
 
 function loadPosts() {
   feed.innerHTML = '';
-  Object.keys(users).forEach(user => {
-    users[user].posts.forEach((text, i) => {
+  Object.entries(users).forEach(([user, data]) => {
+    data.posts.forEach((text, i) => {
       const post = document.createElement('div');
       post.className = 'post';
       post.innerHTML = `
         <div class="post-header">
-          <div class="avatar"></div>
+          <div class="avatar" style="${data.avatar ? `background-image: url(${data.avatar});` : ''}"></div>
           <div class="username">${user}</div>
         </div>
         <div class="post-content">${text.replace(/\n/g, '<br>')}</div>
@@ -472,8 +490,6 @@ function loadPosts() {
         </div>
       `;
       feed.appendChild(post);
-
-      // stagger анімація
       setTimeout(() => post.classList.add('show'), 60 * i);
     });
   });
@@ -488,7 +504,30 @@ function updateProfile() {
   document.getElementById('followersCount').textContent = `Підписники: ${u.followers.length}`;
   document.getElementById('followingCount').textContent = `Підписки: ${u.following.length}`;
   document.getElementById('profileBio').textContent     = u.bio || 'Немає опису';
+  const avatarEl = document.getElementById('profileAvatar');
+  avatarEl.style.backgroundImage = u.avatar ? `url(${u.avatar})` : 'none';
 }
+
+// ─── Аватарка ────────────────────────────────────
+
+document.getElementById('profileAvatar').onclick = () => {
+  if (!currentUser) return;
+  document.getElementById('avatarInput').click();
+};
+
+document.getElementById('avatarInput').onchange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const base64 = ev.target.result;
+    users[currentUser].avatar = base64;
+    localStorage.setItem('users', JSON.stringify(users));
+    updateProfile();
+    loadPosts(); // оновити аватарки в постах
+  };
+  reader.readAsDataURL(file);
+};
 
 // ─── Модалка редагування ─────────────────────────
 

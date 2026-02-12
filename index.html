@@ -251,4 +251,43 @@ document.getElementById('saveProfileEdit').addEventListener('click',()=>{
 document.getElementById('toggleTheme').addEventListener('click',()=>document.body.classList.toggle('light'));
 </script>
 </body>
-</html>
+</html><style>
+/* Анімації для постів */
+.post{opacity:0;transform:translateY(20px);transition:0.4s;}
+.post.show{opacity:1;transform:translateY(0);}
+
+/* Кнопки при наведенні */
+button{transition:0.2s, transform 0.2s;}
+button:hover{transform:scale(1.05);}
+
+/* Секції */
+.section{opacity:0;transform:translateY(10px);transition:0.3s;}
+.section.active{opacity:1;transform:translateY(0);}
+
+/* Бургер меню плавно */
+.burger span{transition:0.4s;}
+</style>
+
+<script>
+// Показ постів з анімацією
+db.ref('posts').on('value',snapshot=>{
+  feed.innerHTML='';
+  const data=snapshot.val();
+  if(!data)return;
+  Object.keys(data).reverse().forEach(key=>{
+    const p=data[key];
+    const div=document.createElement('div');
+    div.className='post';
+    div.innerHTML=`
+      <div class="post-header">
+        <div class="avatar" style="background-image:url('${p.avatar||''}')"></div>
+        <div class="username">${p.username}</div>
+      </div>
+      <div class="post-content">${p.text}${p.image?`<img src="${p.image}" style="max-width:100%;margin-top:8px;border-radius:8px;"/>`:''}</div>
+    `;
+    feed.appendChild(div);
+    // Додаємо клас для анімації після вставки
+    setTimeout(()=>{div.classList.add('show');},50);
+  });
+});
+</script>

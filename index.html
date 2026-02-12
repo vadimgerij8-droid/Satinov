@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>FANTASYAS</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+  <!-- Підключення Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <style>
     :root {
@@ -424,7 +426,7 @@
 
   <div id="messages" class="section">
     <div class="chat-list" id="chatList"></div>
-    <div class="chat-window" id="chatWindow">
+    <div class="chat-window" id="chatWindow" style="display:none;">
       <div class="chat-header" id="chatHeader"></div>
       <div class="chat-messages" id="chatMessages"></div>
       <div class="chat-input">
@@ -451,8 +453,32 @@
 </div>
 
 <script>
+// Supabase ініціалізація
+const supabaseUrl = 'https://cubpfcdnlyznoibvcukh.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN1YnBmY2RubHl6bm9pYnZjdWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MDQ1NDcsImV4cCI6MjA4NjQ4MDU0N30.8z6JGRr-R-8LUEpGJ9LORrZDQpxmrvNRVbqboTywL-8';
+
+const supabase = Supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+// Глобальні змінні
+let currentUser = null;
+let currentUserId = null;
+
+// Перевірка сесії при завантаженні
+supabase.auth.getSession().then(({ data: { session } }) => {
+  if (session) {
+    currentUserId = session.user.id;
+    currentUser = session.user.user_metadata.nickname;
+    authBox.style.display = 'none';
+    newPostBox.style.display = 'block';
+    document.getElementById('profileUsernameDisplay').textContent = currentUser;
+    updateProfile();
+    loadPosts();
+    loadChatList();
+  }
+});
+
 // ──────────────────────────────────────────────
-// Основні змінні
+// Основні елементи
 // ──────────────────────────────────────────────
 
 const burger = document.getElementById('burger');
@@ -473,18 +499,11 @@ document.querySelectorAll('[data-section]').forEach(link => {
   };
 });
 
-let users = JSON.parse(localStorage.getItem('users')) || {};
-let currentUser = localStorage.getItem('currentUser') || null;
-
 const authBox     = document.getElementById('authBox');
 const loginForm   = document.getElementById('loginForm');
 const registerForm= document.getElementById('registerForm');
 const newPostBox  = document.getElementById('newPostBox');
 const feed        = document.getElementById('feed');
-
-// ──────────────────────────────────────────────
-// Авторизація / Реєстрація
-// ──────────────────────────────────────────────
 
 document.getElementById('toRegister').onclick = () => {
   loginForm.style.display = 'none';
@@ -495,123 +514,105 @@ document.getElementById('toLogin').onclick = () => {
   loginForm.style.display = 'block';
 };
 
-document.getElementById('registerBtn').onclick = () => {
+// ──────────────────────────────────────────────
+// Реєстрація / Логін через Supabase Auth
+// ──────────────────────────────────────────────
+
+document.getElementById('registerBtn').onclick = async () => {
   const nick = document.getElementById('registerNickname').value.trim();
   const pass = document.getElementById('registerPassword').value.trim();
   if (!nick || !pass) return alert('Заповніть усі поля');
-  if (users[nick]) return alert('Такий псевдонім вже зайнятий');
 
-  users[nick] = { password: pass, bio: '', avatar: '', posts: [], followers: [], following: [], messages: {}, lastOnline: Date.now() };
-  localStorage.setItem('users', JSON.stringify(users));
+  const { data, error } = await supabase.auth.signUp({
+    email: nick + '@fantasyas.com',
+    password: pass,
+    options: {
+      data: { nickname: nick }
+    }
+  });
+
+  if (error) return alert('Помилка реєстрації: ' + error.message);
   alert('Реєстрація успішна! Тепер увійдіть.');
   registerForm.style.display = 'none';
   loginForm.style.display = 'block';
 };
 
-document.getElementById('loginBtn').onclick = () => {
+document.getElementById('loginBtn').onclick = async () => {
   const nick = document.getElementById('loginNickname').value.trim();
   const pass = document.getElementById('loginPassword').value.trim();
-  if (!users[nick] || users[nick].password !== pass) return alert('Невірний псевдонім або пароль');
 
-  currentUser = nick;
-  localStorage.setItem('currentUser', currentUser);
-  users[currentUser].lastOnline = Date.now();
-  localStorage.setItem('users', JSON.stringify(users));
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: nick + '@fantasyas.com',
+    password: pass
+  });
 
+  if (error) return alert('Невірний псевдонім або пароль: ' + error.message);
+
+  currentUserId = data.user.id;
+  currentUser = data.user.user_metadata.nickname;
   authBox.style.display = 'none';
   newPostBox.style.display = 'block';
   document.getElementById('profileUsernameDisplay').textContent = currentUser;
   updateProfile();
   loadPosts();
-
-  // Автоматична підписка
-  const me = users[currentUser];
-  if (me.following.length === 0) {
-    Object.keys(users).forEach(other => {
-      if (other !== currentUser && !me.following.includes(other)) {
-        me.following.push(other);
-        if (!users[other].followers.includes(currentUser)) {
-          users[other].followers.push(currentUser);
-        }
-      }
-    });
-    localStorage.setItem('users', JSON.stringify(users));
-    loadPosts();
-  }
 };
 
 // ──────────────────────────────────────────────
-// Створення поста
+// Створення поста через Supabase
 // ──────────────────────────────────────────────
 
-document.getElementById('addPost').onclick = () => {
+document.getElementById('addPost').onclick = async () => {
   const text = document.getElementById('postText').value.trim();
   if (!text) return alert('Напишіть текст поста');
   if (!currentUser) return alert('Спочатку увійдіть');
 
-  const newPost = {
-    id: Date.now() + Math.random().toString(36).slice(2),
+  const { error } = await supabase.from('posts').insert({
+    user_id: currentUserId,
     text: text,
-    createdAt: Date.now(),
     likes: [],
     comments: [],
     reactions: {}
-  };
+  });
 
-  users[currentUser].posts.unshift(newPost);
-  localStorage.setItem('users', JSON.stringify(users));
+  if (error) return alert('Помилка публікації: ' + error.message);
+
   document.getElementById('postText').value = '';
   loadPosts();
   updateProfile();
 };
 
 // ──────────────────────────────────────────────
-// Завантаження стрічки
+// Завантаження постів з Supabase
 // ──────────────────────────────────────────────
 
-function loadPosts() {
+async function loadPosts() {
   feed.innerHTML = '';
 
-  if (!currentUser || !users[currentUser]) return;
+  const { data: posts, error } = await supabase
+    .from('posts')
+    .select('*')
+    .order('created_at', { ascending: false });
 
-  const me = users[currentUser];
-  const accountsToShow = [currentUser, ...me.following];
+  if (error) {
+    console.error(error);
+    return alert('Помилка завантаження постів');
+  }
 
-  let postsToShow = [];
-
-  accountsToShow.forEach(username => {
-    const user = users[username];
-    if (!user) return;
-
-    user.posts.forEach(postObj => {
-      postsToShow.push({
-        author: username,
-        avatar: user.avatar || '',
-        post: postObj,
-        time: postObj.createdAt
-      });
-    });
-  });
-
-  postsToShow.sort((a, b) => b.time - a.time);
-
-  postsToShow.forEach((p, i) => {
-    const postEl = document.createElement('div');
-    postEl.className = 'post';
-    postEl.dataset.postId = p.post.id;
-    postEl.dataset.author = p.author;
+  posts.forEach((p, i) => {
+    const post = document.createElement('div');
+    post.className = 'post';
+    post.dataset.postId = p.id;
+    post.dataset.author = p.user_id;
 
     let reactionsHtml = '';
-    Object.entries(p.post.reactions || {}).forEach(([emoji, usersArr]) => {
-      if (usersArr.length > 0) {
-        reactionsHtml += `<span class="reaction-badge">${emoji} ${usersArr.length}</span>`;
-      }
+    Object.entries(p.reactions || {}).forEach(([emoji, usersArr]) => {
+      if (usersArr.length > 0) reactionsHtml += `<span class="reaction-badge">${emoji} ${usersArr.length}</span>`;
     });
 
-    postEl.innerHTML = `
+    post.innerHTML = `
       <div class="post-header">
-        <div class="avatar" style="${p.avatar ? `background-image: url(${p.avatar});` : ''}"></div>
-        <div class="username">@${p.author}</div>
+        <div class="avatar"></div>
+        <div class="username">@${p.user_id}</div>
         <div style="margin-left:auto; position:relative;">
           <button class="more-btn" style="background:none;border:none;font-size:1.4rem;color:var(--text-secondary);cursor:pointer;">⋯</button>
           <div class="reaction-menu" style="display:none;position:absolute;right:0;top:30px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:8px;z-index:10;display:flex;flex-wrap:wrap;gap:6px;width:180px;">
@@ -624,15 +625,15 @@ function loadPosts() {
           </div>
         </div>
       </div>
-      <div class="post-content">${p.post.text.replace(/\n/g, '<br>')}</div>
+      <div class="post-content">${p.text.replace(/\n/g, '<br>')}</div>
 
       <div class="post-footer" style="justify-content:space-between;align-items:center;">
         <div style="display:flex;gap:24px;">
-          <button class="like-btn" style="background:none;border:none;color:${p.post.likes.includes(currentUser)?'red':'var(--text-secondary)'};cursor:pointer;">
-            ${p.post.likes.includes(currentUser) ? '❤️' : '♡'} ${p.post.likes.length}
+          <button class="like-btn" style="background:none;border:none;color:${p.likes.includes(currentUserId)?'red':'var(--text-secondary)'};cursor:pointer;">
+            ${p.likes.includes(currentUserId) ? '❤️' : '♡'} ${p.likes.length}
           </button>
           <button class="comment-btn" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;">
-            💬 ${p.post.comments.length}
+            💬 ${p.comments.length}
           </button>
         </div>
         <div class="reactions-preview" style="font-size:0.9rem;">${reactionsHtml}</div>
@@ -647,133 +648,191 @@ function loadPosts() {
       </div>
     `;
 
-    feed.appendChild(postEl);
-    setTimeout(() => postEl.classList.add('show'), 50 * i);
+    feed.appendChild(post);
+    setTimeout(() => post.classList.add('show'), 50 * i);
 
-    postEl.querySelector('.like-btn').onclick = () => {
-      const targetPost = users[p.author].posts.find(po => po.id === p.post.id);
-      if (targetPost.likes.includes(currentUser)) {
-        targetPost.likes = targetPost.likes.filter(u => u !== currentUser);
+    // Лайк
+    post.querySelector('.like-btn').onclick = async () => {
+      let likes = p.likes || [];
+      if (likes.includes(currentUserId)) {
+        likes = likes.filter(u => u !== currentUserId);
       } else {
-        targetPost.likes.push(currentUser);
+        likes.push(currentUserId);
       }
-      localStorage.setItem('users', JSON.stringify(users));
+      const { error } = await supabase.from('posts').update({ likes }).eq('id', p.id);
+      if (error) alert('Помилка лайку');
       loadPosts();
     };
 
-    const moreBtn = postEl.querySelector('.more-btn');
-    const menu = postEl.querySelector('.reaction-menu');
-    moreBtn.onclick = (e) => {
+    // Реакції
+    const menu = post.querySelector('.reaction-menu');
+    post.querySelector('.more-btn').onclick = (e) => {
       e.stopPropagation();
-      menu.style.display = menu.style.display === 'none' || !menu.style.display ? 'flex' : 'none';
+      menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
     };
-    document.addEventListener('click', e => {
-      if (!moreBtn.contains(e.target) && !menu.contains(e.target)) menu.style.display = 'none';
-    });
 
     menu.querySelectorAll('.emoji-btn').forEach(btn => {
-      btn.onclick = () => {
+      btn.onclick = async () => {
         const emoji = btn.dataset.emoji;
-        const targetPost = users[p.author].posts.find(po => po.id === p.post.id);
-        if (!targetPost.reactions) targetPost.reactions = {};
-        if (!targetPost.reactions[emoji]) targetPost.reactions[emoji] = [];
-
-        if (targetPost.reactions[emoji].includes(currentUser)) {
-          targetPost.reactions[emoji] = targetPost.reactions[emoji].filter(u => u !== currentUser);
-          if (!targetPost.reactions[emoji].length) delete targetPost.reactions[emoji];
+        let reactions = p.reactions || {};
+        reactions[emoji] = reactions[emoji] || [];
+        if (reactions[emoji].includes(currentUserId)) {
+          reactions[emoji] = reactions[emoji].filter(u => u !== currentUserId);
+          if (!reactions[emoji].length) delete reactions[emoji];
         } else {
-          targetPost.reactions[emoji].push(currentUser);
+          reactions[emoji].push(currentUserId);
         }
-        localStorage.setItem('users', JSON.stringify(users));
+        const { error } = await supabase.from('posts').update({ reactions }).eq('id', p.id);
+        if (error) alert('Помилка реакції');
         loadPosts();
       };
     });
 
-    const commentBtn = postEl.querySelector('.comment-btn');
-    const commentsSec = postEl.querySelector('.comments-section');
-    commentBtn.onclick = () => {
+    // Коментарі
+    const commentsSec = post.querySelector('.comments-section');
+    post.querySelector('.comment-btn').onclick = () => {
       commentsSec.style.display = commentsSec.style.display === 'none' ? 'block' : 'none';
-      renderComments(postEl);
+      renderComments(post, p);
     };
 
-    const sendBtn = postEl.querySelector('.send-comment');
-    const input = postEl.querySelector('.comment-input');
-    sendBtn.onclick = () => {
-      const txt = input.value.trim();
+    post.querySelector('.send-comment').onclick = async () => {
+      const txt = post.querySelector('.comment-input').value.trim();
       if (!txt) return;
-      const targetPost = users[p.author].posts.find(po => po.id === p.post.id);
-      targetPost.comments.push({ user: currentUser, text: txt, createdAt: Date.now() });
-      localStorage.setItem('users', JSON.stringify(users));
-      input.value = '';
-      renderComments(postEl);
+      let comments = p.comments || [];
+      comments.push({ user: currentUser, text: txt, createdAt: Date.now() });
+      const { error } = await supabase.from('posts').update({ comments }).eq('id', p.id);
+      if (error) alert('Помилка коментаря');
+      post.querySelector('.comment-input').value = '';
       loadPosts();
     };
   });
 }
 
-function renderComments(postEl) {
-  const list = postEl.querySelector('.comments-list');
-  const postId = postEl.dataset.postId;
-  const author = postEl.dataset.author;
-  const post = users[author].posts.find(p => p.id === postId);
-
+function renderComments(post, p) {
+  const list = post.querySelector('.comments-list');
   list.innerHTML = '';
-  (post.comments || []).forEach(c => {
+  (p.comments || []).forEach(c => {
     const div = document.createElement('div');
-    div.style.margin = '8px 0';
     div.innerHTML = `<strong>@${c.user}</strong>: ${c.text}`;
     list.appendChild(div);
   });
 }
 
 // ──────────────────────────────────────────────
-// Пошук користувачів
+// Профіль
 // ──────────────────────────────────────────────
 
-function loadSearchUsers(query = '') {
+async function updateProfile() {
+  if (!currentUserId) return;
+  const { data: user, error } = await supabase.from('profiles').select('*').eq('id', currentUserId).single();
+  if (error || !user) return;
+
+  document.getElementById('postsCount').textContent = `Пости: ${user.posts_count || 0}`;
+  document.getElementById('followersCount').textContent = `Підписники: ${user.followers.length || 0}`;
+  document.getElementById('followingCount').textContent = `Підписки: ${user.following.length || 0}`;
+  document.getElementById('profileBio').textContent = user.bio || 'Немає опису';
+  document.getElementById('profileAvatar').style.backgroundImage = user.avatar ? `url(${user.avatar})` : 'none';
+}
+
+// ─── Аватарка ────────────────────────────────────
+
+document.getElementById('profileAvatar').onclick = () => {
+  document.getElementById('avatarInput').click();
+};
+
+document.getElementById('avatarInput').onchange = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const { data, error } = await supabase.storage.from('avatars').upload(`${currentUserId}/${file.name}`, file);
+  if (error) return alert('Помилка завантаження аватарки');
+  const url = supabase.storage.from('avatars').getPublicUrl(data.path).data.publicUrl;
+  await supabase.from('profiles').update({ avatar: url }).eq('id', currentUserId);
+  updateProfile();
+  loadPosts();
+};
+
+// ─── Модалка редагування ─────────────────────────
+
+const modal = document.getElementById('editProfileModal');
+document.getElementById('editProfileBtn').onclick = () => modal.classList.add('active');
+document.getElementById('closeModal').onclick = () => modal.classList.remove('active');
+document.getElementById('saveProfileEdit').onclick = async () => {
+  const bio = document.getElementById('editBio').value.trim();
+  await supabase.from('profiles').update({ bio }).eq('id', currentUserId);
+  modal.classList.remove('active');
+  updateProfile();
+};
+
+// ─── Тема ────────────────────────────────────────
+
+document.getElementById('toggleTheme').onclick = () => {
+  document.body.classList.toggle('light');
+  localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+};
+
+// ─── Ініціалізація ───────────────────────────────
+
+if (localStorage.getItem('theme') === 'light') {
+  document.body.classList.add('light');
+}
+
+// ──────────────────────────────────────────────
+// Пошук користувачів через Supabase
+// ──────────────────────────────────────────────
+
+async function loadSearchUsers(query = '') {
   const userList = document.getElementById('userList');
   userList.innerHTML = '';
 
-  Object.entries(users).forEach(([nick, data]) => {
-    if (nick !== currentUser && nick.toLowerCase().includes(query.toLowerCase())) {
-      const timeAgo = Math.floor((Date.now() - data.lastOnline) / 60000);
-      const status = timeAgo < 60 ? `${timeAgo} хв тому` : `${Math.floor(timeAgo / 60)} год тому`;
+  const { data: usersData, error } = await supabase.from('profiles').select('*').ilike('nickname', `%${query}%`);
 
-      const item = document.createElement('div');
-      item.className = 'user-item';
-      item.innerHTML = `
-        <div class="avatar" style="${data.avatar ? `background-image: url(${data.avatar});` : ''}"></div>
-        <div>
-          <div class="name">@${nick}</div>
-          <div class="status">У мережі ${status}</div>
-        </div>
-      `;
-      item.onclick = () => openChat(nick);
-      userList.appendChild(item);
-    }
+  if (error) return alert('Помилка пошуку');
+
+  usersData.forEach(u => {
+    const item = document.createElement('div');
+    item.className = 'user-item';
+    item.innerHTML = `
+      <div class="avatar" style="${u.avatar ? `background-image: url(${u.avatar});` : ''}"></div>
+      <div>
+        <div class="name">@${u.nickname}</div>
+        <div class="status">У мережі</div>
+      </div>
+    `;
+    item.onclick = () => openChat(u.nickname);
+    userList.appendChild(item);
   });
 }
 
 document.getElementById('searchInput').oninput = (e) => loadSearchUsers(e.target.value);
 
 // ──────────────────────────────────────────────
-// Месенджер
+// Месенджер через Supabase realtime
 // ──────────────────────────────────────────────
 
 let currentChatUser = null;
 
-function loadChatList() {
+async function loadChatList() {
   const chatList = document.getElementById('chatList');
   chatList.innerHTML = '';
 
-  const myMessages = users[currentUser].messages || {};
+  const { data: messages, error } = await supabase.from('messages').select('*').or(`from.eq.${currentUserId},to.eq.${currentUserId}`).order('created_at', { ascending: false });
 
-  Object.keys(myMessages).forEach(other => {
-    const lastMsg = myMessages[other][myMessages[other].length - 1] || {text: ''};
+  if (error) return alert('Помилка завантаження чатів');
+
+  const chats = {};
+  messages.forEach(m => {
+    const other = m.from === currentUserId ? m.to : m.from;
+    if (!chats[other]) chats[other] = [];
+    chats[other].push(m);
+  });
+
+  for (const other in chats) {
+    const lastMsg = chats[other][0];
     const item = document.createElement('div');
     item.className = 'chat-item';
     item.innerHTML = `
-      <div class="avatar" style="${users[other].avatar ? `background-image: url(${users[other].avatar});` : ''}"></div>
+      <div class="avatar"></div>
       <div>
         <div class="name">@${other}</div>
         <div class="status">${lastMsg.text.slice(0, 20)}...</div>
@@ -781,111 +840,63 @@ function loadChatList() {
     `;
     item.onclick = () => openChat(other);
     chatList.appendChild(item);
-  });
+  }
 }
 
 function openChat(otherUser) {
   currentChatUser = otherUser;
-  const chatWindow = document.getElementById('chatWindow');
-  const chatHeader = document.getElementById('chatHeader');
-  const chatMessages = document.getElementById('chatMessages');
-
-  chatWindow.style.display = 'flex';
-
-  chatHeader.innerHTML = `
-    <div class="avatar" style="${users[otherUser].avatar ? `background-image: url(${users[otherUser].avatar});` : ''}"></div>
+  document.getElementById('chatWindow').style.display = 'flex';
+  document.getElementById('chatHeader').innerHTML = `
+    <div class="avatar"></div>
     <div class="name">@${otherUser}</div>
   `;
-
   renderChatMessages();
+
+  // Realtime підписка
+  supabase.channel('messages').on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, renderChatMessages).subscribe();
 }
 
-function renderChatMessages() {
+async function renderChatMessages() {
   const chatMessages = document.getElementById('chatMessages');
   chatMessages.innerHTML = '';
 
-  const conversation = users[currentUser].messages[currentChatUser] || [];
+  const { data: msgs, error } = await supabase.from('messages').select('*').or(`(from.eq.${currentUserId},to.eq.${currentChatUser}),(from.eq.${currentChatUser},to.eq.${currentUserId})`).order('created_at', { ascending: true });
 
-  conversation.forEach(msg => {
+  if (error) return;
+
+  msgs.forEach(m => {
     const div = document.createElement('div');
-    div.className = `message ${msg.from === currentUser ? 'sent' : 'received'}`;
-    div.textContent = msg.text;
+    div.className = `message ${m.from === currentUserId ? 'sent' : 'received'}`;
+    div.textContent = m.text;
     chatMessages.appendChild(div);
   });
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-document.getElementById('sendMessage').onclick = () => {
+document.getElementById('sendMessage').onclick = async () => {
   const text = document.getElementById('chatText').value.trim();
   if (!text || !currentChatUser) return;
 
-  const msg = { from: currentUser, to: currentChatUser, text, createdAt: Date.now() };
+  const { error } = await supabase.from('messages').insert({
+    from: currentUserId,
+    to: currentChatUser,
+    text: text
+  });
 
-  if (!users[currentUser].messages[currentChatUser]) users[currentUser].messages[currentChatUser] = [];
-  users[currentUser].messages[currentChatUser].push(msg);
-
-  if (!users[currentChatUser].messages[currentUser]) users[currentChatUser].messages[currentUser] = [];
-  users[currentChatUser].messages[currentUser].push(msg);
-
-  localStorage.setItem('users', JSON.stringify(users));
+  if (error) return alert('Помилка відправки');
   document.getElementById('chatText').value = '';
   renderChatMessages();
-  loadChatList();
 };
 
-// ──────────────────────────────────────────────
-// Профіль, аватар, біо, тема
-// ──────────────────────────────────────────────
-
-function updateProfile() {
-  if (!currentUser) return;
-  const u = users[currentUser];
-  document.getElementById('postsCount').textContent     = `Пости: ${u.posts.length}`;
-  document.getElementById('followersCount').textContent = `Підписники: ${u.followers.length}`;
-  document.getElementById('followingCount').textContent = `Підписки: ${u.following.length}`;
-  document.getElementById('profileBio').textContent     = u.bio || 'Немає опису';
-  document.getElementById('profileAvatar').style.backgroundImage = u.avatar ? `url(${u.avatar})` : 'none';
-}
-
-document.getElementById('profileAvatar').onclick = () => document.getElementById('avatarInput').click();
-
-document.getElementById('avatarInput').onchange = e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    users[currentUser].avatar = ev.target.result;
-    localStorage.setItem('users', JSON.stringify(users));
-    updateProfile();
+// Ініціалізація
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN') {
+    currentUserId = session.user.id;
+    currentUser = session.user.user_metadata.nickname;
     loadPosts();
-  };
-  reader.readAsDataURL(file);
-};
+  }
+});
 
-const modal = document.getElementById('editProfileModal');
-document.getElementById('editProfileBtn').onclick = () => modal.classList.add('active');
-document.getElementById('closeModal').onclick = () => modal.classList.remove('active');
-document.getElementById('saveProfileEdit').onclick = () => {
-  users[currentUser].bio = document.getElementById('editBio').value.trim();
-  localStorage.setItem('users', JSON.stringify(users));
-  updateProfile();
-  modal.classList.remove('active');
-};
-
-document.getElementById('toggleTheme').onclick = () => {
-  document.body.classList.toggle('light');
-  localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
-};
-
-if (localStorage.getItem('theme') === 'light') document.body.classList.add('light');
-
-if (currentUser && users[currentUser]) {
-  authBox.style.display = 'none';
-  newPostBox.style.display = 'block';
-  document.getElementById('profileUsernameDisplay').textContent = currentUser;
-  updateProfile();
-  loadPosts();
-}
 </script>
 </body>
 </html>

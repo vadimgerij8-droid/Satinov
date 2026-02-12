@@ -3,303 +3,233 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEBULA</title>
-
+<title>FANTASYAS</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
+
 body{
   font-family:'Inter',sans-serif;
-  background:linear-gradient(135deg,#0f0f0f,#1a1a1a);
+  background:#000;
   color:#fff;
-  min-height:100vh;
-  transition:.3s;
-}
-
-body.light{
-  background:linear-gradient(135deg,#f3f3f3,#ffffff);
-  color:#111;
-}
-
-header{
-  position:fixed;
-  top:0;left:0;right:0;
-  height:70px;
   display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 20px;
-  backdrop-filter:blur(12px);
-  background:rgba(255,255,255,0.05);
-  border-bottom:1px solid rgba(255,255,255,0.1);
-  z-index:1000;
-}
-
-.logo{
-  font-size:1.6rem;
-  font-weight:800;
-  letter-spacing:2px;
-}
-
-.menu-btn{
-  font-size:1.4rem;
-  cursor:pointer;
+  min-height:100vh;
 }
 
 .sidebar{
+  width:260px;
+  padding:30px 20px;
+  border-right:1px solid #222;
   position:fixed;
-  top:70px;
-  left:-260px;
-  width:250px;
   height:100%;
-  background:rgba(20,20,20,.95);
-  backdrop-filter:blur(15px);
-  padding:20px;
-  transition:.4s;
 }
 
-.sidebar.active{left:0;}
+.logo{
+  font-size:1.8rem;
+  font-weight:800;
+  margin-bottom:40px;
+}
 
-.sidebar button{
+.nav a{
   display:block;
-  width:100%;
-  margin:10px 0;
-  padding:10px;
-  border:none;
-  border-radius:12px;
-  background:rgba(255,255,255,.08);
-  color:#fff;
-  cursor:pointer;
+  padding:12px 15px;
+  border-radius:30px;
+  text-decoration:none;
+  color:#aaa;
+  margin-bottom:10px;
   transition:.2s;
 }
 
-.sidebar button:hover{
-  background:#6c63ff;
+.nav a:hover{
+  background:#111;
+  color:#fff;
 }
 
-main{
-  margin-top:90px;
-  padding:20px;
-  max-width:700px;
-  margin-left:auto;
-  margin-right:auto;
+.main{
+  margin-left:260px;
+  flex:1;
+  display:flex;
+  justify-content:center;
 }
 
-.card{
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:18px;
-  padding:18px;
-  margin-bottom:20px;
-  backdrop-filter:blur(10px);
-  animation:fade .4s ease;
-}
-
-@keyframes fade{
-  from{opacity:0;transform:translateY(10px)}
-  to{opacity:1;transform:translateY(0)}
-}
-
-textarea,input{
+.feed{
   width:100%;
-  padding:12px;
-  border-radius:12px;
-  border:none;
-  background:rgba(255,255,255,.08);
-  color:#fff;
-  margin-bottom:10px;
+  max-width:600px;
+  border-left:1px solid #222;
+  border-right:1px solid #222;
+  min-height:100vh;
 }
 
-button.primary{
-  background:#6c63ff;
+.top{
+  padding:20px;
+  font-size:1.2rem;
+  font-weight:700;
+  border-bottom:1px solid #222;
+}
+
+.new-post{
+  padding:20px;
+  border-bottom:1px solid #222;
+}
+
+.new-post textarea{
+  width:100%;
+  background:#000;
   border:none;
-  padding:10px 16px;
-  border-radius:12px;
   color:#fff;
+  resize:none;
+  font-size:1rem;
+  outline:none;
+}
+
+.new-post-actions{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:15px;
+}
+
+.btn{
+  background:#fff;
+  color:#000;
+  border:none;
+  padding:8px 18px;
+  border-radius:30px;
   font-weight:600;
   cursor:pointer;
+}
+
+.post{
+  padding:20px;
+  border-bottom:1px solid #222;
   transition:.2s;
 }
 
-button.primary:hover{
-  transform:scale(1.05);
+.post:hover{
+  background:#0a0a0a;
 }
 
 .post-header{
   display:flex;
-  justify-content:space-between;
-  margin-bottom:10px;
+  gap:12px;
+  align-items:center;
+}
+
+.avatar{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  background:#222;
+  background-size:cover;
+  background-position:center;
+}
+
+.username{
   font-weight:600;
+}
+
+.post-text{
+  margin-top:10px;
+  line-height:1.5;
 }
 
 .post-actions{
   display:flex;
-  gap:15px;
-  margin-top:10px;
-  font-size:.9rem;
-}
-
-.post-actions span{
+  gap:30px;
+  margin-top:15px;
+  color:#777;
+  font-size:0.9rem;
   cursor:pointer;
-  transition:.2s;
 }
 
-.post-actions span:hover{
-  color:#6c63ff;
+.file-input{
+  display:none;
 }
-
-.profile{
-  text-align:center;
-}
-
-.profile img{
-  width:110px;
-  height:110px;
-  border-radius:50%;
-  object-fit:cover;
-  margin-bottom:10px;
-  border:3px solid #6c63ff;
-}
-
-.hidden{display:none}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">NEBULA</div>
-  <div class="menu-btn" id="menuBtn">☰</div>
-</header>
-
-<div class="sidebar" id="sidebar">
-  <button onclick="showSection('home')">Головна</button>
-  <button onclick="showSection('profile')">Профіль</button>
-  <button onclick="toggleTheme()">Змінити тему</button>
-  <button onclick="logout()">Вийти</button>
-</div>
-
-<main>
-
-<!-- HOME -->
-<div id="home">
-
-<div class="card" id="loginCard">
-  <input type="text" id="usernameInput" placeholder="Твоє ім'я">
-  <button class="primary" onclick="saveUser()">Увійти</button>
-</div>
-
-<div class="card hidden" id="newPostCard">
-  <textarea id="postText" rows="3" placeholder="Що нового?"></textarea>
-  <button class="primary" onclick="addPost()">Опублікувати</button>
-</div>
-
-<div id="feed"></div>
-
-</div>
-
-<!-- PROFILE -->
-<div id="profile" class="hidden">
-  <div class="card profile">
-    <img id="profileAvatar" src="">
-    <h2 id="profileName"></h2>
-    <p id="profilePostsCount"></p>
+<div class="sidebar">
+  <div class="logo">FANTASYAS</div>
+  <div class="nav">
+    <a href="#">Головна</a>
+    <a href="#">Профіль</a>
+    <a href="#">Повідомлення</a>
+    <a href="#">Налаштування</a>
   </div>
 </div>
 
-</main>
+<div class="main">
+  <div class="feed">
+
+    <div class="top">Головна</div>
+
+    <div class="new-post">
+      <textarea id="postText" rows="3" placeholder="Що нового?"></textarea>
+
+      <div class="new-post-actions">
+        <label for="avatarUpload" style="cursor:pointer;color:#777;">Оновити аватар</label>
+        <input type="file" id="avatarUpload" class="file-input" accept="image/*">
+        <button class="btn" id="publishBtn">Опублікувати</button>
+      </div>
+    </div>
+
+    <div id="posts"></div>
+
+  </div>
+</div>
 
 <script>
+let avatar = localStorage.getItem("fantasyas_avatar") || "";
+let posts = JSON.parse(localStorage.getItem("fantasyas_posts")) || [];
 
-let username = localStorage.getItem("nebulaUser");
-let posts = JSON.parse(localStorage.getItem("nebulaPosts")) || [];
+const postsContainer = document.getElementById("posts");
 
-const sidebar = document.getElementById("sidebar");
-const menuBtn = document.getElementById("menuBtn");
-
-menuBtn.onclick=()=>sidebar.classList.toggle("active");
-
-function showSection(id){
-  document.getElementById("home").classList.add("hidden");
-  document.getElementById("profile").classList.add("hidden");
-  document.getElementById(id).classList.remove("hidden");
-  sidebar.classList.remove("active");
-  if(id==="profile") loadProfile();
-}
-
-function saveUser(){
-  const val=document.getElementById("usernameInput").value.trim();
-  if(!val)return alert("Введи ім'я");
-  username=val;
-  localStorage.setItem("nebulaUser",username);
-  document.getElementById("loginCard").classList.add("hidden");
-  document.getElementById("newPostCard").classList.remove("hidden");
-  renderPosts();
-}
-
-function addPost(){
-  const text=document.getElementById("postText").value.trim();
-  if(!text)return;
-  posts.unshift({
-    id:Date.now(),
-    user:username,
-    text,
-    likes:0
-  });
-  localStorage.setItem("nebulaPosts",JSON.stringify(posts));
-  document.getElementById("postText").value="";
-  renderPosts();
-}
-
-function renderPosts(){
-  const feed=document.getElementById("feed");
-  feed.innerHTML="";
+function render(){
+  postsContainer.innerHTML="";
   posts.forEach(p=>{
     const div=document.createElement("div");
-    div.className="card";
+    div.className="post";
     div.innerHTML=`
       <div class="post-header">
-        <span>${p.user}</span>
-        <span>${new Date(p.id).toLocaleDateString()}</span>
+        <div class="avatar" style="background-image:url('${avatar}')"></div>
+        <div class="username">Ти</div>
       </div>
-      <div>${p.text}</div>
+      <div class="post-text">${p}</div>
       <div class="post-actions">
-        <span onclick="likePost(${p.id})">❤️ ${p.likes}</span>
+        <span>♡</span>
+        <span>💬</span>
+        <span>☆</span>
       </div>
     `;
-    feed.appendChild(div);
+    postsContainer.appendChild(div);
   });
 }
 
-function likePost(id){
-  const post=posts.find(p=>p.id===id);
-  post.likes++;
-  localStorage.setItem("nebulaPosts",JSON.stringify(posts));
-  renderPosts();
-}
+document.getElementById("publishBtn").onclick=()=>{
+  const text=document.getElementById("postText").value.trim();
+  if(!text) return;
+  posts.unshift(text);
+  localStorage.setItem("fantasyas_posts",JSON.stringify(posts));
+  document.getElementById("postText").value="";
+  render();
+};
 
-function loadProfile(){
-  document.getElementById("profileName").textContent=username;
-  document.getElementById("profileAvatar").src="https://api.dicebear.com/7.x/initials/svg?seed="+username;
-  document.getElementById("profilePostsCount").textContent=
-    "Постів: "+posts.filter(p=>p.user===username).length;
-}
+document.getElementById("avatarUpload").onchange=e=>{
+  const file=e.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    avatar=ev.target.result;
+    localStorage.setItem("fantasyas_avatar",avatar);
+    render();
+  };
+  reader.readAsDataURL(file);
+};
 
-function toggleTheme(){
-  document.body.classList.toggle("light");
-}
-
-function logout(){
-  localStorage.removeItem("nebulaUser");
-  location.reload();
-}
-
-if(username){
-  document.getElementById("loginCard").classList.add("hidden");
-  document.getElementById("newPostCard").classList.remove("hidden");
-  renderPosts();
-}
-
+render();
 </script>
+
 </body>
 </html>

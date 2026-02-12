@@ -6,7 +6,7 @@
   <title>FANTASYAS</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
+
   <style>
     :root {
       --bg: #000;
@@ -320,7 +320,6 @@
       font-size: 0.9rem;
     }
 
-    /* Нові стилі для пошуку та месенджера */
     .search-input { margin-bottom: 20px; }
     .user-list { display: flex; flex-direction: column; gap: 12px; }
     .user-item {
@@ -457,14 +456,14 @@
 // ──────────────────────────────────────────────
 const supabaseUrl = 'https://cubpfcdnlyznoibvcukh.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN1YnBmY2RubHl6bm9pYnZjdWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MDQ1NDcsImV4cCI6MjA4NjQ4MDU0N30.8z6JGRr-R-8LUEpGJ9LORrZDQpxmrvNRVbqboTywL-8';
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 // ──────────────────────────────────────────────
 // Основні змінні
 // ──────────────────────────────────────────────
-
 const burger = document.getElementById('burger');
 const sidebar = document.getElementById('sidebar');
+
 burger.onclick = () => {
   burger.classList.toggle('active');
   sidebar.classList.toggle('active');
@@ -476,6 +475,7 @@ document.querySelectorAll('[data-section]').forEach(link => {
     document.getElementById(link.dataset.section).classList.add('active');
     sidebar.classList.remove('active');
     burger.classList.remove('active');
+
     if (link.dataset.section === 'search') loadSearchUsers();
     if (link.dataset.section === 'messages') loadChatList();
     if (link.dataset.section === 'profile') updateProfile();
@@ -498,6 +498,7 @@ document.getElementById('toRegister').onclick = () => {
   loginForm.style.display = 'none';
   registerForm.style.display = 'block';
 };
+
 document.getElementById('toLogin').onclick = () => {
   registerForm.style.display = 'none';
   loginForm.style.display = 'block';
@@ -508,46 +509,70 @@ document.getElementById('registerBtn').onclick = async () => {
   const pass = document.getElementById('registerPassword').value.trim();
   if (!nick || !pass) return alert('Заповніть усі поля');
 
-  const { data: existing } = await supabase.from('users').select('nickname').eq('nickname', nick).single();
-  if (existing) return alert('Такий псевдонім вже зайнятий');
+  try {
+    const { data: existing } = await supabase
+      .from('users')
+      .select('nickname')
+      .eq('nickname', nick)
+      .maybeSingle();
 
-  const newUser = {
-    nickname: nick,
-    password: pass, // Note: Plain password is insecure; consider using Supabase Auth for hashing in production
-    bio: '',
-    avatar: '',
-    posts: [],
-    followers: [],
-    following: [],
-    messages: {},
-    last_online: Date.now()
-  };
+    if (existing) return alert('Такий псевдонім вже зайнятий');
 
-  const { error } = await supabase.from('users').insert(newUser);
-  if (error) return alert('Помилка реєстрації');
+    const newUser = {
+      nickname: nick,
+      password: pass,
+      bio: '',
+      avatar: '',
+      posts: [],
+      followers: [],
+      following: [],
+      messages: {},
+      last_online: Date.now()
+    };
 
-  alert('Реєстрація успішна! Тепер увійдіть.');
-  registerForm.style.display = 'none';
-  loginForm.style.display = 'block';
+    const { error } = await supabase.from('users').insert(newUser);
+    if (error) throw error;
+
+    alert('Реєстрація успішна! Тепер увійдіть.');
+    registerForm.style.display = 'none';
+    loginForm.style.display = 'block';
+  } catch (err) {
+    console.error(err);
+    alert('Помилка реєстрації: ' + (err.message || 'невідома помилка'));
+  }
 };
 
 document.getElementById('loginBtn').onclick = async () => {
   const nick = document.getElementById('loginNickname').value.trim();
   const pass = document.getElementById('loginPassword').value.trim();
 
-  const { data: user } = await supabase.from('users').select('*').eq('nickname', nick).single();
-  if (!user || user.password !== pass) return alert('Невірний псевдонім або пароль');
+  try {
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('nickname', nick)
+      .maybeSingle();
 
-  currentUser = nick;
-  localStorage.setItem('currentUser', currentUser);
+    if (error) throw error;
+    if (!user || user.password !== pass) return alert('Невірний псевдонім або пароль');
 
-  await supabase.from('users').update({ last_online: Date.now() }).eq('nickname', nick);
+    currentUser = nick;
+    localStorage.setItem('currentUser', currentUser);
 
-  authBox.style.display = 'none';
-  newPostBox.style.display = 'block';
-  document.getElementById('profileUsernameDisplay').textContent = currentUser;
-  updateProfile();
-  loadPosts();
+    await supabase
+      .from('users')
+      .update({ last_online: Date.now() })
+      .eq('nickname', nick);
+
+    authBox.style.display = 'none';
+    newPostBox.style.display = 'block';
+    document.getElementById('profileUsernameDisplay').textContent = currentUser;
+    updateProfile();
+    loadPosts();
+  } catch (err) {
+    console.error(err);
+    alert('Помилка входу: ' + (err.message || 'невідома помилка'));
+  }
 };
 
 // ──────────────────────────────────────────────
@@ -559,23 +584,40 @@ document.getElementById('addPost').onclick = async () => {
   if (!text) return alert('Напишіть текст поста');
   if (!currentUser) return alert('Спочатку увійдіть');
 
-  const { data: user } = await supabase.from('users').select('posts').eq('nickname', currentUser).single();
+  try {
+    const { data: user, error: fetchErr } = await supabase
+      .from('users')
+      .select('posts')
+      .eq('nickname', currentUser)
+      .single();
 
-  const newPost = {
-    id: Date.now() + Math.random().toString(36).slice(2),
-    text: text,
-    createdAt: Date.now(),
-    likes: [],
-    comments: [],
-    reactions: {}
-  };
+    if (fetchErr) throw fetchErr;
 
-  const newPosts = [newPost, ...user.posts];
+    const newPost = {
+      id: Date.now() + Math.random().toString(36).slice(2),
+      text,
+      createdAt: Date.now(),
+      likes: [],
+      comments: [],
+      reactions: {}
+    };
 
-  await supabase.from('users').update({ posts: newPosts }).eq('nickname', currentUser);
-  document.getElementById('postText').value = '';
-  loadPosts();
-  updateProfile();
+    const newPosts = [newPost, ...(user.posts || [])];
+
+    const { error: updateErr } = await supabase
+      .from('users')
+      .update({ posts: newPosts })
+      .eq('nickname', currentUser);
+
+    if (updateErr) throw updateErr;
+
+    document.getElementById('postText').value = '';
+    loadPosts();
+    updateProfile();
+  } catch (err) {
+    console.error(err);
+    alert('Помилка при створенні поста');
+  }
 };
 
 // ──────────────────────────────────────────────
@@ -584,201 +626,263 @@ document.getElementById('addPost').onclick = async () => {
 
 async function loadPosts() {
   feed.innerHTML = '';
-
   if (!currentUser) return;
 
-  const { data: me } = await supabase.from('users').select('following').eq('nickname', currentUser).single();
-  const accountsToShow = [currentUser, ...me.following];
+  try {
+    const { data: me } = await supabase
+      .from('users')
+      .select('following')
+      .eq('nickname', currentUser)
+      .single();
 
-  const { data: usersData } = await supabase.from('users').select('nickname, avatar, posts').in('nickname', accountsToShow);
+    const accountsToShow = [currentUser, ...(me?.following || [])];
 
-  const usersMap = {};
-  usersData.forEach(u => usersMap[u.nickname] = u);
+    const { data: usersData } = await supabase
+      .from('users')
+      .select('nickname, avatar, posts')
+      .in('nickname', accountsToShow);
 
-  let postsToShow = [];
+    const usersMap = {};
+    (usersData || []).forEach(u => usersMap[u.nickname] = u);
 
-  accountsToShow.forEach(username => {
-    const user = usersMap[username];
-    if (!user) return;
+    let postsToShow = [];
 
-    user.posts.forEach(postObj => {
-      postsToShow.push({
-        author: username,
-        avatar: user.avatar || '',
-        post: postObj,
-        time: postObj.createdAt
+    accountsToShow.forEach(username => {
+      const user = usersMap[username];
+      if (!user) return;
+      (user.posts || []).forEach(postObj => {
+        postsToShow.push({
+          author: username,
+          avatar: user.avatar || '',
+          post: postObj,
+          time: postObj.createdAt
+        });
       });
     });
-  });
 
-  postsToShow.sort((a, b) => b.time - a.time);
+    postsToShow.sort((a, b) => b.time - a.time);
 
-  postsToShow.forEach((p, i) => {
-    const postEl = document.createElement('div');
-    postEl.className = 'post';
-    postEl.dataset.postId = p.post.id;
-    postEl.dataset.author = p.author;
+    postsToShow.forEach((p, i) => {
+      const postEl = document.createElement('div');
+      postEl.className = 'post';
+      postEl.dataset.postId = p.post.id;
+      postEl.dataset.author = p.author;
 
-    let reactionsHtml = '';
-    Object.entries(p.post.reactions || {}).forEach(([emoji, usersArr]) => {
-      if (usersArr.length > 0) {
-        reactionsHtml += `<span class="reaction-badge">${emoji} ${usersArr.length}</span>`;
-      }
-    });
+      let reactionsHtml = '';
+      Object.entries(p.post.reactions || {}).forEach(([emoji, usersArr]) => {
+        if (usersArr.length > 0) {
+          reactionsHtml += `<span class="reaction-badge">${emoji} ${usersArr.length}</span>`;
+        }
+      });
 
-    postEl.innerHTML = `
-      <div class="post-header">
-        <div class="avatar" style="${p.avatar ? `background-image: url(${p.avatar});` : ''}"></div>
-        <div class="username">@${p.author}</div>
-        <div style="margin-left:auto; position:relative;">
-          <button class="more-btn" style="background:none;border:none;font-size:1.4rem;color:var(--text-secondary);cursor:pointer;">⋯</button>
-          <div class="reaction-menu" style="display:none;position:absolute;right:0;top:30px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:8px;z-index:10;display:flex;flex-wrap:wrap;gap:6px;width:180px;">
-            <button class="emoji-btn" data-emoji="❤️">❤️</button>
-            <button class="emoji-btn" data-emoji="😂">😂</button>
-            <button class="emoji-btn" data-emoji="😮">😮</button>
-            <button class="emoji-btn" data-emoji="😢">😢</button>
-            <button class="emoji-btn" data-emoji="👍">👍</button>
-            <button class="emoji-btn" data-emoji="🔥">🔥</button>
+      postEl.innerHTML = `
+        <div class="post-header">
+          <div class="avatar" style="${p.avatar ? `background-image: url(${p.avatar});` : ''}"></div>
+          <div class="username">@${p.author}</div>
+          <div style="margin-left:auto; position:relative;">
+            <button class="more-btn" style="background:none;border:none;font-size:1.4rem;color:var(--text-secondary);cursor:pointer;">⋯</button>
+            <div class="reaction-menu" style="display:none;position:absolute;right:0;top:30px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:8px;z-index:10;display:flex;flex-wrap:wrap;gap:6px;width:180px;">
+              <button class="emoji-btn" data-emoji="❤️">❤️</button>
+              <button class="emoji-btn" data-emoji="😂">😂</button>
+              <button class="emoji-btn" data-emoji="😮">😮</button>
+              <button class="emoji-btn" data-emoji="😢">😢</button>
+              <button class="emoji-btn" data-emoji="👍">👍</button>
+              <button class="emoji-btn" data-emoji="🔥">🔥</button>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="post-content">${p.post.text.replace(/\n/g, '<br>')}</div>
+        <div class="post-content">${p.post.text.replace(/\n/g, '<br>')}</div>
 
-      <div class="post-footer" style="justify-content:space-between;align-items:center;">
-        <div style="display:flex;gap:24px;">
-          <button class="like-btn" style="background:none;border:none;color:${p.post.likes.includes(currentUser)?'red':'var(--text-secondary)'};cursor:pointer;">
-            ${p.post.likes.includes(currentUser) ? '❤️' : '♡'} ${p.post.likes.length}
-          </button>
-          <button class="comment-btn" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;">
-            💬 ${p.post.comments.length}
-          </button>
+        <div class="post-footer" style="justify-content:space-between;align-items:center;">
+          <div style="display:flex;gap:24px;">
+            <button class="like-btn" style="background:none;border:none;color:${p.post.likes.includes(currentUser)?'red':'var(--text-secondary)'};cursor:pointer;">
+              ${p.post.likes.includes(currentUser) ? '❤️' : '♡'} ${p.post.likes.length}
+            </button>
+            <button class="comment-btn" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;">
+              💬 ${p.post.comments.length}
+            </button>
+          </div>
+          <div class="reactions-preview" style="font-size:0.9rem;">${reactionsHtml}</div>
         </div>
-        <div class="reactions-preview" style="font-size:0.9rem;">${reactionsHtml}</div>
-      </div>
 
-      <div class="comments-section" style="margin-top:12px;display:none;border-top:1px solid var(--card-border);padding-top:12px;">
-        <div class="comments-list"></div>
-        <div style="margin-top:8px;display:flex;gap:8px;">
-          <input type="text" class="comment-input" placeholder="Напишіть відповідь..." style="flex:1;background:var(--input-bg);border:1px solid var(--input-border);border-radius:10px;padding:8px;color:var(--text);"/>
-          <button class="send-comment" style="background:var(--btn-bg);color:white;padding:8px 16px;border-radius:10px;cursor:pointer;">Відправити</button>
+        <div class="comments-section" style="margin-top:12px;display:none;border-top:1px solid var(--card-border);padding-top:12px;">
+          <div class="comments-list"></div>
+          <div style="margin-top:8px;display:flex;gap:8px;">
+            <input type="text" class="comment-input" placeholder="Напишіть відповідь..." style="flex:1;background:var(--input-bg);border:1px solid var(--input-border);border-radius:10px;padding:8px;color:var(--text);"/>
+            <button class="send-comment" style="background:var(--btn-bg);color:white;padding:8px 16px;border-radius:10px;cursor:pointer;">Відправити</button>
+          </div>
         </div>
-      </div>
-    `;
+      `;
 
-    feed.appendChild(postEl);
-    setTimeout(() => postEl.classList.add('show'), 50 * i);
+      feed.appendChild(postEl);
+      setTimeout(() => postEl.classList.add('show'), 50 * i);
 
-    postEl.querySelector('.like-btn').onclick = async () => {
-      const author = postEl.dataset.author;
-      const postId = postEl.dataset.postId;
-      const { data: user } = await supabase.from('users').select('posts').eq('nickname', author).single();
-      const targetPostIndex = user.posts.findIndex(po => po.id === postId);
-      const targetPost = user.posts[targetPostIndex];
+      // Лайк
+      postEl.querySelector('.like-btn').onclick = async () => {
+        try {
+          const { data: userData } = await supabase
+            .from('users')
+            .select('posts')
+            .eq('nickname', p.author)
+            .single();
 
-      if (targetPost.likes.includes(currentUser)) {
-        targetPost.likes = targetPost.likes.filter(u => u !== currentUser);
-      } else {
-        targetPost.likes.push(currentUser);
-      }
-      user.posts[targetPostIndex] = targetPost;
-      await supabase.from('users').update({ posts: user.posts }).eq('nickname', author);
-      loadPosts();
-    };
+          const posts = userData.posts || [];
+          const postIndex = posts.findIndex(po => po.id === p.post.id);
+          if (postIndex === -1) return;
 
-    const moreBtn = postEl.querySelector('.more-btn');
-    const menu = postEl.querySelector('.reaction-menu');
-    moreBtn.onclick = (e) => {
-      e.stopPropagation();
-      menu.style.display = menu.style.display === 'none' || !menu.style.display ? 'flex' : 'none';
-    };
-    document.addEventListener('click', e => {
-      if (!moreBtn.contains(e.target) && !menu.contains(e.target)) menu.style.display = 'none';
-    });
+          const targetPost = posts[postIndex];
+          if (targetPost.likes.includes(currentUser)) {
+            targetPost.likes = targetPost.likes.filter(u => u !== currentUser);
+          } else {
+            targetPost.likes.push(currentUser);
+          }
 
-    menu.querySelectorAll('.emoji-btn').forEach(btn => {
-      btn.onclick = async () => {
-        const emoji = btn.dataset.emoji;
-        const author = postEl.dataset.author;
-        const postId = postEl.dataset.postId;
-        const { data: user } = await supabase.from('users').select('posts').eq('nickname', author).single();
-        const targetPostIndex = user.posts.findIndex(po => po.id === postId);
-        const targetPost = user.posts[targetPostIndex];
-        if (!targetPost.reactions) targetPost.reactions = {};
-        if (!targetPost.reactions[emoji]) targetPost.reactions[emoji] = [];
+          posts[postIndex] = targetPost;
 
-        if (targetPost.reactions[emoji].includes(currentUser)) {
-          targetPost.reactions[emoji] = targetPost.reactions[emoji].filter(u => u !== currentUser);
-          if (!targetPost.reactions[emoji].length) delete targetPost.reactions[emoji];
-        } else {
-          targetPost.reactions[emoji].push(currentUser);
+          await supabase
+            .from('users')
+            .update({ posts })
+            .eq('nickname', p.author);
+
+          loadPosts();
+        } catch (err) {
+          console.error(err);
         }
-        user.posts[targetPostIndex] = targetPost;
-        await supabase.from('users').update({ posts: user.posts }).eq('nickname', author);
-        loadPosts();
+      };
+
+      // Реакції
+      const moreBtn = postEl.querySelector('.more-btn');
+      const menu = postEl.querySelector('.reaction-menu');
+
+      moreBtn.onclick = (e) => {
+        e.stopPropagation();
+        menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+      };
+
+      document.addEventListener('click', e => {
+        if (!moreBtn.contains(e.target) && !menu.contains(e.target)) {
+          menu.style.display = 'none';
+        }
+      });
+
+      menu.querySelectorAll('.emoji-btn').forEach(btn => {
+        btn.onclick = async () => {
+          const emoji = btn.dataset.emoji;
+          try {
+            const { data: userData } = await supabase
+              .from('users')
+              .select('posts')
+              .eq('nickname', p.author)
+              .single();
+
+            const posts = userData.posts || [];
+            const postIndex = posts.findIndex(po => po.id === p.post.id);
+            if (postIndex === -1) return;
+
+            const targetPost = posts[postIndex];
+            if (!targetPost.reactions) targetPost.reactions = {};
+            if (!targetPost.reactions[emoji]) targetPost.reactions[emoji] = [];
+
+            if (targetPost.reactions[emoji].includes(currentUser)) {
+              targetPost.reactions[emoji] = targetPost.reactions[emoji].filter(u => u !== currentUser);
+              if (targetPost.reactions[emoji].length === 0) delete targetPost.reactions[emoji];
+            } else {
+              targetPost.reactions[emoji].push(currentUser);
+            }
+
+            posts[postIndex] = targetPost;
+
+            await supabase
+              .from('users')
+              .update({ posts })
+              .eq('nickname', p.author);
+
+            loadPosts();
+          } catch (err) {
+            console.error(err);
+          }
+        };
+      });
+
+      // Коментарі
+      const commentBtn = postEl.querySelector('.comment-btn');
+      const commentsSec = postEl.querySelector('.comments-section');
+      commentBtn.onclick = () => {
+        commentsSec.style.display = commentsSec.style.display === 'none' ? 'block' : 'none';
+        renderComments(postEl);
+      };
+
+      const sendBtn = postEl.querySelector('.send-comment');
+      const input = postEl.querySelector('.comment-input');
+      sendBtn.onclick = async () => {
+        const txt = input.value.trim();
+        if (!txt) return;
+
+        try {
+          const { data: userData } = await supabase
+            .from('users')
+            .select('posts')
+            .eq('nickname', p.author)
+            .single();
+
+          const posts = userData.posts || [];
+          const postIndex = posts.findIndex(po => po.id === p.post.id);
+          if (postIndex === -1) return;
+
+          const targetPost = posts[postIndex];
+          targetPost.comments = targetPost.comments || [];
+          targetPost.comments.push({
+            user: currentUser,
+            text: txt,
+            createdAt: Date.now()
+          });
+
+          posts[postIndex] = targetPost;
+
+          await supabase
+            .from('users')
+            .update({ posts })
+            .eq('nickname', p.author);
+
+          input.value = '';
+          renderComments(postEl);
+          loadPosts();
+        } catch (err) {
+          console.error(err);
+        }
       };
     });
-
-    const commentBtn = postEl.querySelector('.comment-btn');
-    const commentsSec = postEl.querySelector('.comments-section');
-    commentBtn.onclick = () => {
-      commentsSec.style.display = commentsSec.style.display === 'none' ? 'block' : 'none';
-      renderComments(postEl);
-    };
-
-    const sendBtn = postEl.querySelector('.send-comment');
-    const input = postEl.querySelector('.comment-input');
-    sendBtn.onclick = async () => {
-      const txt = input.value.trim();
-      if (!txt) return;
-      const author = postEl.dataset.author;
-      const postId = postEl.dataset.postId;
-      const { data: user } = await supabase.from('users').select('posts').eq('nickname', author).single();
-      const targetPostIndex = user.posts.findIndex(po => po.id === postId);
-      const targetPost = user.posts[targetPostIndex];
-      targetPost.comments.push({ user: currentUser, text: txt, createdAt: Date.now() });
-      user.posts[targetPostIndex] = targetPost;
-      await supabase.from('users').update({ posts: user.posts }).eq('nickname', author);
-      input.value = '';
-      renderComments(postEl);
-      loadPosts();
-    };
-  });
+  } catch (err) {
+    console.error('Помилка завантаження стрічки:', err);
+    feed.innerHTML = '<p style="text-align:center;color:#f66;">Не вдалося завантажити стрічку</p>';
+  }
 }
 
-function renderComments(postEl) {
-  const list = postEl.querySelector('.comments-list');
-  const postId = postEl.dataset.postId;
-  const author = postEl.dataset.author;
-
-  // Since we can't fetch here easily, re-fetch or use cached, but for simplicity, assume loadPosts refreshes
-  // But to render, need data
-  // Actually, since it's sync, better async but for now, use placeholder or reload
-  // To fix, make renderComments async
-
-  // Change to:
-  // async function renderComments(postEl) { ... await fetch ... }
-
-  // But to keep simple, reload loadPosts after comment, so comments shown after.
-  // For now, let's make it async.
-
-  // Wait, let's add async
-}
-
-// Quick fix: make renderComments async
 async function renderComments(postEl) {
   const list = postEl.querySelector('.comments-list');
   const postId = postEl.dataset.postId;
   const author = postEl.dataset.author;
-  const { data: user } = await supabase.from('users').select('posts').eq('nickname', author).single();
-  const post = user.posts.find(p => p.id === postId);
 
-  list.innerHTML = '';
-  (post.comments || []).forEach(c => {
-    const div = document.createElement('div');
-    div.style.margin = '8px 0';
-    div.innerHTML = `<strong>@${c.user}</strong>: ${c.text}`;
-    list.appendChild(div);
-  });
+  try {
+    const { data: userData } = await supabase
+      .from('users')
+      .select('posts')
+      .eq('nickname', author)
+      .single();
+
+    const post = (userData.posts || []).find(p => p.id === postId);
+    list.innerHTML = '';
+
+    (post?.comments || []).forEach(c => {
+      const div = document.createElement('div');
+      div.style.margin = '8px 0';
+      div.innerHTML = `<strong>@${c.user}</strong>: ${c.text}`;
+      list.appendChild(div);
+    });
+  } catch (err) {
+    console.error(err);
+    list.innerHTML = '<p>Помилка завантаження коментарів</p>';
+  }
 }
 
 // ──────────────────────────────────────────────
@@ -791,57 +895,113 @@ async function loadSearchUsers(query = '') {
 
   if (!currentUser) return;
 
-  const { data: me } = await supabase.from('users').select('following').eq('nickname', currentUser).single();
-  const following = me.following || [];
+  try {
+    const { data: me } = await supabase
+      .from('users')
+      .select('following')
+      .eq('nickname', currentUser)
+      .single();
 
-  const { data: foundUsers } = await supabase.from('users').select('nickname, avatar, last_online').ilike('nickname', `%${query}%`).neq('nickname', currentUser);
+    const following = me?.following || [];
 
-  foundUsers.forEach(data => {
-    const timeAgo = Math.floor((Date.now() - data.last_online) / 60000);
-    const status = timeAgo < 60 ? `${timeAgo} хв тому` : `${Math.floor(timeAgo / 60)} год тому`;
+    const { data: foundUsers } = await supabase
+      .from('users')
+      .select('nickname, avatar, last_online')
+      .ilike('nickname', `%${query}%`)
+      .neq('nickname', currentUser);
 
-    const isFollowing = following.includes(data.nickname);
+    (foundUsers || []).forEach(data => {
+      const timeAgo = Math.floor((Date.now() - (data.last_online || 0)) / 60000);
+      const status = timeAgo < 60 ? `${timeAgo} хв тому` : `${Math.floor(timeAgo / 60)} год тому`;
 
-    const item = document.createElement('div');
-    item.className = 'user-item';
-    item.innerHTML = `
-      <div class="avatar" style="${data.avatar ? `background-image: url(${data.avatar});` : ''}"></div>
-      <div>
-        <div class="name">@${data.nickname}</div>
-        <div class="status">У мережі ${status}</div>
-      </div>
-      <button class="follow-btn" data-user="${data.nickname}" style="margin-left:auto;padding:6px 12px;background:var(--btn-bg);border-radius:8px;">${isFollowing ? 'Відписатися' : 'Підписатися'}</button>
-    `;
-    item.onclick = (e) => {
-      if (!e.target.classList.contains('follow-btn')) openChat(data.nickname);
-    };
-    userList.appendChild(item);
-  });
+      const isFollowing = following.includes(data.nickname);
+
+      const item = document.createElement('div');
+      item.className = 'user-item';
+      item.innerHTML = `
+        <div class="avatar" style="${data.avatar ? `background-image: url(${data.avatar});` : ''}"></div>
+        <div>
+          <div class="name">@${data.nickname}</div>
+          <div class="status">У мережі ${status}</div>
+        </div>
+        <button class="follow-btn" data-user="${data.nickname}" style="margin-left:auto;padding:6px 12px;background:var(--btn-bg);border-radius:8px;">
+          ${isFollowing ? 'Відписатися' : 'Підписатися'}
+        </button>
+      `;
+
+      item.onclick = (e) => {
+        if (!e.target.classList.contains('follow-btn')) {
+          openChat(data.nickname);
+        }
+      };
+
+      userList.appendChild(item);
+    });
+  } catch (err) {
+    console.error(err);
+    userList.innerHTML = '<p>Помилка пошуку</p>';
+  }
 }
 
 document.getElementById('searchInput').oninput = (e) => loadSearchUsers(e.target.value);
 
 document.getElementById('userList').addEventListener('click', async e => {
-  if (e.target.classList.contains('follow-btn')) {
-    const targetUser = e.target.dataset.user;
-    const { data: me } = await supabase.from('users').select('following').eq('nickname', currentUser).single();
-    let newFollowing = me.following || [];
+  if (!e.target.classList.contains('follow-btn')) return;
+
+  const targetUser = e.target.dataset.user;
+
+  try {
+    const { data: me } = await supabase
+      .from('users')
+      .select('following')
+      .eq('nickname', currentUser)
+      .single();
+
+    let newFollowing = me?.following || [];
 
     if (newFollowing.includes(targetUser)) {
       newFollowing = newFollowing.filter(u => u !== targetUser);
-      const { data: other } = await supabase.from('users').select('followers').eq('nickname', targetUser).single();
-      const newFollowers = other.followers.filter(u => u !== currentUser);
-      await supabase.from('users').update({ followers: newFollowers }).eq('nickname', targetUser);
+
+      const { data: other } = await supabase
+        .from('users')
+        .select('followers')
+        .eq('nickname', targetUser)
+        .single();
+
+      const newFollowers = (other?.followers || []).filter(u => u !== currentUser);
+
+      await supabase
+        .from('users')
+        .update({ followers: newFollowers })
+        .eq('nickname', targetUser);
     } else {
       newFollowing.push(targetUser);
-      const { data: other } = await supabase.from('users').select('followers').eq('nickname', targetUser).single();
-      const newFollowers = [...(other.followers || []), currentUser];
-      await supabase.from('users').update({ followers: newFollowers }).eq('nickname', targetUser);
+
+      const { data: other } = await supabase
+        .from('users')
+        .select('followers')
+        .eq('nickname', targetUser)
+        .single();
+
+      const newFollowers = [...(other?.followers || []), currentUser];
+
+      await supabase
+        .from('users')
+        .update({ followers: newFollowers })
+        .eq('nickname', targetUser);
     }
 
-    await supabase.from('users').update({ following: newFollowing }).eq('nickname', currentUser);
+    await supabase
+      .from('users')
+      .update({ following: newFollowing })
+      .eq('nickname', currentUser);
+
     loadSearchUsers(document.getElementById('searchInput').value);
-    if (document.getElementById('profile').classList.contains('active')) updateProfile();
+    if (document.getElementById('profile').classList.contains('active')) {
+      updateProfile();
+    }
+  } catch (err) {
+    console.error(err);
   }
 });
 
@@ -855,153 +1015,254 @@ async function loadChatList() {
   const chatList = document.getElementById('chatList');
   chatList.innerHTML = '';
 
-  const { data: me } = await supabase.from('users').select('messages').eq('nickname', currentUser).single();
-  const myMessages = me.messages || {};
+  if (!currentUser) return;
 
-  const others = Object.keys(myMessages);
-  if (others.length === 0) return;
+  try {
+    const { data: me } = await supabase
+      .from('users')
+      .select('messages')
+      .eq('nickname', currentUser)
+      .single();
 
-  const { data: usersData } = await supabase.from('users').select('nickname, avatar').in('nickname', others);
+    const myMessages = me?.messages || {};
 
-  const usersMap = {};
-  usersData.forEach(u => usersMap[u.nickname] = u);
+    const others = Object.keys(myMessages);
+    if (others.length === 0) return;
 
-  others.forEach(other => {
-    const lastMsg = myMessages[other][myMessages[other].length - 1] || {text: ''};
-    const item = document.createElement('div');
-    item.className = 'chat-item';
-    item.innerHTML = `
-      <div class="avatar" style="${usersMap[other].avatar ? `background-image: url(${usersMap[other].avatar});` : ''}"></div>
-      <div>
-        <div class="name">@${other}</div>
-        <div class="status">${lastMsg.text.slice(0, 20)}...</div>
-      </div>
-    `;
-    item.onclick = () => openChat(other);
-    chatList.appendChild(item);
-  });
+    const { data: usersData } = await supabase
+      .from('users')
+      .select('nickname, avatar')
+      .in('nickname', others);
+
+    const usersMap = {};
+    (usersData || []).forEach(u => usersMap[u.nickname] = u);
+
+    others.forEach(other => {
+      const lastMsg = (myMessages[other] || [])[myMessages[other].length - 1] || { text: '' };
+      const item = document.createElement('div');
+      item.className = 'chat-item';
+      item.innerHTML = `
+        <div class="avatar" style="${usersMap[other]?.avatar ? `background-image: url(${usersMap[other].avatar});` : ''}"></div>
+        <div>
+          <div class="name">@${other}</div>
+          <div class="status">${lastMsg.text.slice(0, 20) || '...'}</div>
+        </div>
+      `;
+      item.onclick = () => openChat(other);
+      chatList.appendChild(item);
+    });
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 async function openChat(otherUser) {
   currentChatUser = otherUser;
   const chatWindow = document.getElementById('chatWindow');
   const chatHeader = document.getElementById('chatHeader');
-  const { data: other } = await supabase.from('users').select('avatar').eq('nickname', otherUser).single();
 
-  chatWindow.style.display = 'flex';
+  try {
+    const { data: other } = await supabase
+      .from('users')
+      .select('avatar')
+      .eq('nickname', otherUser)
+      .single();
 
-  chatHeader.innerHTML = `
-    <div class="avatar" style="${other.avatar ? `background-image: url(${other.avatar});` : ''}"></div>
-    <div class="name">@${otherUser}</div>
-  `;
+    chatWindow.style.display = 'flex';
 
-  await renderChatMessages();
+    chatHeader.innerHTML = `
+      <div class="avatar" style="${other?.avatar ? `background-image: url(${other.avatar});` : ''}"></div>
+      <div class="name">@${otherUser}</div>
+    `;
+
+    await renderChatMessages();
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 async function renderChatMessages() {
   const chatMessages = document.getElementById('chatMessages');
   chatMessages.innerHTML = '';
 
-  const { data: me } = await supabase.from('users').select('messages').eq('nickname', currentUser).single();
-  const conversation = me.messages[currentChatUser] || [];
+  if (!currentChatUser) return;
 
-  conversation.forEach(msg => {
-    const div = document.createElement('div');
-    div.className = `message ${msg.from === currentUser ? 'sent' : 'received'}`;
-    div.textContent = msg.text;
-    chatMessages.appendChild(div);
-  });
-  chatMessages.scrollTop = chatMessages.scrollHeight;
+  try {
+    const { data: me } = await supabase
+      .from('users')
+      .select('messages')
+      .eq('nickname', currentUser)
+      .single();
+
+    const conversation = (me?.messages?.[currentChatUser] || []);
+
+    conversation.forEach(msg => {
+      const div = document.createElement('div');
+      div.className = `message ${msg.from === currentUser ? 'sent' : 'received'}`;
+      div.textContent = msg.text;
+      chatMessages.appendChild(div);
+    });
+
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 document.getElementById('sendMessage').onclick = async () => {
   const text = document.getElementById('chatText').value.trim();
   if (!text || !currentChatUser) return;
 
-  const msg = { from: currentUser, to: currentChatUser, text, createdAt: Date.now() };
+  try {
+    const msg = { from: currentUser, to: currentChatUser, text, createdAt: Date.now() };
 
-  const { data: me } = await supabase.from('users').select('messages').eq('nickname', currentUser).single();
-  if (!me.messages[currentChatUser]) me.messages[currentChatUser] = [];
-  me.messages[currentChatUser].push(msg);
-  await supabase.from('users').update({ messages: me.messages }).eq('nickname', currentUser);
+    // Оновлюємо себе
+    const { data: me } = await supabase
+      .from('users')
+      .select('messages')
+      .eq('nickname', currentUser)
+      .single();
 
-  const { data: other } = await supabase.from('users').select('messages').eq('nickname', currentChatUser).single();
-  if (!other.messages[currentUser]) other.messages[currentUser] = [];
-  other.messages[currentUser].push(msg);
-  await supabase.from('users').update({ messages: other.messages }).eq('nickname', currentChatUser);
+    const myMessages = me?.messages || {};
+    if (!myMessages[currentChatUser]) myMessages[currentChatUser] = [];
+    myMessages[currentChatUser].push(msg);
 
-  document.getElementById('chatText').value = '';
-  await renderChatMessages();
-  loadChatList();
+    await supabase
+      .from('users')
+      .update({ messages: myMessages })
+      .eq('nickname', currentUser);
+
+    // Оновлюємо співрозмовника
+    const { data: other } = await supabase
+      .from('users')
+      .select('messages')
+      .eq('nickname', currentChatUser)
+      .single();
+
+    const otherMessages = other?.messages || {};
+    if (!otherMessages[currentUser]) otherMessages[currentUser] = [];
+    otherMessages[currentUser].push(msg);
+
+    await supabase
+      .from('users')
+      .update({ messages: otherMessages })
+      .eq('nickname', currentChatUser);
+
+    document.getElementById('chatText').value = '';
+    await renderChatMessages();
+    loadChatList();
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 // ──────────────────────────────────────────────
-// Профіль, аватар, біо, тема
+// Профіль, аватар, біо
 // ──────────────────────────────────────────────
 
 async function updateProfile() {
   if (!currentUser) return;
-  const { data: u } = await supabase.from('users').select('bio, avatar, posts, followers, following').eq('nickname', currentUser).single();
-  document.getElementById('postsCount').textContent     = `Пости: ${u.posts.length}`;
-  document.getElementById('followersCount').textContent = `Підписники: ${u.followers.length}`;
-  document.getElementById('followingCount').textContent = `Підписки: ${u.following.length}`;
-  document.getElementById('profileBio').textContent     = u.bio || 'Немає опису';
-  document.getElementById('profileAvatar').style.backgroundImage = u.avatar ? `url(${u.avatar})` : 'none';
+
+  try {
+    const { data: u } = await supabase
+      .from('users')
+      .select('bio, avatar, posts, followers, following')
+      .eq('nickname', currentUser)
+      .single();
+
+    document.getElementById('postsCount').textContent     = `Пости: ${(u?.posts || []).length}`;
+    document.getElementById('followersCount').textContent = `Підписники: ${(u?.followers || []).length}`;
+    document.getElementById('followingCount').textContent = `Підписки: ${(u?.following || []).length}`;
+    document.getElementById('profileBio').textContent     = u?.bio || 'Немає опису';
+    document.getElementById('profileAvatar').style.backgroundImage = u?.avatar ? `url(${u.avatar})` : 'none';
+  } catch (err) {
+    console.error(err);
+  }
 }
 
-document.getElementById('profileAvatar').onclick = () => document.getElementById('avatarInput').click();
+document.getElementById('profileAvatar').onclick = () => {
+  document.getElementById('avatarInput').click();
+};
 
 document.getElementById('avatarInput').onchange = async e => {
   const file = e.target.files[0];
-  if (!file) return;
+  if (!file || !currentUser) return;
 
-  const fileName = `${currentUser}/${Date.now()}_${file.name}`;
-  const { error: uploadErr } = await supabase.storage.from('avatars').upload(fileName, file);
-  if (uploadErr) return alert('Помилка завантаження аватара');
+  try {
+    const fileName = `${currentUser}/${Date.now()}_${file.name}`;
+    const { error: uploadErr } = await supabase.storage
+      .from('avatars')
+      .upload(fileName, file);
 
-  const publicUrlData = supabase.storage.from('avatars').getPublicUrl(fileName);
-  const publicUrl = publicUrlData.data.publicUrl;
+    if (uploadErr) throw uploadErr;
 
-  await supabase.from('users').update({ avatar: publicUrl }).eq('nickname', currentUser);
-  updateProfile();
-  loadPosts();
+    const { data: urlData } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(fileName);
+
+    const publicUrl = urlData.publicUrl;
+
+    await supabase
+      .from('users')
+      .update({ avatar: publicUrl })
+      .eq('nickname', currentUser);
+
+    updateProfile();
+    loadPosts();
+  } catch (err) {
+    console.error(err);
+    alert('Помилка завантаження аватара');
+  }
 };
 
 const modal = document.getElementById('editProfileModal');
 document.getElementById('editProfileBtn').onclick = () => modal.classList.add('active');
 document.getElementById('closeModal').onclick = () => modal.classList.remove('active');
+
 document.getElementById('saveProfileEdit').onclick = async () => {
   const bio = document.getElementById('editBio').value.trim();
-  await supabase.from('users').update({ bio }).eq('nickname', currentUser);
-  updateProfile();
-  modal.classList.remove('active');
-};
 
-document.getElementById('toggleTheme').onclick = () => {
-  document.body.classList.toggle('light');
-  localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
-};
+  try {
+    await supabase
+      .from('users')
+      .update({ bio })
+      .eq('nickname', currentUser);
 
-if (localStorage.getItem('theme') === 'light') document.body.classList.add('light');
+    updateProfile();
+    modal.classList.remove('active');
+  } catch (err) {
+    console.error(err);
+  }
+};
 
 // ──────────────────────────────────────────────
-// Ініціалізація при завантаженні
+// Автозавантаження при старті
 // ──────────────────────────────────────────────
 (async () => {
   currentUser = localStorage.getItem('currentUser');
   if (currentUser) {
-    const { data } = await supabase.from('users').select('nickname').eq('nickname', currentUser).single();
-    if (data) {
-      authBox.style.display = 'none';
-      newPostBox.style.display = 'block';
-      document.getElementById('profileUsernameDisplay').textContent = currentUser;
-      await updateProfile();
-      await loadPosts();
-    } else {
-      localStorage.removeItem('currentUser');
-      currentUser = null;
+    try {
+      const { data } = await supabase
+        .from('users')
+        .select('nickname')
+        .eq('nickname', currentUser)
+        .maybeSingle();
+
+      if (data) {
+        authBox.style.display = 'none';
+        newPostBox.style.display = 'block';
+        document.getElementById('profileUsernameDisplay').textContent = currentUser;
+        await updateProfile();
+        await loadPosts();
+        return;
+      }
+    } catch (err) {
+      console.error(err);
     }
   }
+
+  localStorage.removeItem('currentUser');
+  currentUser = null;
 })();
 </script>
 </body>

@@ -6,21 +6,28 @@
 <title>FANTASYAS</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"/>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Manrope',sans-serif;}
 body{background:#000;color:#fff;min-height:100vh;transition:0.4s;}
 body.light{background:#fff;color:#111;}
+
+/* Верхня панель */
 .top-bar{position:fixed;top:0;left:0;right:0;height:70px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);z-index:1000;transition:0.3s;}
 body.light .top-bar{background:rgba(255,255,255,0.9);}
 .site-name{font-size:1.7rem;font-weight:800;background:linear-gradient(90deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;transition:0.3s;}
 body.light .site-name{background:linear-gradient(90deg,#000,#444);}
+
+/* Бургер меню */
 .burger{width:30px;height:22px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:0.3s;}
 .burger span{height:3px;width:100%;background:#fff;border-radius:3px;transition:0.4s;}
 body.light .burger span{background:#000;}
 .burger.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
 .burger.active span:nth-child(2){opacity:0;}
 .burger.active span:nth-child(3){transform:rotate(-45deg) translate(6px,-6px);}
+
+/* Бокове меню */
 .sidebar{position: fixed;top:0;left:-280px;width:280px;height:100%;background: rgba(0,0,0,0.4);backdrop-filter: blur(10px);padding:100px 30px;border-right:1px solid rgba(255,255,255,0.1);transition:0.4s;z-index:900;}
 body.light .sidebar{background: rgba(255,255,255,0.4);backdrop-filter: blur(10px);border-right:1px solid rgba(0,0,0,0.08);}
 .sidebar.active{left:0;}
@@ -28,18 +35,21 @@ body.light .sidebar{background: rgba(255,255,255,0.4);backdrop-filter: blur(10px
 body.light .sidebar a{color:#555;}
 .sidebar a:hover{color:#fff;transform:translateX(6px);}
 body.light .sidebar a:hover{color:#000;}
+
+/* Контент */
 .main-content{margin-top:80px;padding:20px;}
 .section{display:none;opacity:0;transform:translateY(10px);transition:0.3s;}
 .section.active{display:block;opacity:1;transform:translateY(0);}
-.login-box,.new-post,.settings,.profile-edit-form{margin-bottom:20px;display:flex;flex-direction:column;gap:12px;background:rgba(255,255,255,0.05);border-radius:14px;padding:18px;transition:0.3s;}
-body.light .login-box, body.light .new-post, body.light .settings, body.light .profile-edit-form{background:rgba(0,0,0,0.03);}
-input,textarea{padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;outline:none;resize:vertical;}
-body.light input,body.light textarea{background:#fff;color:#000;border:1px solid #ddd;}
-input::placeholder,textarea::placeholder{color:#aaa;}
-button{padding:10px 18px;border:none;border-radius:10px;cursor:pointer;font-weight:700;transition:0.2s, transform 0.2s;background:#444;color:#fff;}
-button:hover{opacity:0.9;transform:scale(1.05);}
-.danger-btn{background:#c53030;color:#fff;}
-.danger-btn:hover{background:#a71d2a;}
+
+/* Авторизація */
+.auth-box{display:flex;flex-direction:column;gap:12px;background:rgba(255,255,255,0.05);padding:20px;border-radius:16px;max-width:400px;margin:auto;margin-top:60px;transition:0.3s;}
+body.light .auth-box{background:rgba(0,0,0,0.03);}
+.auth-box input{padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;outline:none;}
+body.light .auth-box input{background:#fff;color:#000;border:1px solid #ddd;}
+.auth-box button{padding:10px 18px;border:none;border-radius:10px;cursor:pointer;font-weight:700;transition:0.2s, transform 0.2s;background:#444;color:#fff;}
+.auth-box button:hover{transform:scale(1.05);opacity:0.9;}
+
+/* Пости */
 .feed{display:flex;flex-direction:column;gap:16px;transition:0.3s;}
 .post{background:rgba(255,255,255,0.05);border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,0.1);opacity:0;transform:translateY(20px);transition:0.4s;}
 .post.show{opacity:1;transform:translateY(0);}
@@ -49,25 +59,24 @@ body.light .post{background:rgba(0,0,0,0.03);}
 body.light .avatar{background:#ccc;}
 .username{font-weight:700;}
 .post-content{margin-bottom:8px;}
-.post-footer{display:flex;gap:15px;}
-.post-footer button{background:none;border:none;color:#aaa;cursor:pointer;display:flex;align-items:center;gap:6px;}
-body.light .post-footer button{color:#666;}
-.post-footer button:hover{color:#fff;}
-body.light .post-footer button:hover{color:#000;}
+
+/* Профіль */
+.profile-avatar{width:100px;height:100px;border-radius:50%;background:#333;background-size:cover;margin-bottom:10px;}
+body.light .profile-avatar{background:#ddd;}
+.profile-edit-form{display:flex;flex-direction:column;gap:12px;}
+.profile-stats{display:flex;gap:15px;margin-top:8px;font-weight:600;}
+.follow-btn{margin-top:10px;padding:8px 14px;border-radius:10px;font-weight:700;background:#555;color:#fff;cursor:pointer;transition:0.3s;}
+.follow-btn.following{background:#0a84ff;color:#fff;transform:scale(1.05);}
+.follow-btn:hover{opacity:0.9;}
+
+/* Модалки */
 .modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:2000;transition:0.3s;}
 .modal.active{display:flex;}
 .modal-content{background:#111;width:90%;max-width:500px;border-radius:16px;padding:24px;position:relative;border:1px solid rgba(255,255,255,0.15);}
 body.light .modal-content{background:#fff;color:#000;}
 .close-modal{position:absolute;top:12px;right:16px;font-size:1.8rem;cursor:pointer;color:#aaa;}
 body.light .close-modal{color:#555;}
-.profile-avatar{width:100px;height:100px;border-radius:50%;background:#333;background-size:cover;}
-body.light .profile-avatar{background:#ddd;}
-.profile-edit-form input[type="file"]{padding:6px;cursor:pointer;}
-.profile-stats{display:flex;gap:15px;margin-top:8px;font-weight:600;}
-.follow-btn{margin-top:10px;padding:8px 14px;border-radius:10px;font-weight:700;background:#555;color:#fff;cursor:pointer;}
-.follow-btn.following{background:#0a84ff;color:#fff;}
-.hashtag{color:#aaa;font-weight:600;text-decoration:none;}
-.hashtag:hover{text-decoration:underline;}
+
 @media(max-width:900px){.sidebar{width:100%;left:-100%;border-right:none;}}
 </style>
 </head>
@@ -87,10 +96,14 @@ body.light .profile-avatar{background:#ddd;}
 </nav>
 
 <main class="main-content">
+
+  <!-- Авторизація -->
   <div id="home" class="section active">
-    <div class="login-box" id="loginBox">
-      <input type="text" id="usernameInput" placeholder="Введіть ім'я">
-      <button id="saveUsername">Увійти</button>
+    <div class="auth-box" id="authBox">
+      <input type="email" id="emailInput" placeholder="Email">
+      <input type="password" id="passwordInput" placeholder="Пароль">
+      <button id="loginBtn">Увійти</button>
+      <button id="registerBtn">Зареєструватися</button>
     </div>
     <div class="new-post" id="newPostBox" style="display:none;">
       <textarea id="postText" placeholder="Що у тебе на думці?..." rows="4"></textarea>
@@ -100,6 +113,7 @@ body.light .profile-avatar{background:#ddd;}
     <div class="feed" id="feed"></div>
   </div>
 
+  <!-- Профіль -->
   <div id="profile" class="section">
     <div class="profile-header">
       <div class="profile-avatar" id="profileAvatar"></div>
@@ -117,24 +131,12 @@ body.light .profile-avatar{background:#ddd;}
     </div>
   </div>
 
-  <div id="messages" class="section">
-    <h2>Чати</h2>
-    <div id="messagesList"></div>
-    <textarea id="dmText" placeholder="Напиши повідомлення..." rows="2"></textarea>
-    <button id="sendDm">Відправити</button>
-  </div>
-
-  <div id="groups" class="section">
-    <h2>Групи</h2>
-    <p>Тут будуть твої групи</p>
-  </div>
-
-  <div id="settings" class="section">
-    <h2>Налаштування</h2>
-    <button id="toggleTheme">Світла/Темна тема</button>
-  </div>
+  <div id="messages" class="section"><h2>Чати</h2></div>
+  <div id="groups" class="section"><h2>Групи</h2></div>
+  <div id="settings" class="section"><h2>Налаштування</h2><button id="toggleTheme">Світла/Темна тема</button></div>
 </main>
 
+<!-- Модалка редагування -->
 <div class="modal" id="editProfileModal">
   <div class="modal-content">
     <span class="close-modal" id="closeModal">&times;</span>
@@ -159,12 +161,14 @@ const firebaseConfig = {
   appId: "ВАШ_APPID"
 };
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const db=firebase.database();
+const auth=firebase.auth();
 
-let username = localStorage.getItem('fantasyasUsername') || '';
-let userData = {avatar:'', bio:'', followers:[], following:[]};
+// Змінні
+let currentUser=null;
+let userData={avatar:'',bio:'',followers:[],following:[]};
 
-// Меню
+// Бургер меню
 const burger=document.getElementById('burger');
 const sidebar=document.getElementById('sidebar');
 burger.addEventListener('click',()=>{burger.classList.toggle('active');sidebar.classList.toggle('active');});
@@ -180,34 +184,54 @@ document.querySelectorAll('[data-section]').forEach(el=>{
 });
 
 // Авторизація
-const loginBox=document.getElementById('loginBox');
+const authBox=document.getElementById('authBox');
 const newPostBox=document.getElementById('newPostBox');
 const profileUsernameDisplay=document.getElementById('profileUsernameDisplay');
-if(username){loginBox.style.display='none';newPostBox.style.display='flex'; profileUsernameDisplay.innerText=username; initUserStats();}
-document.getElementById('saveUsername').addEventListener('click',()=>{
-  const val=document.getElementById('usernameInput').value.trim();
-  if(!val)return alert('Введи ім’я');
-  username=val; localStorage.setItem('fantasyasUsername',username);
-  loginBox.style.display='none'; newPostBox.style.display='flex';
-  profileUsernameDisplay.innerText=username;
-  initUserStats();
+
+document.getElementById('registerBtn').addEventListener('click',()=>{
+  const email=document.getElementById('emailInput').value;
+  const pass=document.getElementById('passwordInput').value;
+  if(!email||!pass)return alert('Введіть email і пароль');
+  auth.createUserWithEmailAndPassword(email,pass)
+    .then(res=>{
+      currentUser=res.user;
+      db.ref(`users/${currentUser.uid}`).set({email,followers:[],following:[],avatar:'',bio:''});
+      afterLogin();
+    }).catch(err=>alert(err.message));
 });
+
+document.getElementById('loginBtn').addEventListener('click',()=>{
+  const email=document.getElementById('emailInput').value;
+  const pass=document.getElementById('passwordInput').value;
+  if(!email||!pass)return alert('Введіть email і пароль');
+  auth.signInWithEmailAndPassword(email,pass)
+    .then(res=>{currentUser=res.user; afterLogin();})
+    .catch(err=>alert(err.message));
+});
+
+function afterLogin(){
+  authBox.style.display='none';
+  newPostBox.style.display='flex';
+  profileUsernameDisplay.innerText=currentUser.email;
+  loadUserData();
+  updatePostsCount();
+}
 
 // Новий пост
 document.getElementById('addPost').addEventListener('click',()=>{
   const text=document.getElementById('postText').value.trim();
-  if(!text || !username)return;
+  if(!text||!currentUser)return;
   const file=document.getElementById('postImage').files[0];
   if(file){
     const reader=new FileReader();
     reader.onload=e=>{
-      db.ref('posts').push({username,text,image:e.target.result,time:Date.now()});
+      db.ref('posts').push({username:currentUser.email,text,image:e.target.result,time:Date.now()});
       document.getElementById('postText').value=''; document.getElementById('postImage').value='';
       updatePostsCount();
     };
     reader.readAsDataURL(file);
-  } else {
-    db.ref('posts').push({username,text,image:null,time:Date.now()});
+  }else{
+    db.ref('posts').push({username:currentUser.email,text,image:null,time:Date.now()});
     document.getElementById('postText').value='';
     updatePostsCount();
   }
@@ -215,9 +239,9 @@ document.getElementById('addPost').addEventListener('click',()=>{
 
 // Пости
 const feed=document.getElementById('feed');
-db.ref('posts').on('value',snapshot=>{
+db.ref('posts').on('value',snap=>{
   feed.innerHTML='';
-  const data=snapshot.val();
+  const data=snap.val();
   if(!data)return;
   Object.keys(data).reverse().forEach(key=>{
     const p=data[key];
@@ -235,7 +259,7 @@ db.ref('posts').on('value',snapshot=>{
   });
 });
 
-// Профіль
+// Редагування профілю
 const editModal=document.getElementById('editProfileModal');
 document.getElementById('editProfileBtn').addEventListener('click',()=>editModal.classList.add('active'));
 document.getElementById('closeModal').addEventListener('click',()=>editModal.classList.remove('active'));
@@ -247,12 +271,14 @@ document.getElementById('saveProfileEdit').addEventListener('click',()=>{
     reader.onload=e=>{
       userData.avatar=e.target.result;
       document.getElementById('profileAvatar').style.backgroundImage=`url('${userData.avatar}')`;
+      db.ref(`users/${currentUser.uid}`).update({avatar:userData.avatar});
       editModal.classList.remove('active');
     };
     reader.readAsDataURL(file);
   }
   userData.bio=bio;
   document.getElementById('profileBio').innerText=bio||'Немає опису';
+  db.ref(`users/${currentUser.uid}`).update({bio});
 });
 
 // Тема
@@ -264,32 +290,29 @@ const followersCount=document.getElementById('followersCount');
 const followingCount=document.getElementById('followingCount');
 const followBtn=document.getElementById('followBtn');
 
-function initUserStats(){
-  db.ref('posts').once('value',snap=>{
-    const posts = snap.val();
-    const count = posts ? Object.values(posts).filter(p=>p.username===username).length : 0;
-    postsCount.innerText=`Пости: ${count}`;
-  });
-
-  db.ref(`users/${username}`).once('value',snap=>{
-    const data = snap.val() || {};
-    userData.followers = data.followers || [];
-    userData.following = data.following || [];
+function loadUserData(){
+  db.ref(`users/${currentUser.uid}`).once('value',snap=>{
+    userData=snap.val()||{avatar:'',bio:'',followers:[],following:[]};
+    document.getElementById('profileAvatar').style.backgroundImage=`url('${userData.avatar}')`;
+    document.getElementById('profileBio').innerText=userData.bio||'Немає опису';
     followersCount.innerText=`Підписники: ${userData.followers.length}`;
     followingCount.innerText=`Підписки: ${userData.following.length}`;
-    followBtn.style.display='none';
   });
 }
 
 function updatePostsCount(){
   db.ref('posts').once('value',snap=>{
     const posts = snap.val();
-    const count = posts ? Object.values(posts).filter(p=>p.username===username).length : 0;
+    const count = posts ? Object.values(posts).filter(p=>p.username===currentUser.email).length : 0;
     postsCount.innerText=`Пости: ${count}`;
   });
 }
 
-initUserStats();
+// Підписка/відписка
+followBtn.addEventListener('click',()=>{
+  // ТУТ Можна додати логіку підписки на інших користувачів
+});
+
 </script>
 </body>
 </html>

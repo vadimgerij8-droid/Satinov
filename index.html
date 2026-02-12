@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>FANTASYAS</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -115,7 +116,9 @@
     .sidebar.active { left: 0; }
 
     .sidebar a {
-      display: block;
+      display: flex;
+      align-items: center;
+      gap: 12px;
       color: var(--text-secondary);
       text-decoration: none;
       font-size: 1.22rem;
@@ -155,6 +158,12 @@
       padding: 20px;
       margin-bottom: 20px;
       transition: all 0.2s;
+    }
+    .card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    body.light .card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
 
     input, textarea {
@@ -350,10 +359,23 @@
     .chat-input { display: flex; padding: 12px; border-top: 1px solid var(--card-border); }
     .chat-input input { flex: 1; margin-right: 8px; }
 
+    /* Mobile */
     @media (max-width: 900px) {
       .sidebar { width: 100%; left: -100%; border-right: none; }
       .main-content { padding: 16px; margin-top: 80px; }
       .profile-header { flex-direction: column; align-items: center; text-align: center; }
+    }
+
+    /* TV/Large screens */
+    @media (min-width: 1200px) {
+      .sidebar { left: 0; width: 300px; padding: 100px 32px; }
+      .main-content { margin-left: 300px; max-width: none; padding: 40px; }
+      .top-bar .burger { display: none; }
+      .site-name { font-size: 2.2rem; }
+      .sidebar a { font-size: 1.4rem; }
+      .card { padding: 28px; border-radius: 18px; }
+      input, textarea { font-size: 1.1rem; padding: 14px 16px; }
+      button { padding: 13px 24px; font-size: 1.1rem; }
     }
   </style>
 </head>
@@ -365,12 +387,12 @@
 </div>
 
 <nav class="sidebar" id="sidebar">
-  <a data-section="home">Головна</a>
-  <a data-section="search">Пошук</a>
-  <a data-section="profile">Профіль</a>
-  <a data-section="messages">Повідомлення</a>
-  <a data-section="groups">Групи</a>
-  <a data-section="settings">Налаштування</a>
+  <a data-section="home"><i class="fa-solid fa-house"></i> Головна</a>
+  <a data-section="search"><i class="fa-solid fa-magnifying-glass"></i> Пошук</a>
+  <a data-section="profile"><i class="fa-solid fa-user"></i> Профіль</a>
+  <a data-section="messages"><i class="fa-solid fa-message"></i> Повідомлення</a>
+  <a data-section="groups"><i class="fa-solid fa-users"></i> Групи</a>
+  <a data-section="settings"><i class="fa-solid fa-gear"></i> Налаштування</a>
 </nav>
 
 <main class="main-content">
@@ -434,9 +456,15 @@
     </div>
   </div>
 
+  <div id="groups" class="section card">
+    <h2>Групи</h2>
+    <p>Функціонал груп в розробці.</p>
+  </div>
+
   <div id="settings" class="section card">
     <h2>Налаштування</h2>
     <button id="toggleTheme" style="margin-top:16px;">Перемкнути тему</button>
+    <button id="logoutBtn" style="margin-top:16px;background:#f66;">Вийти</button>
   </div>
 
 </main>
@@ -482,7 +510,8 @@ document.querySelectorAll('[data-section]').forEach(link => {
   };
 });
 
-let currentUser = null;
+let currentNickname = null;
+let currentUserId = null;
 
 const authBox     = document.getElementById('authBox');
 const loginForm   = document.getElementById('loginForm');
@@ -491,7 +520,7 @@ const newPostBox  = document.getElementById('newPostBox');
 const feed        = document.getElementById('feed');
 
 // ──────────────────────────────────────────────
-// Авторизація / Реєстрація
+// Авторизація / Реєстрація з Supabase Auth
 // ──────────────────────────────────────────────
 
 document.getElementById('toRegister').onclick = () => {
@@ -511,16 +540,21 @@ document.getElementById('registerBtn').onclick = async () => {
 
   try {
     const { data: existing } = await supabase
-      .from('users')
+      .from('profiles')
       .select('nickname')
-      .eq('nickname', nick)
+      .ilike('nickname', nick)
       .maybeSingle();
 
     if (existing) return alert('Такий псевдонім вже зайнятий');
 
-    const newUser = {
+    const email = `${nick.toLowerCase()}@fantasyas.app`;
+
+    const { data: { user }, error: signUpError } = await supabase.auth.signUp({ email, password });
+    if (signUpError) throw signUpError;
+
+    const newProfile = {
+      user_id: user.id,
       nickname: nick,
-      password: pass,
       bio: '',
       avatar: '',
       posts: [],
@@ -530,12 +564,14 @@ document.getElementById('registerBtn').onclick = async () => {
       last_online: Date.now()
     };
 
-    const { error } = await supabase.from('users').insert(newUser);
-    if (error) throw error;
+    const { error: insertError } = await supabase.from('profiles').insert(newProfile);
+    if (insertError) throw insertError;
 
-    alert('Реєстрація успішна! Тепер увійдіть.');
-    registerForm.style.display = 'none';
-    loginForm.style.display = 'block';
+    // Автоматичний логін
+    const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+    if (loginError) throw loginError;
+
+    alert('Реєстрація успішна!');
   } catch (err) {
     console.error(err);
     alert('Помилка реєстрації: ' + (err.message || 'невідома помилка'));
@@ -547,26 +583,30 @@ document.getElementById('loginBtn').onclick = async () => {
   const pass = document.getElementById('loginPassword').value.trim();
 
   try {
-    const { data: user, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('nickname', nick)
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('nickname')
+      .ilike('nickname', nick)
       .maybeSingle();
 
-    if (error) throw error;
-    if (!user || user.password !== pass) return alert('Невірний псевдонім або пароль');
+    if (!profile) return alert('Невірний псевдонім або пароль');
 
-    currentUser = nick;
-    localStorage.setItem('currentUser', currentUser);
+    const email = `${profile.nickname.toLowerCase()}@fantasyas.app`;
+
+    const { data: { session }, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+
+    currentNickname = profile.nickname;
+    localStorage.setItem('currentNickname', currentNickname);
 
     await supabase
-      .from('users')
+      .from('profiles')
       .update({ last_online: Date.now() })
-      .eq('nickname', nick);
+      .eq('nickname', currentNickname);
 
     authBox.style.display = 'none';
     newPostBox.style.display = 'block';
-    document.getElementById('profileUsernameDisplay').textContent = currentUser;
+    document.getElementById('profileUsernameDisplay').textContent = currentNickname;
     updateProfile();
     loadPosts();
   } catch (err) {
@@ -582,16 +622,14 @@ document.getElementById('loginBtn').onclick = async () => {
 document.getElementById('addPost').onclick = async () => {
   const text = document.getElementById('postText').value.trim();
   if (!text) return alert('Напишіть текст поста');
-  if (!currentUser) return alert('Спочатку увійдіть');
+  if (!currentNickname) return alert('Спочатку увійдіть');
 
   try {
-    const { data: user, error: fetchErr } = await supabase
-      .from('users')
+    const { data: profile } = await supabase
+      .from('profiles')
       .select('posts')
-      .eq('nickname', currentUser)
+      .eq('nickname', currentNickname)
       .single();
-
-    if (fetchErr) throw fetchErr;
 
     const newPost = {
       id: Date.now() + Math.random().toString(36).slice(2),
@@ -602,14 +640,14 @@ document.getElementById('addPost').onclick = async () => {
       reactions: {}
     };
 
-    const newPosts = [newPost, ...(user.posts || [])];
+    const newPosts = [newPost, ...(profile.posts || [])];
 
-    const { error: updateErr } = await supabase
-      .from('users')
+    const { error } = await supabase
+      .from('profiles')
       .update({ posts: newPosts })
-      .eq('nickname', currentUser);
+      .eq('nickname', currentNickname);
 
-    if (updateErr) throw updateErr;
+    if (error) throw error;
 
     document.getElementById('postText').value = '';
     loadPosts();
@@ -626,34 +664,34 @@ document.getElementById('addPost').onclick = async () => {
 
 async function loadPosts() {
   feed.innerHTML = '';
-  if (!currentUser) return;
+  if (!currentNickname) return;
 
   try {
     const { data: me } = await supabase
-      .from('users')
+      .from('profiles')
       .select('following')
-      .eq('nickname', currentUser)
+      .eq('nickname', currentNickname)
       .single();
 
-    const accountsToShow = [currentUser, ...(me?.following || [])];
+    const accountsToShow = [currentNickname, ...(me?.following || [])];
 
-    const { data: usersData } = await supabase
-      .from('users')
+    const { data: profilesData } = await supabase
+      .from('profiles')
       .select('nickname, avatar, posts')
       .in('nickname', accountsToShow);
 
-    const usersMap = {};
-    (usersData || []).forEach(u => usersMap[u.nickname] = u);
+    const profilesMap = {};
+    (profilesData || []).forEach(p => profilesMap[p.nickname] = p);
 
     let postsToShow = [];
 
     accountsToShow.forEach(username => {
-      const user = usersMap[username];
-      if (!user) return;
-      (user.posts || []).forEach(postObj => {
+      const profile = profilesMap[username];
+      if (!profile) return;
+      (profile.posts || []).forEach(postObj => {
         postsToShow.push({
           author: username,
-          avatar: user.avatar || '',
+          avatar: profile.avatar || '',
           post: postObj,
           time: postObj.createdAt
         });
@@ -695,8 +733,8 @@ async function loadPosts() {
 
         <div class="post-footer" style="justify-content:space-between;align-items:center;">
           <div style="display:flex;gap:24px;">
-            <button class="like-btn" style="background:none;border:none;color:${p.post.likes.includes(currentUser)?'red':'var(--text-secondary)'};cursor:pointer;">
-              ${p.post.likes.includes(currentUser) ? '❤️' : '♡'} ${p.post.likes.length}
+            <button class="like-btn" style="background:none;border:none;color:${p.post.likes.includes(currentNickname)?'red':'var(--text-secondary)'};cursor:pointer;">
+              ${p.post.likes.includes(currentNickname) ? '❤️' : '♡'} ${p.post.likes.length}
             </button>
             <button class="comment-btn" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;">
               💬 ${p.post.comments.length}
@@ -720,27 +758,27 @@ async function loadPosts() {
       // Лайк
       postEl.querySelector('.like-btn').onclick = async () => {
         try {
-          const { data: userData } = await supabase
-            .from('users')
+          const { data: profileData } = await supabase
+            .from('profiles')
             .select('posts')
             .eq('nickname', p.author)
             .single();
 
-          const posts = userData.posts || [];
+          const posts = profileData.posts || [];
           const postIndex = posts.findIndex(po => po.id === p.post.id);
           if (postIndex === -1) return;
 
           const targetPost = posts[postIndex];
-          if (targetPost.likes.includes(currentUser)) {
-            targetPost.likes = targetPost.likes.filter(u => u !== currentUser);
+          if (targetPost.likes.includes(currentNickname)) {
+            targetPost.likes = targetPost.likes.filter(u => u !== currentNickname);
           } else {
-            targetPost.likes.push(currentUser);
+            targetPost.likes.push(currentNickname);
           }
 
           posts[postIndex] = targetPost;
 
           await supabase
-            .from('users')
+            .from('profiles')
             .update({ posts })
             .eq('nickname', p.author);
 
@@ -769,13 +807,13 @@ async function loadPosts() {
         btn.onclick = async () => {
           const emoji = btn.dataset.emoji;
           try {
-            const { data: userData } = await supabase
-              .from('users')
+            const { data: profileData } = await supabase
+              .from('profiles')
               .select('posts')
               .eq('nickname', p.author)
               .single();
 
-            const posts = userData.posts || [];
+            const posts = profileData.posts || [];
             const postIndex = posts.findIndex(po => po.id === p.post.id);
             if (postIndex === -1) return;
 
@@ -783,17 +821,17 @@ async function loadPosts() {
             if (!targetPost.reactions) targetPost.reactions = {};
             if (!targetPost.reactions[emoji]) targetPost.reactions[emoji] = [];
 
-            if (targetPost.reactions[emoji].includes(currentUser)) {
-              targetPost.reactions[emoji] = targetPost.reactions[emoji].filter(u => u !== currentUser);
+            if (targetPost.reactions[emoji].includes(currentNickname)) {
+              targetPost.reactions[emoji] = targetPost.reactions[emoji].filter(u => u !== currentNickname);
               if (targetPost.reactions[emoji].length === 0) delete targetPost.reactions[emoji];
             } else {
-              targetPost.reactions[emoji].push(currentUser);
+              targetPost.reactions[emoji].push(currentNickname);
             }
 
             posts[postIndex] = targetPost;
 
             await supabase
-              .from('users')
+              .from('profiles')
               .update({ posts })
               .eq('nickname', p.author);
 
@@ -819,20 +857,20 @@ async function loadPosts() {
         if (!txt) return;
 
         try {
-          const { data: userData } = await supabase
-            .from('users')
+          const { data: profileData } = await supabase
+            .from('profiles')
             .select('posts')
             .eq('nickname', p.author)
             .single();
 
-          const posts = userData.posts || [];
+          const posts = profileData.posts || [];
           const postIndex = posts.findIndex(po => po.id === p.post.id);
           if (postIndex === -1) return;
 
           const targetPost = posts[postIndex];
           targetPost.comments = targetPost.comments || [];
           targetPost.comments.push({
-            user: currentUser,
+            user: currentNickname,
             text: txt,
             createdAt: Date.now()
           });
@@ -840,7 +878,7 @@ async function loadPosts() {
           posts[postIndex] = targetPost;
 
           await supabase
-            .from('users')
+            .from('profiles')
             .update({ posts })
             .eq('nickname', p.author);
 
@@ -864,13 +902,13 @@ async function renderComments(postEl) {
   const author = postEl.dataset.author;
 
   try {
-    const { data: userData } = await supabase
-      .from('users')
+    const { data: profileData } = await supabase
+      .from('profiles')
       .select('posts')
       .eq('nickname', author)
       .single();
 
-    const post = (userData.posts || []).find(p => p.id === postId);
+    const post = (profileData.posts || []).find(p => p.id === postId);
     list.innerHTML = '';
 
     (post?.comments || []).forEach(c => {
@@ -893,24 +931,24 @@ async function loadSearchUsers(query = '') {
   const userList = document.getElementById('userList');
   userList.innerHTML = '';
 
-  if (!currentUser) return;
+  if (!currentNickname) return;
 
   try {
     const { data: me } = await supabase
-      .from('users')
+      .from('profiles')
       .select('following')
-      .eq('nickname', currentUser)
+      .eq('nickname', currentNickname)
       .single();
 
     const following = me?.following || [];
 
-    const { data: foundUsers } = await supabase
-      .from('users')
+    const { data: foundProfiles } = await supabase
+      .from('profiles')
       .select('nickname, avatar, last_online')
       .ilike('nickname', `%${query}%`)
-      .neq('nickname', currentUser);
+      .neq('nickname', currentNickname);
 
-    (foundUsers || []).forEach(data => {
+    (foundProfiles || []).forEach(data => {
       const timeAgo = Math.floor((Date.now() - (data.last_online || 0)) / 60000);
       const status = timeAgo < 60 ? `${timeAgo} хв тому` : `${Math.floor(timeAgo / 60)} год тому`;
 
@@ -952,9 +990,9 @@ document.getElementById('userList').addEventListener('click', async e => {
 
   try {
     const { data: me } = await supabase
-      .from('users')
+      .from('profiles')
       .select('following')
-      .eq('nickname', currentUser)
+      .eq('nickname', currentNickname)
       .single();
 
     let newFollowing = me?.following || [];
@@ -963,38 +1001,38 @@ document.getElementById('userList').addEventListener('click', async e => {
       newFollowing = newFollowing.filter(u => u !== targetUser);
 
       const { data: other } = await supabase
-        .from('users')
+        .from('profiles')
         .select('followers')
         .eq('nickname', targetUser)
         .single();
 
-      const newFollowers = (other?.followers || []).filter(u => u !== currentUser);
+      const newFollowers = (other?.followers || []).filter(u => u !== currentNickname);
 
       await supabase
-        .from('users')
+        .from('profiles')
         .update({ followers: newFollowers })
         .eq('nickname', targetUser);
     } else {
       newFollowing.push(targetUser);
 
       const { data: other } = await supabase
-        .from('users')
+        .from('profiles')
         .select('followers')
         .eq('nickname', targetUser)
         .single();
 
-      const newFollowers = [...(other?.followers || []), currentUser];
+      const newFollowers = [...(other?.followers || []), currentNickname];
 
       await supabase
-        .from('users')
+        .from('profiles')
         .update({ followers: newFollowers })
         .eq('nickname', targetUser);
     }
 
     await supabase
-      .from('users')
+      .from('profiles')
       .update({ following: newFollowing })
-      .eq('nickname', currentUser);
+      .eq('nickname', currentNickname);
 
     loadSearchUsers(document.getElementById('searchInput').value);
     if (document.getElementById('profile').classList.contains('active')) {
@@ -1015,13 +1053,13 @@ async function loadChatList() {
   const chatList = document.getElementById('chatList');
   chatList.innerHTML = '';
 
-  if (!currentUser) return;
+  if (!currentNickname) return;
 
   try {
     const { data: me } = await supabase
-      .from('users')
+      .from('profiles')
       .select('messages')
-      .eq('nickname', currentUser)
+      .eq('nickname', currentNickname)
       .single();
 
     const myMessages = me?.messages || {};
@@ -1029,20 +1067,20 @@ async function loadChatList() {
     const others = Object.keys(myMessages);
     if (others.length === 0) return;
 
-    const { data: usersData } = await supabase
-      .from('users')
+    const { data: profilesData } = await supabase
+      .from('profiles')
       .select('nickname, avatar')
       .in('nickname', others);
 
-    const usersMap = {};
-    (usersData || []).forEach(u => usersMap[u.nickname] = u);
+    const profilesMap = {};
+    (profilesData || []).forEach(p => profilesMap[p.nickname] = p);
 
     others.forEach(other => {
       const lastMsg = (myMessages[other] || [])[myMessages[other].length - 1] || { text: '' };
       const item = document.createElement('div');
       item.className = 'chat-item';
       item.innerHTML = `
-        <div class="avatar" style="${usersMap[other]?.avatar ? `background-image: url(${usersMap[other].avatar});` : ''}"></div>
+        <div class="avatar" style="${profilesMap[other]?.avatar ? `background-image: url(${profilesMap[other].avatar});` : ''}"></div>
         <div>
           <div class="name">@${other}</div>
           <div class="status">${lastMsg.text.slice(0, 20) || '...'}</div>
@@ -1063,7 +1101,7 @@ async function openChat(otherUser) {
 
   try {
     const { data: other } = await supabase
-      .from('users')
+      .from('profiles')
       .select('avatar')
       .eq('nickname', otherUser)
       .single();
@@ -1089,16 +1127,16 @@ async function renderChatMessages() {
 
   try {
     const { data: me } = await supabase
-      .from('users')
+      .from('profiles')
       .select('messages')
-      .eq('nickname', currentUser)
+      .eq('nickname', currentNickname)
       .single();
 
     const conversation = (me?.messages?.[currentChatUser] || []);
 
     conversation.forEach(msg => {
       const div = document.createElement('div');
-      div.className = `message ${msg.from === currentUser ? 'sent' : 'received'}`;
+      div.className = `message ${msg.from === currentNickname ? 'sent' : 'received'}`;
       div.textContent = msg.text;
       chatMessages.appendChild(div);
     });
@@ -1114,13 +1152,13 @@ document.getElementById('sendMessage').onclick = async () => {
   if (!text || !currentChatUser) return;
 
   try {
-    const msg = { from: currentUser, to: currentChatUser, text, createdAt: Date.now() };
+    const msg = { from: currentNickname, to: currentChatUser, text, createdAt: Date.now() };
 
     // Оновлюємо себе
     const { data: me } = await supabase
-      .from('users')
+      .from('profiles')
       .select('messages')
-      .eq('nickname', currentUser)
+      .eq('nickname', currentNickname)
       .single();
 
     const myMessages = me?.messages || {};
@@ -1128,23 +1166,23 @@ document.getElementById('sendMessage').onclick = async () => {
     myMessages[currentChatUser].push(msg);
 
     await supabase
-      .from('users')
+      .from('profiles')
       .update({ messages: myMessages })
-      .eq('nickname', currentUser);
+      .eq('nickname', currentNickname);
 
     // Оновлюємо співрозмовника
     const { data: other } = await supabase
-      .from('users')
+      .from('profiles')
       .select('messages')
       .eq('nickname', currentChatUser)
       .single();
 
     const otherMessages = other?.messages || {};
-    if (!otherMessages[currentUser]) otherMessages[currentUser] = [];
-    otherMessages[currentUser].push(msg);
+    if (!otherMessages[currentNickname]) otherMessages[currentNickname] = [];
+    otherMessages[currentNickname].push(msg);
 
     await supabase
-      .from('users')
+      .from('profiles')
       .update({ messages: otherMessages })
       .eq('nickname', currentChatUser);
 
@@ -1161,20 +1199,20 @@ document.getElementById('sendMessage').onclick = async () => {
 // ──────────────────────────────────────────────
 
 async function updateProfile() {
-  if (!currentUser) return;
+  if (!currentNickname) return;
 
   try {
-    const { data: u } = await supabase
-      .from('users')
+    const { data: p } = await supabase
+      .from('profiles')
       .select('bio, avatar, posts, followers, following')
-      .eq('nickname', currentUser)
+      .eq('nickname', currentNickname)
       .single();
 
-    document.getElementById('postsCount').textContent     = `Пости: ${(u?.posts || []).length}`;
-    document.getElementById('followersCount').textContent = `Підписники: ${(u?.followers || []).length}`;
-    document.getElementById('followingCount').textContent = `Підписки: ${(u?.following || []).length}`;
-    document.getElementById('profileBio').textContent     = u?.bio || 'Немає опису';
-    document.getElementById('profileAvatar').style.backgroundImage = u?.avatar ? `url(${u.avatar})` : 'none';
+    document.getElementById('postsCount').textContent     = `Пости: ${(p?.posts || []).length}`;
+    document.getElementById('followersCount').textContent = `Підписники: ${(p?.followers || []).length}`;
+    document.getElementById('followingCount').textContent = `Підписки: ${(p?.following || []).length}`;
+    document.getElementById('profileBio').textContent     = p?.bio || 'Немає опису';
+    document.getElementById('profileAvatar').style.backgroundImage = p?.avatar ? `url(${p.avatar})` : 'none';
   } catch (err) {
     console.error(err);
   }
@@ -1186,10 +1224,10 @@ document.getElementById('profileAvatar').onclick = () => {
 
 document.getElementById('avatarInput').onchange = async e => {
   const file = e.target.files[0];
-  if (!file || !currentUser) return;
+  if (!file || !currentNickname) return;
 
   try {
-    const fileName = `${currentUser}/${Date.now()}_${file.name}`;
+    const fileName = `${currentNickname}/${Date.now()}_${file.name}`;
     const { error: uploadErr } = await supabase.storage
       .from('avatars')
       .upload(fileName, file);
@@ -1203,9 +1241,9 @@ document.getElementById('avatarInput').onchange = async e => {
     const publicUrl = urlData.publicUrl;
 
     await supabase
-      .from('users')
+      .from('profiles')
       .update({ avatar: publicUrl })
-      .eq('nickname', currentUser);
+      .eq('nickname', currentNickname);
 
     updateProfile();
     loadPosts();
@@ -1224,9 +1262,9 @@ document.getElementById('saveProfileEdit').onclick = async () => {
 
   try {
     await supabase
-      .from('users')
+      .from('profiles')
       .update({ bio })
-      .eq('nickname', currentUser);
+      .eq('nickname', currentNickname);
 
     updateProfile();
     modal.classList.remove('active');
@@ -1236,34 +1274,58 @@ document.getElementById('saveProfileEdit').onclick = async () => {
 };
 
 // ──────────────────────────────────────────────
+// Налаштування: тема, вихід
+// ──────────────────────────────────────────────
+document.getElementById('toggleTheme').onclick = () => {
+  document.body.classList.toggle('light');
+  localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+};
+
+document.getElementById('logoutBtn').onclick = async () => {
+  try {
+    await supabase.auth.signOut();
+    localStorage.removeItem('currentNickname');
+    location.reload();
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+// ──────────────────────────────────────────────
 // Автозавантаження при старті
 // ──────────────────────────────────────────────
 (async () => {
-  currentUser = localStorage.getItem('currentUser');
-  if (currentUser) {
-    try {
-      const { data } = await supabase
-        .from('users')
-        .select('nickname')
-        .eq('nickname', currentUser)
-        .maybeSingle();
+  // Тема
+  if (localStorage.getItem('theme') === 'light') document.body.classList.add('light');
 
-      if (data) {
-        authBox.style.display = 'none';
-        newPostBox.style.display = 'block';
-        document.getElementById('profileUsernameDisplay').textContent = currentUser;
-        await updateProfile();
-        await loadPosts();
-        return;
-      }
-    } catch (err) {
-      console.error(err);
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .single();
+
+    if (profile) {
+      currentNickname = profile.nickname;
+      localStorage.setItem('currentNickname', currentNickname);
+      currentUserId = profile.user_id;
+
+      authBox.style.display = 'none';
+      newPostBox.style.display = 'block';
+      document.getElementById('profileUsernameDisplay').textContent = currentNickname;
+      await updateProfile();
+      await loadPosts();
     }
   }
-
-  localStorage.removeItem('currentUser');
-  currentUser = null;
 })();
+
+// Моніторинг аутентифікації
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_OUT') {
+    location.reload();
+  }
+});
 </script>
 </body>
 </html>

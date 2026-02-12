@@ -4,316 +4,189 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>FANTASYAS</title>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   
   <style>
     :root {
       --bg: #000;
       --text: #ffffff;
-      --text-secondary: #cccccc;
+      --text-sec: #cccccc;
       --card-bg: rgba(255,255,255,0.06);
       --card-border: rgba(255,255,255,0.12);
       --input-bg: rgba(255,255,255,0.08);
       --input-border: rgba(255,255,255,0.18);
       --btn-bg: #555;
       --accent: #0af;
+      --like: #ff3366;
     }
 
     body.light {
       --bg: #ffffff;
       --text: #111111;
-      --text-secondary: #555555;
+      --text-sec: #555555;
       --card-bg: rgba(0,0,0,0.04);
       --card-border: rgba(0,0,0,0.10);
       --input-bg: #ffffff;
       --input-border: #d0d0d0;
       --btn-bg: #444444;
       --accent: #0066cc;
+      --like: #e63946;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Manrope', sans-serif;
-    }
-
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Manrope',sans-serif; }
     body {
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      transition: background 0.4s, color 0.4s;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      transition: background 0.5s, color 0.5s;
     }
 
     .top-bar {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: 70px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      z-index: 1000;
-      transition: background 0.3s;
+      position:fixed; top:0; left:0; right:0; height:70px;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 20px; background:rgba(0,0,0,0.6); backdrop-filter:blur(8px);
+      z-index:1000; transition:background 0.4s;
     }
-    body.light .top-bar { background: rgba(255,255,255,0.92); }
+    body.light .top-bar { background:rgba(255,255,255,0.92); }
 
     .site-name {
-      font-size: 1.8rem;
-      font-weight: 800;
-      background: linear-gradient(90deg, #ffffff, #bbbbbb);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      -webkit-text-fill-color: transparent;
+      font-size:1.8rem; font-weight:800;
+      background:linear-gradient(90deg, #ffffff, #bbbbbb);
+      -webkit-background-clip:text; background-clip:text;
+      color:transparent; -webkit-text-fill-color:transparent;
     }
     body.light .site-name {
-      background: linear-gradient(90deg, #111111, #444444);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      -webkit-text-fill-color: transparent;
+      background:linear-gradient(90deg, #111111, #444444);
+      -webkit-background-clip:text; background-clip:text;
+      color:transparent; -webkit-text-fill-color:transparent;
     }
 
-    .burger {
-      width: 32px;
-      height: 24px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      cursor: pointer;
-    }
+    .burger { width:32px; height:24px; cursor:pointer; }
     .burger span {
-      height: 3px;
-      width: 100%;
-      background: var(--text);
-      border-radius: 2px;
-      transition: all 0.35s ease;
+      display:block; height:3px; background:var(--text);
+      border-radius:2px; transition:all 0.35s;
     }
-    .burger.active span:nth-child(1) { transform: rotate(45deg) translate(7px, 7px); }
-    .burger.active span:nth-child(2) { opacity: 0; }
-    .burger.active span:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
+    .burger.active span:nth-child(1){transform:rotate(45deg) translate(7px,7px);}
+    .burger.active span:nth-child(2){opacity:0;}
+    .burger.active span:nth-child(3){transform:rotate(-45deg) translate(6px,-6px);}
 
     .sidebar {
-      position: fixed;
-      top: 0; left: -300px;
-      width: 280px;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      padding: 90px 28px;
-      border-right: 1px solid var(--card-border);
-      transition: left 0.4s ease;
-      z-index: 900;
+      position:fixed; top:0; left:-300px; width:280px; height:100%;
+      background:rgba(0,0,0,0.5); backdrop-filter:blur(12px);
+      padding:90px 28px; transition:left 0.4s ease;
+      z-index:900; border-right:1px solid var(--card-border);
     }
-    body.light .sidebar { background: rgba(255,255,255,0.5); }
-    .sidebar.active { left: 0; }
+    body.light .sidebar { background:rgba(255,255,255,0.5); }
+    .sidebar.active { left:0; }
 
     .sidebar a {
-      display: block;
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-size: 1.22rem;
-      font-weight: 600;
-      margin: 1.4rem 0;
-      transition: all 0.25s;
+      display:block; color:var(--text-sec); text-decoration:none;
+      font-size:1.22rem; font-weight:600; margin:1.4rem 0;
+      transition:all 0.25s;
     }
-    .sidebar a:hover {
-      color: var(--text);
-      transform: translateX(8px);
-    }
+    .sidebar a:hover { color:var(--text); transform:translateX(8px); }
 
-    .main-content {
-      margin-top: 90px;
-      padding: 20px;
-      max-width: 720px;
-      margin-left: auto;
-      margin-right: auto;
-    }
+    .main-content { margin-top:90px; padding:20px; max-width:720px; margin-inline:auto; }
 
-    .section {
-      display: none;
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity 0.35s, transform 0.35s;
-    }
-    .section.active {
-      display: block;
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .section { display:none; opacity:0; transform:translateY(12px); transition:opacity 0.35s, transform 0.35s; }
+    .section.active { display:block; opacity:1; transform:translateY(0); }
 
     .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 20px;
-      transition: all 0.2s;
+      background:var(--card-bg);
+      border:1px solid var(--card-border);
+      border-radius:14px;
+      padding:20px;
+      margin-bottom:20px;
     }
 
     input, textarea {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 10px;
-      border: 1px solid var(--input-border);
-      background: var(--input-bg);
-      color: var(--text);
-      font-size: 1rem;
-      outline: none;
-      transition: border-color 0.2s;
+      width:100%; padding:12px 14px; border-radius:10px;
+      border:1px solid var(--input-border); background:var(--input-bg);
+      color:var(--text); font-size:1rem; outline:none; transition:border-color 0.2s;
     }
-    input:focus, textarea:focus {
-      border-color: var(--accent);
-    }
-    textarea { resize: vertical; min-height: 96px; }
-    ::placeholder { color: var(--text-secondary); opacity: 0.7; }
+    input:focus, textarea:focus { border-color:var(--accent); }
+    textarea { resize:vertical; min-height:96px; }
+    ::placeholder { color:var(--text-sec); opacity:0.7; }
 
     button {
-      padding: 11px 20px;
-      border: none;
-      border-radius: 10px;
-      background: var(--btn-bg);
-      color: white;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.22s;
+      padding:11px 20px; border:none; border-radius:10px;
+      background:var(--btn-bg); color:white; font-weight:700;
+      cursor:pointer; transition:all 0.22s;
     }
-    button:hover {
-      opacity: 0.92;
-      transform: scale(1.03);
-    }
+    button:hover { opacity:0.92; transform:scale(1.03); }
 
-    .feed {
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
+    .feed { display:flex; flex-direction:column; gap:20px; }
 
     .post {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 16px;
-      opacity: 0;
-      transform: translateY(24px);
-      transition: opacity 0.5s, transform 0.5s;
+      background:var(--card-bg);
+      border:1px solid var(--card-border);
+      border-radius:16px;
+      padding:18px;
+      opacity:0; transform:translateY(30px) scale(0.97);
+      transition:all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    .post.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .post.visible { opacity:1; transform:translateY(0) scale(1); }
 
-    .post-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
+    .post-header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
     .avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: #555;
-      background-size: cover;
-      background-position: center;
-      flex-shrink: 0;
-      border: 1px solid var(--card-border);
+      width:48px; height:48px; border-radius:50%;
+      background:#555; background-size:cover; background-position:center;
+      border:1px solid var(--card-border); flex-shrink:0;
     }
-    body.light .avatar { background: #ccc; }
+    body.light .avatar { background:#ccc; }
 
-    .username {
-      font-weight: 700;
-      font-size: 1.05rem;
-    }
+    .username { font-weight:700; font-size:1.05rem; }
 
-    .post-content {
-      line-height: 1.5;
-      word-break: break-word;
-      color: var(--text);
-    }
+    .post-content { line-height:1.55; font-size:1.02rem; margin-bottom:14px; word-break:break-word; }
 
     .post-footer {
-      display: flex;
-      gap: 24px;
-      margin-top: 12px;
-    }
-    .post-footer button {
-      background: none;
-      color: var(--text-secondary);
-      font-size: 0.95rem;
-      padding: 0;
-    }
-    .post-footer button:hover {
-      color: var(--text);
+      display:flex; justify-content:space-between; align-items:center;
+      margin-top:10px; color:var(--text-sec);
     }
 
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.75);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
+    .actions { display:flex; gap:28px; }
+    .action-btn {
+      background:none; border:none; color:var(--text-sec);
+      font-size:0.98rem; cursor:pointer; display:flex; align-items:center; gap:6px;
+      transition:all 0.25s;
     }
-    body.light .modal { background: rgba(255,255,255,0.75); }
-    .modal.active { display: flex; }
+    .action-btn:hover { color:var(--text); transform:scale(1.08); }
+    .action-btn.liked { color:var(--like); animation:heartPop 0.45s ease; }
 
+    @keyframes heartPop {
+      0%   { transform:scale(1); }
+      40%  { transform:scale(1.45); }
+      70%  { transform:scale(0.92); }
+      100% { transform:scale(1); }
+    }
+
+    .reactions { position:relative; }
+    .emoji-picker {
+      position:absolute; bottom:100%; left:-10px;
+      background:var(--card-bg); border:1px solid var(--card-border);
+      border-radius:12px; padding:8px 10px; display:none;
+      flex-wrap:wrap; gap:8px; backdrop-filter:blur(8px);
+      z-index:10; min-width:220px; box-shadow:0 8px 24px rgba(0,0,0,0.45);
+      transform:scale(0.7); opacity:0; transition:all 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .emoji-picker.active { display:flex; transform:scale(1); opacity:1; }
+    .emoji {
+      font-size:1.7rem; cursor:pointer; padding:6px;
+      border-radius:8px; transition:transform 0.18s;
+    }
+    .emoji:hover { transform:scale(1.35); background:rgba(255,255,255,0.12); }
+
+    .modal { position:fixed; inset:0; background:rgba(0,0,0,0.75); display:none; align-items:center; justify-content:center; z-index:2000; }
+    body.light .modal { background:rgba(0,0,0,0.6); }
+    .modal.active { display:flex; }
     .modal-content {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      color: var(--text);
-      width: 92%;
-      max-width: 520px;
-      border-radius: 16px;
-      padding: 28px 24px;
-      position: relative;
+      background:var(--card-bg); border:1px solid var(--card-border);
+      border-radius:16px; width:92%; max-width:500px; padding:28px; color:var(--text);
     }
 
-    .modal-content h2 {
-      color: var(--text);
-      margin-bottom: 20px;
-    }
-
-    .close-modal {
-      position: absolute;
-      top: 16px;
-      right: 20px;
-      font-size: 2rem;
-      cursor: pointer;
-      color: var(--text-secondary);
-    }
-
-    .profile-header {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 24px;
-      align-items: flex-start;
-      margin-bottom: 32px;
-    }
-
-    .profile-avatar {
-      width: 110px;
-      height: 110px;
-      border-radius: 50%;
-      background: #444;
-      background-size: cover;
-      background-position: center;
-      border: 2px solid var(--card-border);
-      cursor: pointer;
-    }
-    body.light .profile-avatar { background: #ddd; }
-
-    @media (max-width: 900px) {
-      .sidebar { width: 100%; left: -100%; border-right: none; }
-      .main-content { padding: 16px; margin-top: 80px; }
-      .profile-header { flex-direction: column; align-items: center; text-align: center; }
+    @media (max-width:900px) {
+      .sidebar { width:100%; left:-100%; border-right:none; }
+      .main-content { padding:16px; margin-top:80px; }
     }
   </style>
 </head>
@@ -353,7 +226,7 @@
 
     <div class="card" id="newPostBox" style="display:none;">
       <textarea id="postText" placeholder="Що у тебе на думці?..."></textarea>
-      <button id="addPost" style="margin-top:12px;">Опублікувати</button>
+      <button id="addPost" style="margin-top:12px; float:right;">Опублікувати</button>
     </div>
 
     <div class="feed" id="feed"></div>
@@ -365,8 +238,8 @@
       <input type="file" id="avatarInput" accept="image/*" style="display:none;"/>
       <div style="flex:1;">
         <h2 id="profileUsernameDisplay"></h2>
-        <p id="profileBio" style="margin:8px 0;color:var(--text-secondary);">Немає опису</p>
-        <div style="display:flex;gap:20px;font-weight:600;color:var(--text-secondary);">
+        <p id="profileBio" style="margin:8px 0;color:var(--text-sec);">Немає опису</p>
+        <div style="display:flex;gap:20px;font-weight:600;color:var(--text-sec);">
           <span id="postsCount">Пости: 0</span>
           <span id="followersCount">Підписники: 0</span>
           <span id="followingCount">Підписки: 0</span>
@@ -392,7 +265,16 @@
   </div>
 </div>
 
+<div class="modal" id="commentsModal">
+  <div class="modal-content">
+    <h3>Коментарі</h3>
+    <p style="color:var(--text-sec); text-align:center; margin:60px 0;">Функція коментарів у розробці...</p>
+    <button onclick="document.getElementById('commentsModal').classList.remove('active')">Закрити</button>
+  </div>
+</div>
+
 <script>
+// Бургер меню + навігація
 const burger = document.getElementById('burger');
 const sidebar = document.getElementById('sidebar');
 burger.onclick = () => {
@@ -403,134 +285,206 @@ burger.onclick = () => {
 document.querySelectorAll('[data-section]').forEach(link => {
   link.onclick = () => {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.getElementById(link.dataset.section).classList.add('active');
+    document.getElementById(link.dataset.section)?.classList.add('active');
     sidebar.classList.remove('active');
     burger.classList.remove('active');
   };
 });
 
-// ──────────────────────────────────────────────
-
+// Дані
 let users = JSON.parse(localStorage.getItem('users')) || {};
 let currentUser = localStorage.getItem('currentUser') || null;
 
-const authBox     = document.getElementById('authBox');
-const loginForm   = document.getElementById('loginForm');
-const registerForm= document.getElementById('registerForm');
-const newPostBox  = document.getElementById('newPostBox');
+const authBox = document.getElementById('authBox');
+const newPostBox = document.getElementById('newPostBox');
+const feed = document.getElementById('feed');
 
-document.getElementById('toRegister').onclick = () => {
-  loginForm.style.display = 'none';
-  registerForm.style.display = 'block';
-};
-document.getElementById('toLogin').onclick = () => {
-  registerForm.style.display = 'none';
-  loginForm.style.display = 'block';
-};
+// Авторизація / Реєстрація (з твого коду)
+document.getElementById('toRegister').onclick = () => { document.getElementById('loginForm').style.display = 'none'; document.getElementById('registerForm').style.display = 'block'; };
+document.getElementById('toLogin').onclick = () => { document.getElementById('registerForm').style.display = 'none'; document.getElementById('loginForm').style.display = 'block'; };
 
 document.getElementById('registerBtn').onclick = () => {
   const nick = document.getElementById('registerNickname').value.trim();
   const pass = document.getElementById('registerPassword').value.trim();
   if (!nick || !pass) return alert('Заповніть усі поля');
   if (users[nick]) return alert('Такий псевдонім вже зайнятий');
-
-  users[nick] = { password: pass, bio: '', avatar: '', posts: [], followers: [], following: [] };
+  users[nick] = { password: pass, bio: '', avatar: '', posts: [] };
   localStorage.setItem('users', JSON.stringify(users));
-  alert('Реєстрація успішна! Тепер увійдіть.');
-  registerForm.style.display = 'none';
-  loginForm.style.display = 'block';
+  alert('Реєстрація успішна! Увійдіть.');
+  document.getElementById('registerForm').style.display = 'none';
+  document.getElementById('loginForm').style.display = 'block';
 };
 
 document.getElementById('loginBtn').onclick = () => {
   const nick = document.getElementById('loginNickname').value.trim();
   const pass = document.getElementById('loginPassword').value.trim();
   if (!users[nick] || users[nick].password !== pass) return alert('Невірний псевдонім або пароль');
-
   currentUser = nick;
   localStorage.setItem('currentUser', currentUser);
-
   authBox.style.display = 'none';
   newPostBox.style.display = 'block';
   document.getElementById('profileUsernameDisplay').textContent = currentUser;
   updateProfile();
-  loadPosts();
+  renderFeed();
 };
 
+// Додавання поста (тепер з id та часом)
 document.getElementById('addPost').onclick = () => {
   const text = document.getElementById('postText').value.trim();
-  if (!text) return alert('Напишіть текст поста');
+  if (!text) return alert('Напишіть текст');
   if (!currentUser) return alert('Спочатку увійдіть');
 
-  users[currentUser].posts.unshift(text);
+  const post = {
+    id: Date.now().toString(),
+    text,
+    time: new Date().toISOString(),
+    likes: 0,
+    likedBy: [],
+    comments: 0
+  };
+
+  users[currentUser].posts.unshift(post);
   localStorage.setItem('users', JSON.stringify(users));
   document.getElementById('postText').value = '';
-  loadPosts();
+  renderFeed();
   updateProfile();
 };
 
-// ─── Пост ────────────────────────────────────────
-
-const feed = document.getElementById('feed');
-
-function loadPosts() {
+// Рендер feed (головна сторінка)
+function renderFeed() {
   feed.innerHTML = '';
+  let delay = 0;
+
   Object.entries(users).forEach(([user, data]) => {
-    data.posts.forEach((text, i) => {
-      const post = document.createElement('div');
-      post.className = 'post';
-      post.innerHTML = `
+    data.posts.forEach(post => {
+      const postEl = document.createElement('div');
+      postEl.className = 'post';
+      postEl.innerHTML = `
         <div class="post-header">
-          <div class="avatar" style="${data.avatar ? `background-image: url(${data.avatar});` : ''}"></div>
-          <div class="username">${user}</div>
+          <div class="avatar" style="${data.avatar ? `background-image:url(${data.avatar})` : ''}"></div>
+          <div>
+            <div class="username">${user}</div>
+            <div style="font-size:0.85rem;color:var(--text-sec);">
+              ${new Date(post.time).toLocaleString('uk-UA',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'})}
+            </div>
+          </div>
         </div>
-        <div class="post-content">${text.replace(/\n/g, '<br>')}</div>
+        <div class="post-content">${post.text.replace(/\n/g,'<br>')}</div>
         <div class="post-footer">
-          <button>Лайк</button>
-          <button>Коментар</button>
+          <div class="actions">
+            <button class="action-btn ${post.likedBy.includes(currentUser)?'liked':''}" data-action="like" data-id="${post.id}">
+              ❤️ <span>${post.likes}</span>
+            </button>
+            <button class="action-btn" data-action="comment" data-id="${post.id}">
+              💬 <span>${post.comments}</span>
+            </button>
+            <div class="reactions">
+              <button class="action-btn" data-action="react" data-id="${post.id}">😀 Реакція</button>
+              <div class="emoji-picker" id="picker-${post.id}">
+                <span class="emoji" data-emoji="❤️">❤️</span>
+                <span class="emoji" data-emoji="😂">😂</span>
+                <span class="emoji" data-emoji="😮">😮</span>
+                <span class="emoji" data-emoji="😢">😢</span>
+                <span class="emoji" data-emoji="🙌">🙌</span>
+                <span class="emoji" data-emoji="🔥">🔥</span>
+              </div>
+            </div>
+          </div>
         </div>
       `;
-      feed.appendChild(post);
-      setTimeout(() => post.classList.add('show'), 60 * i);
+      feed.appendChild(postEl);
+      setTimeout(() => postEl.classList.add('visible'), delay);
+      delay += 100;
     });
+  });
+
+  attachInteractions();
+}
+
+function attachInteractions() {
+  document.querySelectorAll('[data-action="like"]').forEach(btn => {
+    btn.onclick = () => toggleLike(btn.dataset.id, btn);
+  });
+
+  document.querySelectorAll('[data-action="comment"]').forEach(btn => {
+    btn.onclick = () => document.getElementById('commentsModal').classList.add('active');
+  });
+
+  document.querySelectorAll('[data-action="react"]').forEach(btn => {
+    btn.onclick = e => {
+      e.stopPropagation();
+      const picker = document.getElementById(`picker-${btn.dataset.id}`);
+      picker.classList.toggle('active');
+      document.querySelectorAll('.emoji-picker.active').forEach(p => { if (p !== picker) p.classList.remove('active'); });
+    };
+  });
+
+  document.querySelectorAll('.emoji').forEach(em => {
+    em.onclick = e => {
+      e.stopPropagation();
+      const picker = em.closest('.emoji-picker');
+      const postId = picker.id.replace('picker-', '');
+      console.log(`Реакція: ${em.dataset.emoji} на пост ${postId}`);
+      // Можна додати збереження реакцій
+      picker.classList.remove('active');
+    };
+  });
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.reactions')) {
+      document.querySelectorAll('.emoji-picker.active').forEach(p => p.classList.remove('active'));
+    }
   });
 }
 
-// ─── Профіль ─────────────────────────────────────
+function toggleLike(postId, btn) {
+  let found = false;
+  Object.values(users).forEach(u => {
+    u.posts.forEach(p => {
+      if (p.id === postId) {
+        if (!p.likedBy.includes(currentUser)) {
+          p.likedBy.push(currentUser);
+          p.likes++;
+          btn.classList.add('liked');
+        } else {
+          p.likedBy = p.likedBy.filter(x => x !== currentUser);
+          p.likes = Math.max(0, p.likes - 1);
+          btn.classList.remove('liked');
+        }
+        btn.querySelector('span').textContent = p.likes;
+        found = true;
+      }
+    });
+  });
+  if (found) localStorage.setItem('users', JSON.stringify(users));
+}
 
+// Профіль + аватарка (з твого коду)
 function updateProfile() {
   if (!currentUser) return;
   const u = users[currentUser];
-  document.getElementById('postsCount').textContent     = `Пости: ${u.posts.length}`;
-  document.getElementById('followersCount').textContent = `Підписники: ${u.followers.length}`;
-  document.getElementById('followingCount').textContent = `Підписки: ${u.following.length}`;
-  document.getElementById('profileBio').textContent     = u.bio || 'Немає опису';
+  document.getElementById('postsCount').textContent = `Пости: ${u.posts.length}`;
+  document.getElementById('profileBio').textContent = u.bio || 'Немає опису';
   const avatarEl = document.getElementById('profileAvatar');
   avatarEl.style.backgroundImage = u.avatar ? `url(${u.avatar})` : 'none';
 }
 
-// ─── Аватарка ────────────────────────────────────
+document.getElementById('profileAvatar').onclick = () => currentUser && document.getElementById('avatarInput').click();
 
-document.getElementById('profileAvatar').onclick = () => {
-  if (!currentUser) return;
-  document.getElementById('avatarInput').click();
-};
-
-document.getElementById('avatarInput').onchange = (e) => {
+document.getElementById('avatarInput').onchange = e => {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = (ev) => {
-    const base64 = ev.target.result;
-    users[currentUser].avatar = base64;
+  reader.onload = ev => {
+    users[currentUser].avatar = ev.target.result;
     localStorage.setItem('users', JSON.stringify(users));
     updateProfile();
-    loadPosts(); // оновити аватарки в постах
+    renderFeed();
   };
   reader.readAsDataURL(file);
 };
 
-// ─── Модалка редагування ─────────────────────────
-
+// Модалка редагування профілю
 const modal = document.getElementById('editProfileModal');
 document.getElementById('editProfileBtn').onclick = () => modal.classList.add('active');
 document.getElementById('closeModal').onclick = () => modal.classList.remove('active');
@@ -544,25 +498,21 @@ document.getElementById('saveProfileEdit').onclick = () => {
   modal.classList.remove('active');
 };
 
-// ─── Тема ────────────────────────────────────────
-
+// Тема
 document.getElementById('toggleTheme').onclick = () => {
   document.body.classList.toggle('light');
   localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
 };
 
-// ─── Ініціалізація ───────────────────────────────
-
-if (localStorage.getItem('theme') === 'light') {
-  document.body.classList.add('light');
-}
+// Ініціалізація
+if (localStorage.getItem('theme') === 'light') document.body.classList.add('light');
 
 if (currentUser && users[currentUser]) {
   authBox.style.display = 'none';
   newPostBox.style.display = 'block';
   document.getElementById('profileUsernameDisplay').textContent = currentUser;
   updateProfile();
-  loadPosts();
+  renderFeed();
 }
 </script>
 </body>

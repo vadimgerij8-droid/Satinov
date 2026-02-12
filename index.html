@@ -310,6 +310,15 @@
     }
     body.light .profile-avatar { background: #ddd; }
 
+    .reaction-badge {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 2px 8px;
+      margin-right: 6px;
+      font-size: 0.9rem;
+    }
+
     @media (max-width: 900px) {
       .sidebar { width: 100%; left: -100%; border-right: none; }
       .main-content { padding: 16px; margin-top: 80px; }
@@ -462,8 +471,7 @@ document.getElementById('loginBtn').onclick = () => {
   updateProfile();
   loadPosts();
 
-  // Тимчасово: автоматична підписка на всіх інших (для тестування)
-  // Видали цей блок коли зробиш кнопку підписки
+  // Тимчасово: підписка на всіх інших для тестів (можна видалити пізніше)
   const me = users[currentUser];
   if (me.following.length === 0) {
     Object.keys(users).forEach(other => {
@@ -489,8 +497,12 @@ document.getElementById('addPost').onclick = () => {
   if (!currentUser) return alert('Спочатку увійдіть');
 
   const newPost = {
+    id: Date.now() + Math.random().toString(36).slice(2),
     text: text,
-    createdAt: Date.now()
+    createdAt: Date.now(),
+    likes: [],
+    comments: [],
+    reactions: {}
   };
 
   users[currentUser].posts.unshift(newPost);
@@ -501,7 +513,7 @@ document.getElementById('addPost').onclick = () => {
 };
 
 // ──────────────────────────────────────────────
-// Завантаження стрічки (головна зміна — тільки себе + following)
+// Завантаження стрічки
 // ──────────────────────────────────────────────
 
 function loadPosts() {
@@ -522,36 +534,150 @@ function loadPosts() {
       postsToShow.push({
         author: username,
         avatar: user.avatar || '',
-        text: postObj.text,
+        post: postObj,
         time: postObj.createdAt
       });
     });
   });
 
-  // Сортування: новіші зверху
   postsToShow.sort((a, b) => b.time - a.time);
 
   postsToShow.forEach((p, i) => {
-    const post = document.createElement('div');
-    post.className = 'post';
-    post.innerHTML = `
+    const postEl = document.createElement('div');
+    postEl.className = 'post';
+    postEl.dataset.postId = p.post.id;
+    postEl.dataset.author = p.author;
+
+    let reactionsHtml = '';
+    Object.entries(p.post.reactions || {}).forEach(([emoji, usersArr]) => {
+      if (usersArr.length > 0) {
+        reactionsHtml += `<span class="reaction-badge">${emoji} ${usersArr.length}</span>`;
+      }
+    });
+
+    postEl.innerHTML = `
       <div class="post-header">
         <div class="avatar" style="${p.avatar ? `background-image: url(${p.avatar});` : ''}"></div>
         <div class="username">@${p.author}</div>
+        <div style="margin-left:auto; position:relative;">
+          <button class="more-btn" style="background:none;border:none;font-size:1.4rem;color:var(--text-secondary);cursor:pointer;">⋯</button>
+          <div class="reaction-menu" style="display:none;position:absolute;right:0;top:30px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:8px;z-index:10;display:flex;flex-wrap:wrap;gap:6px;width:180px;">
+            <button class="emoji-btn" data-emoji="❤️">❤️</button>
+            <button class="emoji-btn" data-emoji="😂">😂</button>
+            <button class="emoji-btn" data-emoji="😮">😮</button>
+            <button class="emoji-btn" data-emoji="😢">😢</button>
+            <button class="emoji-btn" data-emoji="👍">👍</button>
+            <button class="emoji-btn" data-emoji="🔥">🔥</button>
+          </div>
+        </div>
       </div>
-      <div class="post-content">${p.text.replace(/\n/g, '<br>')}</div>
-      <div class="post-footer">
-        <button>Лайк</button>
-        <button>Коментар</button>
+      <div class="post-content">${p.post.text.replace(/\n/g, '<br>')}</div>
+
+      <div class="post-footer" style="justify-content:space-between;align-items:center;">
+        <div style="display:flex;gap:24px;">
+          <button class="like-btn" style="background:none;border:none;color:${p.post.likes.includes(currentUser)?'red':'var(--text-secondary)'};cursor:pointer;">
+            ${p.post.likes.includes(currentUser) ? '❤️' : '♡'} ${p.post.likes.length}
+          </button>
+          <button class="comment-btn" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;">
+            💬 ${p.post.comments.length}
+          </button>
+        </div>
+        <div class="reactions-preview" style="font-size:0.9rem;">${reactionsHtml}</div>
+      </div>
+
+      <div class="comments-section" style="margin-top:12px;display:none;border-top:1px solid var(--card-border);padding-top:12px;">
+        <div class="comments-list"></div>
+        <div style="margin-top:8px;display:flex;gap:8px;">
+          <input type="text" class="comment-input" placeholder="Напишіть відповідь..." style="flex:1;background:var(--input-bg);border:1px solid var(--input-border);border-radius:10px;padding:8px;color:var(--text);"/>
+          <button class="send-comment" style="background:var(--btn-bg);color:white;padding:8px 16px;border-radius:10px;cursor:pointer;">Відправити</button>
+        </div>
       </div>
     `;
-    feed.appendChild(post);
-    setTimeout(() => post.classList.add('show'), 50 * i);
+
+    feed.appendChild(postEl);
+    setTimeout(() => postEl.classList.add('show'), 50 * i);
+
+    // Лайк
+    postEl.querySelector('.like-btn').onclick = () => {
+      const targetPost = users[p.author].posts.find(po => po.id === p.post.id);
+      if (targetPost.likes.includes(currentUser)) {
+        targetPost.likes = targetPost.likes.filter(u => u !== currentUser);
+      } else {
+        targetPost.likes.push(currentUser);
+      }
+      localStorage.setItem('users', JSON.stringify(users));
+      loadPosts();
+    };
+
+    // Меню реакцій
+    const moreBtn = postEl.querySelector('.more-btn');
+    const menu = postEl.querySelector('.reaction-menu');
+    moreBtn.onclick = (e) => {
+      e.stopPropagation();
+      menu.style.display = menu.style.display === 'none' || !menu.style.display ? 'flex' : 'none';
+    };
+    document.addEventListener('click', e => {
+      if (!moreBtn.contains(e.target) && !menu.contains(e.target)) menu.style.display = 'none';
+    });
+
+    menu.querySelectorAll('.emoji-btn').forEach(btn => {
+      btn.onclick = () => {
+        const emoji = btn.dataset.emoji;
+        const targetPost = users[p.author].posts.find(po => po.id === p.post.id);
+        if (!targetPost.reactions) targetPost.reactions = {};
+        if (!targetPost.reactions[emoji]) targetPost.reactions[emoji] = [];
+
+        if (targetPost.reactions[emoji].includes(currentUser)) {
+          targetPost.reactions[emoji] = targetPost.reactions[emoji].filter(u => u !== currentUser);
+          if (!targetPost.reactions[emoji].length) delete targetPost.reactions[emoji];
+        } else {
+          targetPost.reactions[emoji].push(currentUser);
+        }
+        localStorage.setItem('users', JSON.stringify(users));
+        loadPosts();
+      };
+    });
+
+    // Коментарі
+    const commentBtn = postEl.querySelector('.comment-btn');
+    const commentsSec = postEl.querySelector('.comments-section');
+    commentBtn.onclick = () => {
+      commentsSec.style.display = commentsSec.style.display === 'none' ? 'block' : 'none';
+      renderComments(postEl);
+    };
+
+    const sendBtn = postEl.querySelector('.send-comment');
+    const input = postEl.querySelector('.comment-input');
+    sendBtn.onclick = () => {
+      const txt = input.value.trim();
+      if (!txt) return;
+      const targetPost = users[p.author].posts.find(po => po.id === p.post.id);
+      targetPost.comments.push({ user: currentUser, text: txt, createdAt: Date.now() });
+      localStorage.setItem('users', JSON.stringify(users));
+      input.value = '';
+      renderComments(postEl);
+      loadPosts();
+    };
+  });
+}
+
+function renderComments(postEl) {
+  const list = postEl.querySelector('.comments-list');
+  const postId = postEl.dataset.postId;
+  const author = postEl.dataset.author;
+  const post = users[author].posts.find(p => p.id === postId);
+
+  list.innerHTML = '';
+  (post.comments || []).forEach(c => {
+    const div = document.createElement('div');
+    div.style.margin = '8px 0';
+    div.innerHTML = `<strong>@${c.user}</strong>: ${c.text}`;
+    list.appendChild(div);
   });
 }
 
 // ──────────────────────────────────────────────
-// Профіль
+// Профіль, аватар, біо, тема
 // ──────────────────────────────────────────────
 
 function updateProfile() {
@@ -561,24 +687,17 @@ function updateProfile() {
   document.getElementById('followersCount').textContent = `Підписники: ${u.followers.length}`;
   document.getElementById('followingCount').textContent = `Підписки: ${u.following.length}`;
   document.getElementById('profileBio').textContent     = u.bio || 'Немає опису';
-  const avatarEl = document.getElementById('profileAvatar');
-  avatarEl.style.backgroundImage = u.avatar ? `url(${u.avatar})` : 'none';
+  document.getElementById('profileAvatar').style.backgroundImage = u.avatar ? `url(${u.avatar})` : 'none';
 }
 
-// ─── Аватарка ────────────────────────────────────
+document.getElementById('profileAvatar').onclick = () => document.getElementById('avatarInput').click();
 
-document.getElementById('profileAvatar').onclick = () => {
-  if (!currentUser) return;
-  document.getElementById('avatarInput').click();
-};
-
-document.getElementById('avatarInput').onchange = (e) => {
+document.getElementById('avatarInput').onchange = e => {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = (ev) => {
-    const base64 = ev.target.result;
-    users[currentUser].avatar = base64;
+  reader.onload = ev => {
+    users[currentUser].avatar = ev.target.result;
     localStorage.setItem('users', JSON.stringify(users));
     updateProfile();
     loadPosts();
@@ -586,33 +705,22 @@ document.getElementById('avatarInput').onchange = (e) => {
   reader.readAsDataURL(file);
 };
 
-// ─── Модалка редагування ─────────────────────────
-
 const modal = document.getElementById('editProfileModal');
 document.getElementById('editProfileBtn').onclick = () => modal.classList.add('active');
 document.getElementById('closeModal').onclick = () => modal.classList.remove('active');
 document.getElementById('saveProfileEdit').onclick = () => {
-  const bio = document.getElementById('editBio').value.trim();
-  if (currentUser) {
-    users[currentUser].bio = bio;
-    localStorage.setItem('users', JSON.stringify(users));
-    updateProfile();
-  }
+  users[currentUser].bio = document.getElementById('editBio').value.trim();
+  localStorage.setItem('users', JSON.stringify(users));
+  updateProfile();
   modal.classList.remove('active');
 };
-
-// ─── Тема ────────────────────────────────────────
 
 document.getElementById('toggleTheme').onclick = () => {
   document.body.classList.toggle('light');
   localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
 };
 
-// ─── Ініціалізація ───────────────────────────────
-
-if (localStorage.getItem('theme') === 'light') {
-  document.body.classList.add('light');
-}
+if (localStorage.getItem('theme') === 'light') document.body.classList.add('light');
 
 if (currentUser && users[currentUser]) {
   authBox.style.display = 'none';

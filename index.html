@@ -1,69 +1,305 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>FANTASYAS</title>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"/>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Manrope',sans-serif;}
-body{background:#000;color:#fff;min-height:100vh;transition:0.4s;}
-body.light{background:#fff;color:#111;}
-.top-bar{position:fixed;top:0;left:0;right:0;height:70px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);z-index:1000;transition:0.3s;}
-body.light .top-bar{background:rgba(255,255,255,0.9);}
-.site-name{font-size:1.7rem;font-weight:800;background:linear-gradient(90deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;transition:0.3s;}
-body.light .site-name{background:linear-gradient(90deg,#000,#444);}
-.burger{width:30px;height:22px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:0.3s;}
-.burger span{height:3px;width:100%;background:#fff;border-radius:3px;transition:0.4s;}
-body.light .burger span{background:#000;}
-.burger.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
-.burger.active span:nth-child(2){opacity:0;}
-.burger.active span:nth-child(3){transform:rotate(-45deg) translate(6px,-6px);}
-.sidebar{position: fixed;top:0;left:-280px;width:280px;height:100%;background: rgba(0,0,0,0.4);backdrop-filter: blur(10px);padding:100px 30px;border-right:1px solid rgba(255,255,255,0.1);transition:0.4s;z-index:900;}
-body.light .sidebar{background: rgba(255,255,255,0.4);backdrop-filter: blur(10px);border-right:1px solid rgba(0,0,0,0.08);}
-.sidebar.active{left:0;}
-.sidebar a{display:block;color:#aaa;text-decoration:none;font-size:1.2rem;font-weight:600;margin:1.2rem 0;transition:0.3s;}
-body.light .sidebar a{color:#555;}
-.sidebar a:hover{color:#fff;transform:translateX(6px);}
-body.light .sidebar a:hover{color:#000;}
-.main-content{margin-top:80px;padding:20px;}
-.section{display:none;opacity:0;transform:translateY(10px);transition:0.3s;}
-.section.active{display:block;opacity:1;transform:translateY(0);}
-.login-box,.register-box,.new-post,.settings,.profile-edit-form{margin-bottom:20px;display:flex;flex-direction:column;gap:12px;background:rgba(255,255,255,0.05);border-radius:14px;padding:18px;transition:0.3s;}
-body.light .login-box, body.light .register-box, body.light .new-post, body.light .settings, body.light .profile-edit-form{background:rgba(0,0,0,0.03);}
-input,textarea{padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;outline:none;resize:vertical;}
-body.light input,body.light textarea{background:#fff;color:#000;border:1px solid #ddd;}
-input::placeholder,textarea::placeholder{color:#aaa;}
-button{padding:10px 18px;border:none;border-radius:10px;cursor:pointer;font-weight:700;transition:0.2s, transform 0.2s;background:#444;color:#fff;}
-button:hover{opacity:0.9;transform:scale(1.05);}
-.follow-btn{margin-top:10px;padding:8px 14px;border-radius:10px;font-weight:700;background:#555;color:#fff;cursor:pointer;transition:0.3s;}
-.follow-btn.following{background:#0a84ff;color:#fff;}
-.feed{display:flex;flex-direction:column;gap:16px;transition:0.3s;}
-.post{background:rgba(255,255,255,0.05);border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,0.1);opacity:0;transform:translateY(20px);transition:0.4s;}
-.post.show{opacity:1;transform:translateY(0);}
-body.light .post{background:rgba(0,0,0,0.03);}
-.post-header{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
-.avatar{width:45px;height:45px;border-radius:50%;background:#444;background-size:cover;background-position:center;}
-body.light .avatar{background:#ccc;}
-.username{font-weight:700;}
-.post-content{margin-bottom:8px;}
-.post-footer{display:flex;gap:15px;}
-.post-footer button{background:none;border:none;color:#aaa;cursor:pointer;display:flex;align-items:center;gap:6px;}
-body.light .post-footer button{color:#666;}
-.post-footer button:hover{color:#fff;}
-body.light .post-footer button:hover{color:#000;}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:2000;transition:0.3s;}
-.modal.active{display:flex;}
-.modal-content{background:#111;width:90%;max-width:500px;border-radius:16px;padding:24px;position:relative;border:1px solid rgba(255,255,255,0.15);}
-body.light .modal-content{background:#fff;color:#000;}
-.close-modal{position:absolute;top:12px;right:16px;font-size:1.8rem;cursor:pointer;color:#aaa;}
-body.light .close-modal{color:#555;}
-.profile-avatar{width:100px;height:100px;border-radius:50%;background:#333;background-size:cover;}
-body.light .profile-avatar{background:#ddd;}
-.profile-edit-form input[type="file"]{padding:6px;cursor:pointer;}
-.profile-stats{display:flex;gap:15px;margin-top:8px;font-weight:600;}
-@media(max-width:900px){.sidebar{width:100%;left:-100%;border-right:none;}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FANTASYAS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+  
+  <style>
+    :root {
+      --bg: #000;
+      --text: #ffffff;
+      --text-secondary: #cccccc;
+      --card-bg: rgba(255,255,255,0.06);
+      --card-border: rgba(255,255,255,0.12);
+      --input-bg: rgba(255,255,255,0.08);
+      --input-border: rgba(255,255,255,0.18);
+      --btn-bg: #555;
+      --accent: #0af;
+    }
+
+    body.light {
+      --bg: #ffffff;
+      --text: #111111;
+      --text-secondary: #555555;
+      --card-bg: rgba(0,0,0,0.04);
+      --card-border: rgba(0,0,0,0.10);
+      --input-bg: #ffffff;
+      --input-border: #d0d0d0;
+      --btn-bg: #444444;
+      --accent: #0066cc;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Manrope', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.4s, color 0.4s;
+    }
+
+    .top-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 1000;
+      transition: background 0.3s;
+    }
+    body.light .top-bar { background: rgba(255,255,255,0.92); }
+
+    .site-name {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, #ffffff, #bbbbbb);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    body.light .site-name {
+      background: linear-gradient(90deg, #000000, #444444);
+    }
+
+    .burger {
+      width: 32px;
+      height: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+    .burger span {
+      height: 3px;
+      width: 100%;
+      background: var(--text);
+      border-radius: 2px;
+      transition: all 0.35s ease;
+    }
+    .burger.active span:nth-child(1) { transform: rotate(45deg) translate(7px, 7px); }
+    .burger.active span:nth-child(2) { opacity: 0; }
+    .burger.active span:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
+
+    .sidebar {
+      position: fixed;
+      top: 0; left: -300px;
+      width: 280px;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 90px 28px;
+      border-right: 1px solid var(--card-border);
+      transition: left 0.4s ease;
+      z-index: 900;
+    }
+    body.light .sidebar { background: rgba(255,255,255,0.5); }
+    .sidebar.active { left: 0; }
+
+    .sidebar a {
+      display: block;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 1.22rem;
+      font-weight: 600;
+      margin: 1.4rem 0;
+      transition: all 0.25s;
+    }
+    .sidebar a:hover {
+      color: var(--text);
+      transform: translateX(8px);
+    }
+
+    .main-content {
+      margin-top: 90px;
+      padding: 20px;
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .section {
+      display: none;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.35s, transform 0.35s;
+    }
+    .section.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+      transition: all 0.2s;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--input-border);
+      background: var(--input-bg);
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, textarea:focus {
+      border-color: var(--accent);
+    }
+    textarea { resize: vertical; min-height: 96px; }
+    ::placeholder { color: var(--text-secondary); opacity: 0.7; }
+
+    button {
+      padding: 11px 20px;
+      border: none;
+      border-radius: 10px;
+      background: var(--btn-bg);
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.22s;
+    }
+    button:hover {
+      opacity: 0.92;
+      transform: scale(1.03);
+    }
+
+    .feed {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .post {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.5s, transform 0.5s;
+    }
+    .post.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #555;
+      background-size: cover;
+      background-position: center;
+      flex-shrink: 0;
+      border: 1px solid var(--card-border);
+    }
+
+    .username {
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+
+    .post-content {
+      line-height: 1.5;
+      word-break: break-word;
+      color: var(--text);
+    }
+
+    .post-footer {
+      display: flex;
+      gap: 24px;
+      margin-top: 12px;
+    }
+    .post-footer button {
+      background: none;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      padding: 0;
+    }
+    .post-footer button:hover {
+      color: var(--text);
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    .modal.active { display: flex; }
+
+    .modal-content {
+      background: #111;
+      width: 92%;
+      max-width: 520px;
+      border-radius: 16px;
+      padding: 28px;
+      position: relative;
+      border: 1px solid var(--card-border);
+    }
+    body.light .modal-content { background: #fff; }
+
+    .close-modal {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      font-size: 2rem;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+
+    .profile-header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      align-items: flex-start;
+      margin-bottom: 32px;
+    }
+
+    .profile-avatar {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: #444;
+      background-size: cover;
+      border: 2px solid var(--card-border);
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { width: 100%; left: -100%; border-right: none; }
+      .main-content { padding: 16px; }
+    }
+  </style>
 </head>
 <body>
 
@@ -83,189 +319,210 @@ body.light .profile-avatar{background:#ddd;}
 <main class="main-content">
 
   <div id="home" class="section active">
-    <!-- Вхід/Реєстрація -->
-    <div class="login-box" id="loginBox">
-      <input type="text" id="loginNickname" placeholder="Псевдонім">
-      <input type="password" id="loginPassword" placeholder="Пароль">
-      <button id="loginBtn">Увійти</button>
-      <p>Немає акаунта? <span id="showRegister" style="color:#0af;cursor:pointer">Зареєструватися</span></p>
-    </div>
-    <div class="register-box" id="registerBox" style="display:none;">
-      <input type="text" id="registerNickname" placeholder="Псевдонім">
-      <input type="password" id="registerPassword" placeholder="Пароль">
-      <button id="registerBtn">Зареєструватися</button>
-      <p>Є акаунт? <span id="showLogin" style="color:#0af;cursor:pointer">Увійти</span></p>
+    <div class="card" id="authBox">
+      <div id="loginForm">
+        <input type="text" id="loginNickname" placeholder="Псевдонім" autocomplete="off"/>
+        <input type="password" id="loginPassword" placeholder="Пароль"/>
+        <button id="loginBtn">Увійти</button>
+        <p style="margin-top:12px;">Немає акаунта? <span id="toRegister" style="color:var(--accent);cursor:pointer;">Зареєструватися</span></p>
+      </div>
+
+      <div id="registerForm" style="display:none;">
+        <input type="text" id="registerNickname" placeholder="Псевдонім" autocomplete="off"/>
+        <input type="password" id="registerPassword" placeholder="Пароль"/>
+        <button id="registerBtn">Зареєструватися</button>
+        <p style="margin-top:12px;">Вже є акаунт? <span id="toLogin" style="color:var(--accent);cursor:pointer;">Увійти</span></p>
+      </div>
     </div>
 
-    <!-- Новий пост -->
-    <div class="new-post" id="newPostBox" style="display:none;">
-      <textarea id="postText" placeholder="Що у тебе на думці?..." rows="4"></textarea>
-      <button id="addPost">Опублікувати</button>
+    <div class="card" id="newPostBox" style="display:none;">
+      <textarea id="postText" placeholder="Що у тебе на думці?..."></textarea>
+      <button id="addPost" style="margin-top:12px;">Опублікувати</button>
     </div>
+
     <div class="feed" id="feed"></div>
   </div>
 
   <div id="profile" class="section">
-    <div class="profile-header">
+    <div class="card profile-header">
       <div class="profile-avatar" id="profileAvatar"></div>
-      <div>
+      <div style="flex:1;">
         <h2 id="profileUsernameDisplay"></h2>
-        <p id="profileBio">Немає опису</p>
-        <div class="profile-stats">
+        <p id="profileBio" style="margin:8px 0;color:var(--text-secondary);">Немає опису</p>
+        <div style="display:flex;gap:20px;font-weight:600;color:var(--text-secondary);">
           <span id="postsCount">Пости: 0</span>
           <span id="followersCount">Підписники: 0</span>
           <span id="followingCount">Підписки: 0</span>
         </div>
-        <button id="followBtn" class="follow-btn" style="display:none;">Підписатися</button>
       </div>
       <button id="editProfileBtn">Редагувати профіль</button>
     </div>
   </div>
 
-  <div id="settings" class="section">
+  <div id="settings" class="section card">
     <h2>Налаштування</h2>
-    <button id="toggleTheme">Світла/Темна тема</button>
+    <button id="toggleTheme" style="margin-top:16px;">Перемкнути тему</button>
   </div>
 
 </main>
 
 <div class="modal" id="editProfileModal">
   <div class="modal-content">
-    <span class="close-modal" id="closeModal">&times;</span>
+    <span class="close-modal" id="closeModal">×</span>
     <h2>Редагувати профіль</h2>
-    <div class="profile-edit-form">
-      <textarea id="editBio" rows="4" placeholder="Опис профілю..."></textarea>
-      <button id="saveProfileEdit">Зберегти</button>
-    </div>
+    <textarea id="editBio" placeholder="Розкажи про себе..." rows="5"></textarea>
+    <button id="saveProfileEdit" style="margin-top:16px;">Зберегти</button>
   </div>
 </div>
 
 <script>
-// Бургер меню
-const burger=document.getElementById('burger');
-const sidebar=document.getElementById('sidebar');
-burger.addEventListener('click',()=>{burger.classList.toggle('active');sidebar.classList.toggle('active');});
+const burger = document.getElementById('burger');
+const sidebar = document.getElementById('sidebar');
+burger.onclick = () => {
+  burger.classList.toggle('active');
+  sidebar.classList.toggle('active');
+};
 
-// Секції
-const sections=document.querySelectorAll('.section');
-document.querySelectorAll('[data-section]').forEach(el=>{
-  el.addEventListener('click',()=>{
-    sections.forEach(s=>s.classList.remove('active'));
-    document.getElementById(el.dataset.section).classList.add('active');
-    sidebar.classList.remove('active'); burger.classList.remove('active');
-  });
+document.querySelectorAll('[data-section]').forEach(link => {
+  link.onclick = () => {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(link.dataset.section).classList.add('active');
+    sidebar.classList.remove('active');
+    burger.classList.remove('active');
+  };
 });
 
-// Користувачі з localStorage
+// ──────────────────────────────────────────────
+
 let users = JSON.parse(localStorage.getItem('users')) || {};
 let currentUser = localStorage.getItem('currentUser') || null;
 
-// Вхід/Реєстрація
-const loginBox=document.getElementById('loginBox');
-const registerBox=document.getElementById('registerBox');
-const newPostBox=document.getElementById('newPostBox');
-const profileUsernameDisplay=document.getElementById('profileUsernameDisplay');
+const authBox     = document.getElementById('authBox');
+const loginForm   = document.getElementById('loginForm');
+const registerForm= document.getElementById('registerForm');
+const newPostBox  = document.getElementById('newPostBox');
 
-document.getElementById('showRegister').onclick=()=>{loginBox.style.display='none';registerBox.style.display='flex';};
-document.getElementById('showLogin').onclick=()=>{registerBox.style.display='none';loginBox.style.display='flex';};
-
-document.getElementById('registerBtn').onclick=()=>{
-  const nick=document.getElementById('registerNickname').value.trim();
-  const pass=document.getElementById('registerPassword').value.trim();
-  if(!nick||!pass){alert('Заповни всі поля'); return;}
-  if(users[nick]){alert('Цей псевдонім вже зайнятий'); return;}
-  users[nick]={password:pass, bio:'', posts:[], followers:[], following:[]};
-  localStorage.setItem('users',JSON.stringify(users));
-  alert('Реєстрація успішна');
-  registerBox.style.display='none'; loginBox.style.display='flex';
+document.getElementById('toRegister').onclick = () => {
+  loginForm.style.display = 'none';
+  registerForm.style.display = 'block';
+};
+document.getElementById('toLogin').onclick = () => {
+  registerForm.style.display = 'none';
+  loginForm.style.display = 'block';
 };
 
-document.getElementById('loginBtn').onclick=()=>{
-  const nick=document.getElementById('loginNickname').value.trim();
-  const pass=document.getElementById('loginPassword').value.trim();
-  if(!users[nick] || users[nick].password!==pass){alert('Невірний псевдонім або пароль'); return;}
-  currentUser=nick;
-  localStorage.setItem('currentUser',currentUser);
-  loginBox.style.display='none'; newPostBox.style.display='flex';
-  profileUsernameDisplay.innerText=currentUser;
-  updateProfileStats();
+document.getElementById('registerBtn').onclick = () => {
+  const nick = document.getElementById('registerNickname').value.trim();
+  const pass = document.getElementById('registerPassword').value.trim();
+  if (!nick || !pass) return alert('Заповніть усі поля');
+  if (users[nick]) return alert('Такий псевдонім вже зайнятий');
+
+  users[nick] = { password: pass, bio: '', posts: [], followers: [], following: [] };
+  localStorage.setItem('users', JSON.stringify(users));
+  alert('Реєстрація успішна! Тепер увійдіть.');
+  registerForm.style.display = 'none';
+  loginForm.style.display = 'block';
+};
+
+document.getElementById('loginBtn').onclick = () => {
+  const nick = document.getElementById('loginNickname').value.trim();
+  const pass = document.getElementById('loginPassword').value.trim();
+  if (!users[nick] || users[nick].password !== pass) return alert('Невірний псевдонім або пароль');
+
+  currentUser = nick;
+  localStorage.setItem('currentUser', currentUser);
+
+  authBox.style.display = 'none';
+  newPostBox.style.display = 'block';
+  document.getElementById('profileUsernameDisplay').textContent = currentUser;
+  updateProfile();
   loadPosts();
 };
 
-// Новий пост
-document.getElementById('addPost').onclick=()=>{
-  const text=document.getElementById('postText').value.trim();
-  if(!text || !currentUser) return;
-  users[currentUser].posts.push(text);
-  localStorage.setItem('users',JSON.stringify(users));
-  document.getElementById('postText').value='';
+document.getElementById('addPost').onclick = () => {
+  const text = document.getElementById('postText').value.trim();
+  if (!text || !currentUser) return;
+
+  users[currentUser].posts.unshift(text); // нові зверху
+  localStorage.setItem('users', JSON.stringify(users));
+  document.getElementById('postText').value = '';
   loadPosts();
-  updateProfileStats();
+  updateProfile();
 };
 
-// Показ постів
-const feed=document.getElementById('feed');
-function loadPosts(){
-  feed.innerHTML='';
-  Object.keys(users).forEach(user=>{
-    users[user].posts.forEach(post=>{
-      const div=document.createElement('div');
-      div.className='post show';
-      div.innerHTML=`<div class="post-header"><div class="avatar"></div><div class="username">${user}</div></div><div class="post-content">${post}</div>`;
-      feed.appendChild(div);
+// ─── Пост ────────────────────────────────────────
+
+const feed = document.getElementById('feed');
+
+function loadPosts() {
+  feed.innerHTML = '';
+  Object.keys(users).forEach(user => {
+    users[user].posts.forEach((text, i) => {
+      const post = document.createElement('div');
+      post.className = 'post';
+      post.innerHTML = `
+        <div class="post-header">
+          <div class="avatar"></div>
+          <div class="username">${user}</div>
+        </div>
+        <div class="post-content">${text.replace(/\n/g, '<br>')}</div>
+        <div class="post-footer">
+          <button>Лайк</button>
+          <button>Коментар</button>
+        </div>
+      `;
+      feed.appendChild(post);
+
+      // stagger анімація
+      setTimeout(() => post.classList.add('show'), 60 * i);
     });
   });
 }
 
-// Профіль
-const postsCount=document.getElementById('postsCount');
-const followersCount=document.getElementById('followersCount');
-const followingCount=document.getElementById('followingCount');
-const followBtn=document.getElementById('followBtn');
+// ─── Профіль ─────────────────────────────────────
 
-function updateProfileStats(){
+function updateProfile() {
+  if (!currentUser) return;
   const u = users[currentUser];
-  postsCount.innerText=`Пости: ${u.posts.length}`;
-  followersCount.innerText=`Підписники: ${u.followers.length}`;
-  followingCount.innerText=`Підписки: ${u.following.length}`;
+  document.getElementById('postsCount').textContent     = `Пости: ${u.posts.length}`;
+  document.getElementById('followersCount').textContent = `Підписники: ${u.followers.length}`;
+  document.getElementById('followingCount').textContent = `Підписки: ${u.following.length}`;
+  document.getElementById('profileBio').textContent     = u.bio || 'Немає опису';
 }
 
-// Підписка
-followBtn.onclick=()=>{
-  const u = users[currentUser];
-  if(followBtn.classList.contains('following')){
-    // Відписка
-    u.following = u.following.filter(x=>x!==currentUser);
-    followBtn.classList.remove('following'); followBtn.innerText='Підписатися';
-  } else {
-    u.following.push(currentUser);
-    followBtn.classList.add('following'); followBtn.innerText='Відписатися';
+// ─── Модалка редагування ─────────────────────────
+
+const modal = document.getElementById('editProfileModal');
+document.getElementById('editProfileBtn').onclick = () => modal.classList.add('active');
+document.getElementById('closeModal').onclick = () => modal.classList.remove('active');
+document.getElementById('saveProfileEdit').onclick = () => {
+  const bio = document.getElementById('editBio').value.trim();
+  if (currentUser) {
+    users[currentUser].bio = bio;
+    localStorage.setItem('users', JSON.stringify(users));
+    updateProfile();
   }
-  users[currentUser]=u;
-  localStorage.setItem('users',JSON.stringify(users));
-  updateProfileStats();
+  modal.classList.remove('active');
 };
 
-// Модалка редагування профілю
-const editModal=document.getElementById('editProfileModal');
-document.getElementById('editProfileBtn').addEventListener('click',()=>editModal.classList.add('active'));
-document.getElementById('closeModal').addEventListener('click',()=>editModal.classList.remove('active'));
-document.getElementById('saveProfileEdit').addEventListener('click',()=>{
-  const bio=document.getElementById('editBio').value;
-  users[currentUser].bio=bio;
-  localStorage.setItem('users',JSON.stringify(users));
-  document.getElementById('profileBio').innerText=bio||'Немає опису';
-  editModal.classList.remove('active');
-});
+// ─── Тема ────────────────────────────────────────
 
-// Тема
-document.getElementById('toggleTheme').addEventListener('click',()=>document.body.classList.toggle('light'));
+document.getElementById('toggleTheme').onclick = () => {
+  document.body.classList.toggle('light');
+  localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+};
 
-// Якщо вже залогінений
-if(currentUser){
-  loginBox.style.display='none'; newPostBox.style.display='flex';
-  profileUsernameDisplay.innerText=currentUser;
-  updateProfileStats();
+// ─── Ініціалізація ───────────────────────────────
+
+if (localStorage.getItem('theme') === 'light') {
+  document.body.classList.add('light');
+}
+
+if (currentUser && users[currentUser]) {
+  authBox.style.display = 'none';
+  newPostBox.style.display = 'block';
+  document.getElementById('profileUsernameDisplay').textContent = currentUser;
+  updateProfile();
   loadPosts();
 }
 </script>

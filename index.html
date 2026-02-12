@@ -1,235 +1,216 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FANTASYAS</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FANTASYAS Live</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-
-body{
-  font-family:'Inter',sans-serif;
-  background:#000;
-  color:#fff;
-  display:flex;
-  min-height:100vh;
-}
-
-.sidebar{
-  width:260px;
-  padding:30px 20px;
-  border-right:1px solid #222;
-  position:fixed;
-  height:100%;
-}
-
-.logo{
-  font-size:1.8rem;
-  font-weight:800;
-  margin-bottom:40px;
-}
-
-.nav a{
-  display:block;
-  padding:12px 15px;
-  border-radius:30px;
-  text-decoration:none;
-  color:#aaa;
-  margin-bottom:10px;
-  transition:.2s;
-}
-
-.nav a:hover{
-  background:#111;
-  color:#fff;
-}
-
-.main{
-  margin-left:260px;
-  flex:1;
-  display:flex;
-  justify-content:center;
-}
-
-.feed{
-  width:100%;
-  max-width:600px;
-  border-left:1px solid #222;
-  border-right:1px solid #222;
-  min-height:100vh;
-}
-
-.top{
-  padding:20px;
-  font-size:1.2rem;
-  font-weight:700;
-  border-bottom:1px solid #222;
-}
-
-.new-post{
-  padding:20px;
-  border-bottom:1px solid #222;
-}
-
-.new-post textarea{
-  width:100%;
-  background:#000;
-  border:none;
-  color:#fff;
-  resize:none;
-  font-size:1rem;
-  outline:none;
-}
-
-.new-post-actions{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-top:15px;
-}
-
-.btn{
-  background:#fff;
-  color:#000;
-  border:none;
-  padding:8px 18px;
-  border-radius:30px;
-  font-weight:600;
-  cursor:pointer;
-}
-
-.post{
-  padding:20px;
-  border-bottom:1px solid #222;
-  transition:.2s;
-}
-
-.post:hover{
-  background:#0a0a0a;
-}
-
-.post-header{
-  display:flex;
-  gap:12px;
-  align-items:center;
-}
-
-.avatar{
-  width:44px;
-  height:44px;
-  border-radius:50%;
-  background:#222;
-  background-size:cover;
-  background-position:center;
-}
-
-.username{
-  font-weight:600;
-}
-
-.post-text{
-  margin-top:10px;
-  line-height:1.5;
-}
-
-.post-actions{
-  display:flex;
-  gap:30px;
-  margin-top:15px;
-  color:#777;
-  font-size:0.9rem;
-  cursor:pointer;
-}
-
-.file-input{
-  display:none;
-}
+* {margin:0; padding:0; box-sizing:border-box;}
+body {font-family:'Manrope',sans-serif; background:#000; color:#fff; min-height:100vh; transition:0.4s;}
+body.light {background:#f8f9fa; color:#111;}
+.top-bar {position:fixed; top:0; left:0; right:0; height:70px; display:flex; align-items:center; justify-content:space-between; padding:0 20px; background:rgba(0,0,0,0.5); backdrop-filter:blur(8px); z-index:1000; transition:0.3s;}
+body.light .top-bar {background:rgba(255,255,255,0.8);}
+.site-name {font-size:1.7rem; font-weight:800; background:linear-gradient(90deg,#fff,#aaa); -webkit-background-clip:text; -webkit-text-fill-color:transparent;}
+body.light .site-name {background:linear-gradient(90deg,#000,#444);}
+.burger {width:30px; height:22px; display:flex; flex-direction:column; justify-content:space-between; cursor:pointer; transition:0.3s;}
+.burger span {height:3px; width:100%; background:#fff; border-radius:3px; transition:0.4s;}
+body.light .burger span {background:#000;}
+.burger.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
+.burger.active span:nth-child(2){opacity:0;}
+.burger.active span:nth-child(3){transform:rotate(-45deg) translate(6px,-6px);}
+.sidebar {position:fixed; top:0; left:-280px; width:280px; height:100%; background:#111; padding:100px 30px; border-right:1px solid rgba(255,255,255,0.1); transition:0.4s; z-index:900;}
+body.light .sidebar {background:#fff; border-right:1px solid rgba(0,0,0,0.08);}
+.sidebar.active {left:0;}
+.sidebar a {display:block; color:#aaa; text-decoration:none; font-size:1.2rem; font-weight:600; margin:1.2rem 0; transition:0.3s;}
+body.light .sidebar a {color:#555;}
+.sidebar a:hover{color:#fff; transform:translateX(6px);}
+body.light .sidebar a:hover {color:#000;}
+.main-content {margin-top:80px; padding:20px;}
+.section {display:none;}
+.section.active {display:block;}
+.login-box, .new-post, .settings, .profile-edit-form {margin-bottom:20px; display:flex; flex-direction:column; gap:12px; background:rgba(255,255,255,0.05); border-radius:14px; padding:18px; transition:0.3s;}
+body.light .login-box, body.light .new-post, body.light .settings, body.light .profile-edit-form {background:rgba(0,0,0,0.03);}
+input, textarea {padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.08); color:#fff; outline:none; font-family:'Manrope',sans-serif; resize:vertical;}
+body.light input, body.light textarea {background:#fff; color:#000; border:1px solid #ddd;}
+input::placeholder, textarea::placeholder {color:#aaa;}
+button {padding:10px 18px; border:none; border-radius:10px; cursor:pointer; font-weight:700; transition:0.2s;}
+button:hover {opacity:0.9;}
+.danger-btn {background:#c53030; color:#fff;}
+.danger-btn:hover {background:#a71d2a;}
+.feed {display:flex; flex-direction:column; gap:16px; transition:0.3s;}
+.post {background:rgba(255,255,255,0.05); border-radius:12px; padding:16px; border:1px solid rgba(255,255,255,0.1); transition:0.3s;}
+body.light .post {background:rgba(0,0,0,0.03);}
+.post-header {display:flex; align-items:center; gap:12px; margin-bottom:10px;}
+.avatar {width:45px; height:45px; border-radius:50%; background:#444; background-size:cover; background-position:center;}
+body.light .avatar {background:#ccc;}
+.username {font-weight:700;}
+.post-content {margin-bottom:8px;}
+.post-footer {display:flex; gap:15px;}
+.post-footer button {background:none; border:none; color:#aaa; cursor:pointer; display:flex; align-items:center; gap:6px;}
+body.light .post-footer button {color:#666;}
+.post-footer button:hover {color:#fff;}
+body.light .post-footer button:hover {color:#000;}
+.modal {position:fixed; inset:0; background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; z-index:2000; transition:0.3s;}
+.modal.active {display:flex;}
+.modal-content {background:#111; width:90%; max-width:500px; border-radius:16px; padding:24px; position:relative; border:1px solid rgba(255,255,255,0.15);}
+body.light .modal-content {background:#fff; color:#000;}
+.close-modal {position:absolute; top:12px; right:16px; font-size:1.8rem; cursor:pointer; color:#aaa;}
+body.light .close-modal {color:#555;}
+.profile-avatar {width:100px; height:100px; border-radius:50%; background:#333; background-size:cover;}
+body.light .profile-avatar {background:#ddd;}
+.profile-edit-form input[type="file"] {padding:6px; cursor:pointer;}
+.hashtag {color:#1da1f2; font-weight:600; text-decoration:none;}
+body.light .hashtag {color:#1a8cd8;}
+.hashtag:hover {text-decoration:underline;}
+@media(max-width:900px){.sidebar{width:100%; left:-100%; border-right:none;}}
 </style>
 </head>
 <body>
 
-<div class="sidebar">
-  <div class="logo">FANTASYAS</div>
-  <div class="nav">
-    <a href="#">Головна</a>
-    <a href="#">Профіль</a>
-    <a href="#">Повідомлення</a>
-    <a href="#">Налаштування</a>
-  </div>
+<div class="top-bar">
+  <div class="burger" id="burger"><span></span><span></span><span></span></div>
+  <div class="site-name">FANTASYAS Live</div>
 </div>
 
-<div class="main">
-  <div class="feed">
+<nav class="sidebar" id="sidebar">
+  <a data-section="home">Головна</a>
+  <a data-section="profile">Профіль</a>
+  <a data-section="messages">Повідомлення</a>
+  <a data-section="groups">Групи</a>
+  <a data-section="settings">Налаштування</a>
+</nav>
 
-    <div class="top">Головна</div>
-
-    <div class="new-post">
-      <textarea id="postText" rows="3" placeholder="Що нового?"></textarea>
-
-      <div class="new-post-actions">
-        <label for="avatarUpload" style="cursor:pointer;color:#777;">Оновити аватар</label>
-        <input type="file" id="avatarUpload" class="file-input" accept="image/*">
-        <button class="btn" id="publishBtn">Опублікувати</button>
-      </div>
+<main class="main-content">
+  <!-- Головна -->
+  <div id="home" class="section active">
+    <div class="login-box" id="loginBox">
+      <input type="text" id="usernameInput" placeholder="Введіть ім'я">
+      <button id="saveUsername">Увійти</button>
     </div>
+    <div class="new-post" id="newPostBox" style="display:none;">
+      <textarea id="postText" placeholder="Що у тебе на думці?..." rows="4"></textarea>
+      <input type="file" id="postImage" accept="image/*"/>
+      <button id="addPost">Опублікувати</button>
+    </div>
+    <div class="feed" id="feed"></div>
+  </div>
 
-    <div id="posts"></div>
+  <!-- Профіль -->
+  <div id="profile" class="section">
+    <div class="profile-header">
+      <div class="profile-avatar" id="profileAvatar"></div>
+      <div>
+        <h2 id="profileUsernameDisplay"></h2>
+        <p id="profileBio">Немає опису</p>
+      </div>
+      <button id="editProfileBtn">Редагувати профіль</button>
+    </div>
+  </div>
 
+  <!-- Повідомлення -->
+  <div id="messages" class="section">
+    <h2>Чати</h2>
+    <div id="messagesList"></div>
+    <textarea id="dmText" placeholder="Напиши повідомлення..." rows="2"></textarea>
+    <button id="sendDm">Відправити</button>
+  </div>
+</main>
+
+<!-- Модалка редагування профілю -->
+<div class="modal" id="editProfileModal">
+  <div class="modal-content">
+    <span class="close-modal" id="closeModal">&times;</span>
+    <h2>Редагувати профіль</h2>
+    <div class="profile-edit-form">
+      <input type="file" id="editAvatarFile"/>
+      <textarea id="editBio" rows="4"></textarea>
+      <button id="saveProfileEdit">Зберегти</button>
+    </div>
   </div>
 </div>
 
 <script>
-let avatar = localStorage.getItem("fantasyas_avatar") || "";
-let posts = JSON.parse(localStorage.getItem("fantasyas_posts")) || [];
+// ───── Firebase конфіг ─────
+const firebaseConfig = {
+  apiKey: "ТУТ_ВАШ_API_KEY",
+  authDomain: "ТУТ_ВАШ_PROJECT.firebaseapp.com",
+  databaseURL: "https://ТУТ_ВАШ_PROJECT.firebaseio.com",
+  projectId: "ТУТ_ВАШ_PROJECT",
+  storageBucket: "ТУТ_ВАШ_PROJECT.appspot.com",
+  messagingSenderId: "ТУТ_ВАШ_ID",
+  appId: "ТУТ_ВАШ_APPID"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-const postsContainer = document.getElementById("posts");
+// ───── Глобальні змінні ─────
+let username = localStorage.getItem('fantasyasUsername') || '';
+let userData = {avatar:'', bio:''};
 
-function render(){
-  postsContainer.innerHTML="";
-  posts.forEach(p=>{
-    const div=document.createElement("div");
-    div.className="post";
+// ───── Бургер меню ─────
+const burger = document.getElementById('burger');
+const sidebar = document.getElementById('sidebar');
+burger.addEventListener('click',()=>{burger.classList.toggle('active'); sidebar.classList.toggle('active');});
+
+// ───── Показ секцій ─────
+document.querySelectorAll('[data-section]').forEach(el=>{
+  el.addEventListener('click',()=>{sections.forEach(s=>s.classList.remove('active')); document.getElementById(el.dataset.section).classList.add('active'); sidebar.classList.remove('active'); burger.classList.remove('active');});
+});
+const sections=document.querySelectorAll('.section');
+
+// ───── Авторизація ─────
+const loginBox=document.getElementById('loginBox');
+const newPostBox=document.getElementById('newPostBox');
+if(username){loginBox.style.display='none'; newPostBox.style.display='flex';}
+document.getElementById('saveUsername').addEventListener('click',()=>{
+  const val=document.getElementById('usernameInput').value.trim();
+  if(!val)return alert('Введи ім’я');
+  username=val; localStorage.setItem('fantasyasUsername',username);
+  loginBox.style.display='none'; newPostBox.style.display='flex';
+});
+
+// ───── Пост ─────
+document.getElementById('addPost').addEventListener('click',()=>{
+  const text=document.getElementById('postText').value.trim();
+  if(!text || !username)return;
+  const file=document.getElementById('postImage').files[0];
+  if(file){
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=e.target.result;
+      db.ref('posts').push({username,text,image:img,time:Date.now()});
+      document.getElementById('postText').value=''; document.getElementById('postImage').value='';
+    };
+    reader.readAsDataURL(file);
+  } else {
+    db.ref('posts').push({username,text,image:null,time:Date.now()});
+    document.getElementById('postText').value='';
+  }
+});
+
+// ───── Вивід постів ─────
+const feed=document.getElementById('feed');
+db.ref('posts').on('value',snapshot=>{
+  feed.innerHTML='';
+  const data=snapshot.val();
+  if(!data)return;
+  Object.keys(data).reverse().forEach(key=>{
+    const p=data[key];
+    const div=document.createElement('div');
+    div.className='post';
     div.innerHTML=`
       <div class="post-header">
-        <div class="avatar" style="background-image:url('${avatar}')"></div>
-        <div class="username">Ти</div>
+        <div class="avatar" style="background-image:url('${p.avatar||''}')"></div>
+        <div class="username">${p.username}</div>
       </div>
-      <div class="post-text">${p}</div>
-      <div class="post-actions">
-        <span>♡</span>
-        <span>💬</span>
-        <span>☆</span>
-      </div>
+      <div class="post-content">${p.text}${p.image?`<img src="${p.image}"/>`:''}</div>
     `;
-    postsContainer.appendChild(div);
+    feed.appendChild(div);
   });
-}
-
-document.getElementById("publishBtn").onclick=()=>{
-  const text=document.getElementById("postText").value.trim();
-  if(!text) return;
-  posts.unshift(text);
-  localStorage.setItem("fantasyas_posts",JSON.stringify(posts));
-  document.getElementById("postText").value="";
-  render();
-};
-
-document.getElementById("avatarUpload").onchange=e=>{
-  const file=e.target.files[0];
-  if(!file) return;
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    avatar=ev.target.result;
-    localStorage.setItem("fantasyas_avatar",avatar);
-    render();
-  };
-  reader.readAsDataURL(file);
-};
-
-render();
+});
 </script>
-
 </body>
 </html>

@@ -319,6 +319,37 @@
       font-size: 0.9rem;
     }
 
+    /* Нові стилі для пошуку та месенджера */
+    .search-input { margin-bottom: 20px; }
+    .user-list { display: flex; flex-direction: column; gap: 12px; }
+    .user-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px;
+      border-radius: 10px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      cursor: pointer;
+    }
+    .user-item:hover { background: var(--input-bg); }
+    .user-item .avatar { width: 50px; height: 50px; }
+    .user-item .name { font-weight: 600; }
+    .user-item .status { color: var(--text-secondary); font-size: 0.9rem; }
+
+    .chat-list { display: flex; flex-direction: column; gap: 12px; }
+    .chat-item { display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 10px; background: var(--card-bg); border: 1px solid var(--card-border); cursor: pointer; }
+    .chat-item:hover { background: var(--input-bg); }
+
+    .chat-window { display: none; flex-direction: column; height: 400px; border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; }
+    .chat-header { padding: 12px; border-bottom: 1px solid var(--card-border); display: flex; align-items: center; gap: 8px; }
+    .chat-messages { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+    .message { padding: 8px 12px; border-radius: 10px; max-width: 80%; }
+    .message.sent { background: var(--accent); color: white; align-self: flex-end; }
+    .message.received { background: var(--input-bg); align-self: flex-start; }
+    .chat-input { display: flex; padding: 12px; border-top: 1px solid var(--card-border); }
+    .chat-input input { flex: 1; margin-right: 8px; }
+
     @media (max-width: 900px) {
       .sidebar { width: 100%; left: -100%; border-right: none; }
       .main-content { padding: 16px; margin-top: 80px; }
@@ -335,6 +366,7 @@
 
 <nav class="sidebar" id="sidebar">
   <a data-section="home">Головна</a>
+  <a data-section="search">Пошук</a>
   <a data-section="profile">Профіль</a>
   <a data-section="messages">Повідомлення</a>
   <a data-section="groups">Групи</a>
@@ -368,6 +400,11 @@
     <div class="feed" id="feed"></div>
   </div>
 
+  <div id="search" class="section">
+    <input type="text" id="searchInput" class="search-input" placeholder="Пошук користувачів..."/>
+    <div class="user-list" id="userList"></div>
+  </div>
+
   <div id="profile" class="section">
     <div class="card profile-header">
       <div class="profile-avatar" id="profileAvatar"></div>
@@ -382,6 +419,18 @@
         </div>
       </div>
       <button id="editProfileBtn">Редагувати профіль</button>
+    </div>
+  </div>
+
+  <div id="messages" class="section">
+    <div class="chat-list" id="chatList"></div>
+    <div class="chat-window" id="chatWindow">
+      <div class="chat-header" id="chatHeader"></div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input">
+        <input type="text" id="chatText" placeholder="Напишіть повідомлення..."/>
+        <button id="sendMessage">Відправити</button>
+      </div>
     </div>
   </div>
 
@@ -419,6 +468,8 @@ document.querySelectorAll('[data-section]').forEach(link => {
     document.getElementById(link.dataset.section).classList.add('active');
     sidebar.classList.remove('active');
     burger.classList.remove('active');
+    if (link.dataset.section === 'search') loadSearchUsers();
+    if (link.dataset.section === 'messages') loadChatList();
   };
 });
 
@@ -450,7 +501,7 @@ document.getElementById('registerBtn').onclick = () => {
   if (!nick || !pass) return alert('Заповніть усі поля');
   if (users[nick]) return alert('Такий псевдонім вже зайнятий');
 
-  users[nick] = { password: pass, bio: '', avatar: '', posts: [], followers: [], following: [] };
+  users[nick] = { password: pass, bio: '', avatar: '', posts: [], followers: [], following: [], messages: {}, lastOnline: Date.now() };
   localStorage.setItem('users', JSON.stringify(users));
   alert('Реєстрація успішна! Тепер увійдіть.');
   registerForm.style.display = 'none';
@@ -464,6 +515,8 @@ document.getElementById('loginBtn').onclick = () => {
 
   currentUser = nick;
   localStorage.setItem('currentUser', currentUser);
+  users[currentUser].lastOnline = Date.now();
+  localStorage.setItem('users', JSON.stringify(users));
 
   authBox.style.display = 'none';
   newPostBox.style.display = 'block';
@@ -471,7 +524,7 @@ document.getElementById('loginBtn').onclick = () => {
   updateProfile();
   loadPosts();
 
-  // Тимчасово: підписка на всіх інших для тестів (можна видалити пізніше)
+  // Автоматична підписка
   const me = users[currentUser];
   if (me.following.length === 0) {
     Object.keys(users).forEach(other => {
@@ -597,7 +650,6 @@ function loadPosts() {
     feed.appendChild(postEl);
     setTimeout(() => postEl.classList.add('show'), 50 * i);
 
-    // Лайк
     postEl.querySelector('.like-btn').onclick = () => {
       const targetPost = users[p.author].posts.find(po => po.id === p.post.id);
       if (targetPost.likes.includes(currentUser)) {
@@ -609,7 +661,6 @@ function loadPosts() {
       loadPosts();
     };
 
-    // Меню реакцій
     const moreBtn = postEl.querySelector('.more-btn');
     const menu = postEl.querySelector('.reaction-menu');
     moreBtn.onclick = (e) => {
@@ -638,7 +689,6 @@ function loadPosts() {
       };
     });
 
-    // Коментарі
     const commentBtn = postEl.querySelector('.comment-btn');
     const commentsSec = postEl.querySelector('.comments-section');
     commentBtn.onclick = () => {
@@ -675,6 +725,113 @@ function renderComments(postEl) {
     list.appendChild(div);
   });
 }
+
+// ──────────────────────────────────────────────
+// Пошук користувачів
+// ──────────────────────────────────────────────
+
+function loadSearchUsers(query = '') {
+  const userList = document.getElementById('userList');
+  userList.innerHTML = '';
+
+  Object.entries(users).forEach(([nick, data]) => {
+    if (nick !== currentUser && nick.toLowerCase().includes(query.toLowerCase())) {
+      const timeAgo = Math.floor((Date.now() - data.lastOnline) / 60000);
+      const status = timeAgo < 60 ? `${timeAgo} хв тому` : `${Math.floor(timeAgo / 60)} год тому`;
+
+      const item = document.createElement('div');
+      item.className = 'user-item';
+      item.innerHTML = `
+        <div class="avatar" style="${data.avatar ? `background-image: url(${data.avatar});` : ''}"></div>
+        <div>
+          <div class="name">@${nick}</div>
+          <div class="status">У мережі ${status}</div>
+        </div>
+      `;
+      item.onclick = () => openChat(nick);
+      userList.appendChild(item);
+    }
+  });
+}
+
+document.getElementById('searchInput').oninput = (e) => loadSearchUsers(e.target.value);
+
+// ──────────────────────────────────────────────
+// Месенджер
+// ──────────────────────────────────────────────
+
+let currentChatUser = null;
+
+function loadChatList() {
+  const chatList = document.getElementById('chatList');
+  chatList.innerHTML = '';
+
+  const myMessages = users[currentUser].messages || {};
+
+  Object.keys(myMessages).forEach(other => {
+    const lastMsg = myMessages[other][myMessages[other].length - 1] || {text: ''};
+    const item = document.createElement('div');
+    item.className = 'chat-item';
+    item.innerHTML = `
+      <div class="avatar" style="${users[other].avatar ? `background-image: url(${users[other].avatar});` : ''}"></div>
+      <div>
+        <div class="name">@${other}</div>
+        <div class="status">${lastMsg.text.slice(0, 20)}...</div>
+      </div>
+    `;
+    item.onclick = () => openChat(other);
+    chatList.appendChild(item);
+  });
+}
+
+function openChat(otherUser) {
+  currentChatUser = otherUser;
+  const chatWindow = document.getElementById('chatWindow');
+  const chatHeader = document.getElementById('chatHeader');
+  const chatMessages = document.getElementById('chatMessages');
+
+  chatWindow.style.display = 'flex';
+
+  chatHeader.innerHTML = `
+    <div class="avatar" style="${users[otherUser].avatar ? `background-image: url(${users[otherUser].avatar});` : ''}"></div>
+    <div class="name">@${otherUser}</div>
+  `;
+
+  renderChatMessages();
+}
+
+function renderChatMessages() {
+  const chatMessages = document.getElementById('chatMessages');
+  chatMessages.innerHTML = '';
+
+  const conversation = users[currentUser].messages[currentChatUser] || [];
+
+  conversation.forEach(msg => {
+    const div = document.createElement('div');
+    div.className = `message ${msg.from === currentUser ? 'sent' : 'received'}`;
+    div.textContent = msg.text;
+    chatMessages.appendChild(div);
+  });
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+document.getElementById('sendMessage').onclick = () => {
+  const text = document.getElementById('chatText').value.trim();
+  if (!text || !currentChatUser) return;
+
+  const msg = { from: currentUser, to: currentChatUser, text, createdAt: Date.now() };
+
+  if (!users[currentUser].messages[currentChatUser]) users[currentUser].messages[currentChatUser] = [];
+  users[currentUser].messages[currentChatUser].push(msg);
+
+  if (!users[currentChatUser].messages[currentUser]) users[currentChatUser].messages[currentUser] = [];
+  users[currentChatUser].messages[currentUser].push(msg);
+
+  localStorage.setItem('users', JSON.stringify(users));
+  document.getElementById('chatText').value = '';
+  renderChatMessages();
+  loadChatList();
+};
 
 // ──────────────────────────────────────────────
 // Профіль, аватар, біо, тема

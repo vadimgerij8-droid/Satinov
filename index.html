@@ -31,328 +31,102 @@
       --accent: #0066cc;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Manrope', sans-serif;
-    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Manrope',sans-serif; }
+    body { background:var(--bg); color:var(--text); min-height:100vh; transition:background 0.4s, color 0.4s; }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      transition: background 0.4s, color 0.4s;
-    }
+    .top-bar { position:fixed; top:0; left:0; right:0; height:70px; display:flex; align-items:center; justify-content:space-between; padding:0 20px; background:rgba(0,0,0,0.6); backdrop-filter:blur(8px); z-index:1000; transition:background 0.3s; }
+    body.light .top-bar { background:rgba(255,255,255,0.92); }
 
-    .top-bar {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: 70px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      z-index: 1000;
-      transition: background 0.3s;
-    }
-    body.light .top-bar { background: rgba(255,255,255,0.92); }
+    .site-name { font-size:1.8rem; font-weight:800; background:linear-gradient(90deg,#ffffff,#bbbbbb); -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; }
+    body.light .site-name { background:linear-gradient(90deg,#111111,#444444); -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; }
 
-    .site-name {
-      font-size: 1.8rem;
-      font-weight: 800;
-      background: linear-gradient(90deg, #ffffff, #bbbbbb);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      -webkit-text-fill-color: transparent;
-    }
-    body.light .site-name {
-      background: linear-gradient(90deg, #111111, #444444);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      -webkit-text-fill-color: transparent;
-    }
+    .burger { width:32px; height:24px; display:flex; flex-direction:column; justify-content:space-between; cursor:pointer; }
+    .burger span { height:3px; width:100%; background:var(--text); border-radius:2px; transition:all 0.35s ease; }
+    .burger.active span:nth-child(1) { transform:rotate(45deg) translate(7px,7px); }
+    .burger.active span:nth-child(2) { opacity:0; }
+    .burger.active span:nth-child(3) { transform:rotate(-45deg) translate(6px,-6px); }
 
-    .burger {
-      width: 32px;
-      height: 24px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      cursor: pointer;
-    }
-    .burger span {
-      height: 3px;
-      width: 100%;
-      background: var(--text);
-      border-radius: 2px;
-      transition: all 0.35s ease;
-    }
-    .burger.active span:nth-child(1) { transform: rotate(45deg) translate(7px, 7px); }
-    .burger.active span:nth-child(2) { opacity: 0; }
-    .burger.active span:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
+    .sidebar { position:fixed; top:0; left:-300px; width:280px; height:100%; background:rgba(0,0,0,0.5); backdrop-filter:blur(12px); padding:90px 28px; border-right:1px solid var(--card-border); transition:left 0.4s ease; z-index:900; }
+    body.light .sidebar { background:rgba(255,255,255,0.5); }
+    .sidebar.active { left:0; }
 
-    .sidebar {
-      position: fixed;
-      top: 0; left: -300px;
-      width: 280px;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      padding: 90px 28px;
-      border-right: 1px solid var(--card-border);
-      transition: left 0.4s ease;
-      z-index: 900;
-    }
-    body.light .sidebar { background: rgba(255,255,255,0.5); }
-    .sidebar.active { left: 0; }
+    .sidebar a { display:block; color:var(--text-secondary); text-decoration:none; font-size:1.22rem; font-weight:600; margin:1.4rem 0; transition:all 0.25s; }
+    .sidebar a:hover { color:var(--text); transform:translateX(8px); }
 
-    .sidebar a {
-      display: block;
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-size: 1.22rem;
-      font-weight: 600;
-      margin: 1.4rem 0;
-      transition: all 0.25s;
-    }
-    .sidebar a:hover {
-      color: var(--text);
-      transform: translateX(8px);
-    }
+    .main-content { margin-top:90px; padding:20px; max-width:720px; margin-left:auto; margin-right:auto; }
 
-    .main-content {
-      margin-top: 90px;
-      padding: 20px;
-      max-width: 720px;
-      margin-left: auto;
-      margin-right: auto;
-    }
+    .section { display:none; opacity:0; transform:translateY(12px); transition:opacity 0.35s, transform 0.35s; }
+    .section.active { display:block; opacity:1; transform:translateY(0); }
 
-    .section {
-      display: none;
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity 0.35s, transform 0.35s;
-    }
-    .section.active {
-      display: block;
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:14px; padding:20px; margin-bottom:20px; transition:all 0.2s; }
 
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 20px;
-      transition: all 0.2s;
-    }
+    input, textarea { width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--input-border); background:var(--input-bg); color:var(--text); font-size:1rem; outline:none; transition:border-color 0.2s; }
+    input:focus, textarea:focus { border-color:var(--accent); }
+    textarea { resize:vertical; min-height:96px; }
+    ::placeholder { color:var(--text-secondary); opacity:0.7; }
 
-    input, textarea {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 10px;
-      border: 1px solid var(--input-border);
-      background: var(--input-bg);
-      color: var(--text);
-      font-size: 1rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    input:focus, textarea:focus {
-      border-color: var(--accent);
-    }
-    textarea { resize: vertical; min-height: 96px; }
-    ::placeholder { color: var(--text-secondary); opacity: 0.7; }
+    button { padding:11px 20px; border:none; border-radius:10px; background:var(--btn-bg); color:white; font-weight:700; cursor:pointer; transition:all 0.22s; }
+    button:hover { opacity:0.92; transform:scale(1.03); }
 
-    button {
-      padding: 11px 20px;
-      border: none;
-      border-radius: 10px;
-      background: var(--btn-bg);
-      color: white;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.22s;
-    }
-    button:hover {
-      opacity: 0.92;
-      transform: scale(1.03);
-    }
+    .feed { display:flex; flex-direction:column; gap:18px; }
 
-    .feed {
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
+    .post { background:var(--card-bg); border:1px solid var(--card-border); border-radius:12px; padding:16px; opacity:0; transform:translateY(24px); transition:opacity 0.5s, transform 0.5s; }
+    .post.show { opacity:1; transform:translateY(0); }
 
-    .post {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 16px;
-      opacity: 0;
-      transform: translateY(24px);
-      transition: opacity 0.5s, transform 0.5s;
-    }
-    .post.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .post-header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
 
-    .post-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
+    .avatar { width:48px; height:48px; border-radius:50%; background:#555; background-size:cover; background-position:center; flex-shrink:0; border:1px solid var(--card-border); }
+    body.light .avatar { background:#ccc; }
 
-    .avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: #555;
-      background-size: cover;
-      background-position: center;
-      flex-shrink: 0;
-      border: 1px solid var(--card-border);
-    }
-    body.light .avatar { background: #ccc; }
+    .username { font-weight:700; font-size:1.05rem; }
 
-    .username {
-      font-weight: 700;
-      font-size: 1.05rem;
-    }
+    .post-content { line-height:1.5; word-break:break-word; color:var(--text); }
 
-    .post-content {
-      line-height: 1.5;
-      word-break: break-word;
-      color: var(--text);
-    }
+    .post-media img, .post-media video { width:100%; border-radius:12px; margin-top:12px; }
 
-    .post-footer {
-      display: flex;
-      gap: 24px;
-      margin-top: 12px;
-    }
-    .post-footer button {
-      background: none;
-      color: var(--text-secondary);
-      font-size: 0.95rem;
-      padding: 0;
-    }
-    .post-footer button:hover {
-      color: var(--text);
-    }
+    .post-footer { display:flex; gap:24px; margin-top:12px; }
+    .post-footer button { background:none; color:var(--text-secondary); font-size:0.95rem; padding:0; }
+    .post-footer button:hover { color:var(--text); }
 
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.75);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-    }
-    body.light .modal { background: rgba(255,255,255,0.75); }
-    .modal.active { display: flex; }
+    .modal { position:fixed; inset:0; background:rgba(0,0,0,0.75); display:none; align-items:center; justify-content:center; z-index:2000; }
+    body.light .modal { background:rgba(255,255,255,0.75); }
+    .modal.active { display:flex; }
 
-    .modal-content {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      color: var(--text);
-      width: 92%;
-      max-width: 520px;
-      border-radius: 16px;
-      padding: 28px 24px;
-      position: relative;
-    }
+    .modal-content { background:var(--card-bg); border:1px solid var(--card-border); color:var(--text); width:92%; max-width:520px; border-radius:16px; padding:28px 24px; position:relative; }
 
-    .modal-content h2 {
-      color: var(--text);
-      margin-bottom: 20px;
-    }
+    .modal-content h2 { color:var(--text); margin-bottom:20px; }
 
-    .close-modal {
-      position: absolute;
-      top: 16px;
-      right: 20px;
-      font-size: 2rem;
-      cursor: pointer;
-      color: var(--text-secondary);
-    }
+    .close-modal { position:absolute; top:16px; right:20px; font-size:2rem; cursor:pointer; color:var(--text-secondary); }
 
-    .profile-header {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 24px;
-      align-items: flex-start;
-      margin-bottom: 32px;
-    }
+    .profile-header { display:flex; flex-wrap:wrap; gap:24px; align-items:flex-start; margin-bottom:32px; }
 
-    .profile-avatar {
-      width: 110px;
-      height: 110px;
-      border-radius: 50%;
-      background: #444;
-      background-size: cover;
-      background-position: center;
-      border: 2px solid var(--card-border);
-      cursor: pointer;
-    }
-    body.light .profile-avatar { background: #ddd; }
+    .profile-avatar { width:110px; height:110px; border-radius:50%; background:#444; background-size:cover; background-position:center; border:2px solid var(--card-border); cursor:pointer; }
+    body.light .profile-avatar { background:#ddd; }
 
-    .reaction-badge {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 2px 8px;
-      margin-right: 6px;
-      font-size: 0.9rem;
-    }
+    .search-input { margin-bottom:20px; }
+    .user-list { display:flex; flex-direction:column; gap:12px; }
+    .user-item { display:flex; align-items:center; gap:12px; padding:8px; border-radius:10px; background:var(--card-bg); border:1px solid var(--card-border); cursor:pointer; }
+    .user-item:hover { background:var(--input-bg); }
+    .user-item .avatar { width:50px; height:50px; }
+    .user-item .name { font-weight:600; }
 
-    .search-input { margin-bottom: 20px; }
-    .user-list { display: flex; flex-direction: column; gap: 12px; }
-    .user-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 8px;
-      border-radius: 10px;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      cursor: pointer;
-    }
-    .user-item:hover { background: var(--input-bg); }
-    .user-item .avatar { width: 50px; height: 50px; }
-    .user-item .name { font-weight: 600; }
-    .user-item .status { color: var(--text-secondary); font-size: 0.9rem; }
+    .chat-list { display:flex; flex-direction:column; gap:12px; }
+    .chat-item { display:flex; align-items:center; gap:12px; padding:8px; border-radius:10px; background:var(--card-bg); border:1px solid var(--card-border); cursor:pointer; }
+    .chat-item:hover { background:var(--input-bg); }
 
-    .chat-list { display: flex; flex-direction: column; gap: 12px; }
-    .chat-item { display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 10px; background: var(--card-bg); border: 1px solid var(--card-border); cursor: pointer; }
-    .chat-item:hover { background: var(--input-bg); }
+    .chat-window { display:none; flex-direction:column; height:400px; border:1px solid var(--card-border); border-radius:12px; overflow:hidden; }
+    .chat-header { padding:12px; border-bottom:1px solid var(--card-border); display:flex; align-items:center; gap:8px; }
+    .chat-messages { flex:1; padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
+    .message { padding:8px 12px; border-radius:10px; max-width:80%; }
+    .message.sent { background:var(--accent); color:white; align-self:flex-end; }
+    .message.received { background:var(--input-bg); align-self:flex-start; }
+    .chat-input { display:flex; padding:12px; border-top:1px solid var(--card-border); }
+    .chat-input input { flex:1; margin-right:8px; }
 
-    .chat-window { display: none; flex-direction: column; height: 400px; border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; }
-    .chat-header { padding: 12px; border-bottom: 1px solid var(--card-border); display: flex; align-items: center; gap: 8px; }
-    .chat-messages { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-    .message { padding: 8px 12px; border-radius: 10px; max-width: 80%; }
-    .message.sent { background: var(--accent); color: white; align-self: flex-end; }
-    .message.received { background: var(--input-bg); align-self: flex-start; }
-    .chat-input { display: flex; padding: 12px; border-top: 1px solid var(--card-border); }
-    .chat-input input { flex: 1; margin-right: 8px; }
-
-    @media (max-width: 900px) {
-      .sidebar { width: 100%; left: -100%; border-right: none; }
-      .main-content { padding: 16px; margin-top: 80px; }
-      .profile-header { flex-direction: column; align-items: center; text-align: center; }
+    @media (max-width:900px) {
+      .sidebar { width:100%; left:-100%; border-right:none; }
+      .main-content { padding:16px; margin-top:80px; }
+      .profile-header { flex-direction:column; align-items:center; text-align:center; }
     }
   </style>
 </head>
@@ -367,8 +141,7 @@
   <a data-section="home">Головна</a>
   <a data-section="search">Пошук</a>
   <a data-section="profile">Профіль</a>
-  <a data-section="messages">Повідомлення</a>
-  <a data-section="groups">Групи</a>
+  <a data-section="chats">Чати</a>
   <a data-section="settings">Налаштування</a>
 </nav>
 
@@ -380,6 +153,7 @@
         <input type="text" id="loginNickname" placeholder="Псевдонім" autocomplete="off"/>
         <input type="password" id="loginPassword" placeholder="Пароль"/>
         <button id="loginBtn">Увійти</button>
+        <button id="googleLoginBtn" style="background:#4285F4; color:white; margin-top:12px; width:100%; padding:12px; border:none; border-radius:10px;">Увійти через Google</button>
         <p style="margin-top:12px;">Немає акаунта? <span id="toRegister" style="color:var(--accent);cursor:pointer;">Зареєструватися</span></p>
       </div>
 
@@ -393,7 +167,8 @@
 
     <div class="card" id="newPostBox" style="display:none;">
       <textarea id="postText" placeholder="Що у тебе на думці?..."></textarea>
-      <button id="addPost" style="margin-top:12px;">Опублікувати</button>
+      <input type="file" id="postMedia" accept="image/*,video/*" style="margin:12px 0; display:block;"/>
+      <button id="addPost">Опублікувати</button>
     </div>
 
     <div class="feed" id="feed"></div>
@@ -411,6 +186,7 @@
       <div style="flex:1;">
         <h2 id="profileUsernameDisplay"></h2>
         <p id="profileBio" style="margin:8px 0;color:var(--text-secondary);">Немає опису</p>
+        <p id="profileStatus" style="margin:8px 0;color:var(--accent);">Онлайн</p>
         <div style="display:flex;gap:20px;font-weight:600;color:var(--text-secondary);">
           <span id="postsCount">Пости: 0</span>
           <span id="followersCount">Підписники: 0</span>
@@ -421,9 +197,9 @@
     </div>
   </div>
 
-  <div id="messages" class="section">
+  <div id="chats" class="section">
     <div class="chat-list" id="chatList"></div>
-    <div class="chat-window" id="chatWindow">
+    <div class="chat-window" id="chatWindow" style="display:none;">
       <div class="chat-header" id="chatHeader"></div>
       <div class="chat-messages" id="chatMessages"></div>
       <div class="chat-input">
@@ -435,7 +211,8 @@
 
   <div id="settings" class="section card">
     <h2>Налаштування</h2>
-    <button id="toggleTheme" style="margin-top:16px;">Перемкнути тему</button>
+    <button id="toggleTheme" style="margin:16px 0;">Перемкнути тему</button>
+    <button id="logoutBtn" style="margin:16px 0;">Вийти</button>
   </div>
 
 </main>
@@ -451,16 +228,18 @@
 
 <script type="module">
   // ──────────────────────────────────────────────
-  // Firebase SDK
+  // Firebase SDK (модульний, саме той config, що ти скинув)
   // ──────────────────────────────────────────────
-  import { initializeApp } from "firebase/app";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
   import {
     getAuth,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     onAuthStateChanged,
-    signOut
-  } from "firebase/auth";
+    signOut,
+    GoogleAuthProvider,
+    signInWithPopup
+  } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
   import {
     getFirestore,
     doc,
@@ -470,18 +249,18 @@
     collection,
     addDoc,
     query,
+    where,
     onSnapshot,
     orderBy,
     serverTimestamp,
-    arrayUnion,
-    arrayRemove
-  } from "firebase/firestore";
+    arrayUnion
+  } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
   import {
     getStorage,
     ref,
     uploadBytes,
     getDownloadURL
-  } from "firebase/storage";
+  } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDRzC-QDE0-UXd-XL0i3iqayFiKcc6wmvc",
@@ -498,7 +277,9 @@
   const storage = getStorage(app);
 
   let currentUser = null;
+  let currentChatPartner = null;
   let unsubscribeFeed = null;
+  let unsubscribeChat = null;
 
   // ──────────────────────────────────────────────
   // Burger + sidebar
@@ -514,12 +295,14 @@
       document.getElementById(link.dataset.section).classList.add('active');
       document.getElementById('sidebar').classList.remove('active');
       document.getElementById('burger').classList.remove('active');
-      if (link.dataset.section === 'home') subscribeToFeed();
+      if (link.dataset.section === 'search') loadSearchUsers();
+      if (link.dataset.section === 'chats') loadChatList();
+      if (link.dataset.section === 'profile') loadProfile();
     };
   });
 
   // ──────────────────────────────────────────────
-  // Авторизація
+  // Перемикання форм
   // ──────────────────────────────────────────────
   document.getElementById('toRegister').onclick = () => {
     document.getElementById('loginForm').style.display = 'none';
@@ -531,33 +314,45 @@
     document.getElementById('loginForm').style.display = 'block';
   };
 
+  // ──────────────────────────────────────────────
+  // Реєстрація (псевдонім → email)
+  // ──────────────────────────────────────────────
   document.getElementById('registerBtn').onclick = async () => {
     const nickname = document.getElementById('registerNickname').value.trim();
     const password = document.getElementById('registerPassword').value.trim();
 
-    if (!nickname || !password) return alert('Заповніть усі поля');
+    if (!nickname) return alert('Введіть псевдонім');
+    if (password.length < 6) return alert('Пароль мінімум 6 символів');
 
     try {
-      const email = `${nickname.toLowerCase()}@fantasyas.local`;
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      const safeNick = nickname.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const email = `${safeNick}@fantasyas.local`;
 
-      await setDoc(doc(db, 'users', cred.user.uid), {
-        nickname: nickname,
-        bio: '',
-        avatar: '',
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      const uid = cred.user.uid;
+
+      await setDoc(doc(db, "users", uid), {
+        nickname,
+        bio: "",
+        avatar: "",
         posts: [],
         followers: [],
         following: [],
-        messages: {}
+        createdAt: serverTimestamp()
       });
 
       alert('Реєстрація успішна! Увійдіть.');
       document.getElementById('toLogin').click();
+      document.getElementById('loginNickname').value = nickname;
     } catch (e) {
-      alert('Помилка: ' + e.message);
+      if (e.code === 'auth/email-already-in-use') alert('Такий псевдонім вже зайнятий');
+      else alert(e.message || 'Помилка');
     }
   };
 
+  // ──────────────────────────────────────────────
+  // Вхід (псевдонім + пароль)
+  // ──────────────────────────────────────────────
   document.getElementById('loginBtn').onclick = async () => {
     const nickname = document.getElementById('loginNickname').value.trim();
     const password = document.getElementById('loginPassword').value.trim();
@@ -565,10 +360,38 @@
     if (!nickname || !password) return alert('Заповніть поля');
 
     try {
-      const email = `${nickname.toLowerCase()}@fantasyas.local`;
+      const safeNick = nickname.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const email = `${safeNick}@fantasyas.local`;
+
       await signInWithEmailAndPassword(auth, email, password);
     } catch (e) {
       alert('Невірний псевдонім або пароль');
+    }
+  };
+
+  // ──────────────────────────────────────────────
+  // Google Login
+  // ──────────────────────────────────────────────
+  document.getElementById('googleLoginBtn').onclick = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (!userDoc.exists()) {
+        await setDoc(doc(db, "users", user.uid), {
+          nickname: user.displayName || user.email.split('@')[0],
+          bio: "",
+          avatar: user.photoURL || "",
+          posts: [],
+          followers: [],
+          following: [],
+          createdAt: serverTimestamp()
+        });
+      }
+    } catch (e) {
+      alert('Помилка Google: ' + e.message);
     }
   };
 
@@ -580,6 +403,15 @@
       currentUser = user;
       document.getElementById('authBox').style.display = 'none';
       document.getElementById('newPostBox').style.display = 'block';
+
+      const userSnap = await getDoc(doc(db, "users", user.uid));
+      if (userSnap.exists()) {
+        const data = userSnap.data();
+        document.getElementById('profileUsernameDisplay').textContent = data.nickname;
+        document.getElementById('profileBio').textContent = data.bio || 'Немає опису';
+        if (data.avatar) document.getElementById('profileAvatar').style.backgroundImage = `url(${data.avatar})`;
+      }
+
       subscribeToFeed();
     } else {
       currentUser = null;
@@ -590,22 +422,37 @@
   });
 
   // ──────────────────────────────────────────────
-  // Публікація поста
+  // Публікація поста з медіа
   // ──────────────────────────────────────────────
   document.getElementById('addPost').onclick = async () => {
+    if (!currentUser) return alert('Спочатку увійдіть');
+
     const text = document.getElementById('postText').value.trim();
-    if (!text) return alert('Напишіть текст');
+    const file = document.getElementById('postMedia').files[0];
+
+    if (!text && !file) return alert('Додайте текст або медіа');
 
     try {
-      await addDoc(collection(db, 'posts'), {
+      let mediaUrl = '';
+      if (file) {
+        const storageRef = ref(storage, `posts/${currentUser.uid}/${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        mediaUrl = await getDownloadURL(storageRef);
+      }
+
+      await addDoc(collection(db, "posts"), {
         author: currentUser.uid,
         text,
+        mediaUrl,
+        mediaType: file ? file.type.split('/')[0] : '',
         createdAt: serverTimestamp(),
         likes: [],
-        comments: [],
-        reactions: {}
+        comments: []
       });
+
       document.getElementById('postText').value = '';
+      document.getElementById('postMedia').value = '';
+      alert('Пост опубліковано!');
     } catch (e) {
       alert('Помилка: ' + e.message);
     }
@@ -617,43 +464,137 @@
   function subscribeToFeed() {
     if (unsubscribeFeed) unsubscribeFeed();
 
-    const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
-    unsubscribeFeed = onSnapshot(q, snapshot => {
+    const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+    unsubscribeFeed = onSnapshot(q, async (snapshot) => {
       const feed = document.getElementById('feed');
       feed.innerHTML = '';
-      snapshot.docs.forEach(doc => {
-        const post = doc.data();
+      let delay = 0;
+
+      for (const docSnap of snapshot.docs) {
+        const post = docSnap.data();
+        const authorSnap = await getDoc(doc(db, "users", post.author));
+        const author = authorSnap.exists() ? authorSnap.data() : { nickname: 'Користувач' };
+
         const postEl = document.createElement('div');
         postEl.className = 'post';
         postEl.innerHTML = `
-          <div class="post-content">${post.text}</div>
+          <div class="post-header">
+            <div class="avatar" style="background-image:url(${author.avatar || ''})"></div>
+            <div class="username">@${author.nickname}</div>
+          </div>
+          <div class="post-content">${post.text.replace(/\n/g, '<br>')}</div>
+          ${post.mediaUrl ? `
+            ${post.mediaType === 'image' ? `<img src="${post.mediaUrl}" class="post-media">` : 
+              `<video src="${post.mediaUrl}" controls class="post-media"></video>`}
+          ` : ''}
           <div class="post-footer">
-            <button>❤️ ${post.likes.length}</button>
+            <button>❤️ ${post.likes?.length || 0}</button>
+            <button>💬 ${post.comments?.length || 0}</button>
           </div>
         `;
+
         feed.appendChild(postEl);
-        postEl.classList.add('show');
-      });
+        setTimeout(() => postEl.classList.add('show'), delay);
+        delay += 80;
+      }
     });
   }
 
   // ──────────────────────────────────────────────
-  // Профіль
+  // Профіль та аватар
   // ──────────────────────────────────────────────
-  document.getElementById('editProfileBtn').onclick = () => document.getElementById('editProfileModal').classList.add('active');
-  document.getElementById('closeModal').onclick = () => document.getElementById('editProfileModal').classList.remove('active');
+  document.getElementById('profileAvatar').onclick = () => {
+    if (!currentUser) return alert('Увійдіть');
+    document.getElementById('avatarInput').click();
+  };
 
-  document.getElementById('saveProfileEdit').onclick = async () => {
-    const bio = document.getElementById('editBio').value.trim();
-    if (currentUser) {
-      await updateDoc(doc(db, "users", currentUser.uid), { bio });
-      document.getElementById('profileBio').textContent = bio || 'Немає опису';
+  document.getElementById('avatarInput').onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const storageRef = ref(storage, `avatars/${currentUser.uid}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+
+      await updateDoc(doc(db, "users", currentUser.uid), { avatar: url });
+      document.getElementById('profileAvatar').style.backgroundImage = `url(${url})`;
+    } catch (err) {
+      alert('Помилка завантаження');
     }
-    document.getElementById('editProfileModal').classList.remove('active');
   };
 
   // ──────────────────────────────────────────────
-  // Налаштування
+  // Чати (1-на-1)
+  // ──────────────────────────────────────────────
+  function getChatId(uid1, uid2) {
+    return [uid1, uid2].sort().join('_');
+  }
+
+  async function loadChatList() {
+    const chatList = document.getElementById('chatList');
+    chatList.innerHTML = '';
+
+    // Приклад: показуємо всіх користувачів (можна оптимізувати)
+    const q = query(collection(db, "users"));
+    onSnapshot(q, snapshot => {
+      snapshot.forEach(docSnap => {
+        if (docSnap.id === currentUser.uid) return;
+        const data = docSnap.data();
+        const item = document.createElement('div');
+        item.className = 'chat-item';
+        item.innerHTML = `
+          <div class="avatar" style="background-image:url(${data.avatar || ''})"></div>
+          <div><div class="name">@${data.nickname}</div></div>
+        `;
+        item.onclick = () => openChat(data.nickname, docSnap.id);
+        chatList.appendChild(item);
+      });
+    });
+  }
+
+  function openChat(name, uid) {
+    currentChatPartner = uid;
+    document.getElementById('chatWindow').style.display = 'flex';
+    document.getElementById('chatHeader').innerHTML = `<div class="name">@${name}</div>`;
+    subscribeToChat(uid);
+  }
+
+  function subscribeToChat(otherUid) {
+    if (unsubscribeChat) unsubscribeChat();
+
+    const chatId = getChatId(currentUser.uid, otherUid);
+    const q = query(collection(db, `messages/${chatId}/chat`), orderBy("createdAt"));
+
+    unsubscribeChat = onSnapshot(q, snap => {
+      const messages = document.getElementById('chatMessages');
+      messages.innerHTML = '';
+      snap.forEach(m => {
+        const msg = m.data();
+        const div = document.createElement('div');
+        div.className = `message ${msg.from === currentUser.uid ? 'sent' : 'received'}`;
+        div.textContent = msg.text;
+        messages.appendChild(div);
+      });
+      messages.scrollTop = messages.scrollHeight;
+    });
+  }
+
+  document.getElementById('sendMessage').onclick = async () => {
+    const text = document.getElementById('chatText').value.trim();
+    if (!text || !currentChatPartner) return;
+
+    const chatId = getChatId(currentUser.uid, currentChatPartner);
+    await addDoc(collection(db, `messages/${chatId}/chat`), {
+      from: currentUser.uid,
+      text,
+      createdAt: serverTimestamp()
+    });
+    document.getElementById('chatText').value = '';
+  };
+
+  // ──────────────────────────────────────────────
+  // Інші функції (тема, вихід, редагування біо)
   // ──────────────────────────────────────────────
   document.getElementById('toggleTheme').onclick = () => {
     document.body.classList.toggle('light');
@@ -661,6 +602,19 @@
   };
 
   if (localStorage.getItem('theme') === 'light') document.body.classList.add('light');
+
+  document.getElementById('logoutBtn').onclick = () => signOut(auth);
+
+  // Редагування профілю (біо)
+  document.getElementById('editProfileBtn').onclick = () => document.getElementById('editProfileModal').classList.add('active');
+  document.getElementById('closeModal').onclick = () => document.getElementById('editProfileModal').classList.remove('active');
+
+  document.getElementById('saveProfileEdit').onclick = async () => {
+    const bio = document.getElementById('editBio').value.trim();
+    await updateDoc(doc(db, "users", currentUser.uid), { bio });
+    document.getElementById('profileBio').textContent = bio || 'Немає опису';
+    document.getElementById('editProfileModal').classList.remove('active');
+  };
 
 </script>
 </body>

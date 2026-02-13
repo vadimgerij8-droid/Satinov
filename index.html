@@ -319,7 +319,6 @@
       font-size: 0.9rem;
     }
 
-    /* Нові стилі для пошуку та месенджера */
     .search-input { margin-bottom: 20px; }
     .user-list { display: flex; flex-direction: column; gap: 12px; }
     .user-item {
@@ -450,442 +449,424 @@
   </div>
 </div>
 
-<script>
-// ──────────────────────────────────────────────
-// Основні змінні
-// ──────────────────────────────────────────────
+<script type="module">
+  // ──────────────────────────────────────────────
+  // Firebase 10+ модульний імпорт
+  // ──────────────────────────────────────────────
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+  import {
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc,
+    addDoc,
+    updateDoc,
+    arrayUnion,
+    arrayRemove,
+    collection,
+    query,
+    where,
+    orderBy,
+    onSnapshot,
+    serverTimestamp,
+    getDocs,
+    limit
+  } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-const burger = document.getElementById('burger');
-const sidebar = document.getElementById('sidebar');
-burger.onclick = () => {
-  burger.classList.toggle('active');
-  sidebar.classList.toggle('active');
-};
-
-document.querySelectorAll('[data-section]').forEach(link => {
-  link.onclick = () => {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.getElementById(link.dataset.section).classList.add('active');
-    sidebar.classList.remove('active');
-    burger.classList.remove('active');
-    if (link.dataset.section === 'search') loadSearchUsers();
-    if (link.dataset.section === 'messages') loadChatList();
+  const firebaseConfig = {
+    apiKey: "AIzaSyDRzC-QDE0-UXd-XL0i3iqayFiKcc6wmvc",
+    authDomain: "fantasyasapp.firebaseapp.com",
+    projectId: "fantasyasapp",
+    storageBucket: "fantasyasapp.firebasestorage.app",
+    messagingSenderId: "721763921060",
+    appId: "1:721763921060:web:3d61044ea2424e8176ca31"
   };
-});
 
-let users = JSON.parse(localStorage.getItem('users')) || {};
-let currentUser = localStorage.getItem('currentUser') || null;
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-const authBox     = document.getElementById('authBox');
-const loginForm   = document.getElementById('loginForm');
-const registerForm= document.getElementById('registerForm');
-const newPostBox  = document.getElementById('newPostBox');
-const feed        = document.getElementById('feed');
+  // ──────────────────────────────────────────────
+  // Змінні стану
+  // ──────────────────────────────────────────────
+  let currentUserUid = null;
+  let currentUserData = null;
+  let currentChatPartnerUid = null;
+  let unsubscribeFeed = null;
+  let unsubscribeChat = null;
 
-// ──────────────────────────────────────────────
-// Авторизація / Реєстрація
-// ──────────────────────────────────────────────
+  // ──────────────────────────────────────────────
+  // DOM елементи
+  // ──────────────────────────────────────────────
+  const burger = document.getElementById('burger');
+  const sidebar = document.getElementById('sidebar');
+  const authBox = document.getElementById('authBox');
+  const newPostBox = document.getElementById('newPostBox');
+  const feed = document.getElementById('feed');
+  const profileUsernameDisplay = document.getElementById('profileUsernameDisplay');
+  const profileBio = document.getElementById('profileBio');
+  const profileAvatar = document.getElementById('profileAvatar');
+  const postsCount = document.getElementById('postsCount');
+  const followersCount = document.getElementById('followersCount');
+  const followingCount = document.getElementById('followingCount');
+  const editBio = document.getElementById('editBio');
 
-document.getElementById('toRegister').onclick = () => {
-  loginForm.style.display = 'none';
-  registerForm.style.display = 'block';
-};
-document.getElementById('toLogin').onclick = () => {
-  registerForm.style.display = 'none';
-  loginForm.style.display = 'block';
-};
+  // ──────────────────────────────────────────────
+  // Burger меню
+  // ──────────────────────────────────────────────
+  burger.onclick = () => {
+    burger.classList.toggle('active');
+    sidebar.classList.toggle('active');
+  };
 
-document.getElementById('registerBtn').onclick = () => {
-  const nick = document.getElementById('registerNickname').value.trim();
-  const pass = document.getElementById('registerPassword').value.trim();
-  if (!nick || !pass) return alert('Заповніть усі поля');
-  if (users[nick]) return alert('Такий псевдонім вже зайнятий');
+  document.querySelectorAll('[data-section]').forEach(link => {
+    link.onclick = () => {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(link.dataset.section).classList.add('active');
+      sidebar.classList.remove('active');
+      burger.classList.remove('active');
 
-  users[nick] = { password: pass, bio: '', avatar: '', posts: [], followers: [], following: [], messages: {}, lastOnline: Date.now() };
-  localStorage.setItem('users', JSON.stringify(users));
-  alert('Реєстрація успішна! Тепер увійдіть.');
-  registerForm.style.display = 'none';
-  loginForm.style.display = 'block';
-};
+      if (link.dataset.section === 'search') loadSearchUsers();
+      if (link.dataset.section === 'messages') loadChatList();
+      if (link.dataset.section === 'profile' && currentUserUid) loadProfile();
+    };
+  });
 
-document.getElementById('loginBtn').onclick = () => {
-  const nick = document.getElementById('loginNickname').value.trim();
-  const pass = document.getElementById('loginPassword').value.trim();
-  if (!users[nick] || users[nick].password !== pass) return alert('Невірний псевдонім або пароль');
+  // ──────────────────────────────────────────────
+  // Авторизація / Реєстрація
+  // ──────────────────────────────────────────────
+  document.getElementById('toRegister').onclick = () => {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'block';
+  };
 
-  currentUser = nick;
-  localStorage.setItem('currentUser', currentUser);
-  users[currentUser].lastOnline = Date.now();
-  localStorage.setItem('users', JSON.stringify(users));
+  document.getElementById('toLogin').onclick = () => {
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'block';
+  };
 
-  authBox.style.display = 'none';
-  newPostBox.style.display = 'block';
-  document.getElementById('profileUsernameDisplay').textContent = currentUser;
-  updateProfile();
-  loadPosts();
+  document.getElementById('registerBtn').onclick = async () => {
+    const nickname = document.getElementById('registerNickname').value.trim();
+    const password = document.getElementById('registerPassword').value.trim();
+    if (!nickname || !password) return alert('Заповніть усі поля');
 
-  // Автоматична підписка
-  const me = users[currentUser];
-  if (me.following.length === 0) {
-    Object.keys(users).forEach(other => {
-      if (other !== currentUser && !me.following.includes(other)) {
-        me.following.push(other);
-        if (!users[other].followers.includes(currentUser)) {
-          users[other].followers.push(currentUser);
-        }
+    try {
+      const email = `${nickname.toLowerCase()}@fantasyas.local`;
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      const uid = cred.user.uid;
+
+      await setDoc(doc(db, "users", uid), {
+        nickname,
+        bio: "",
+        avatar: "",
+        posts: [],
+        followers: [],
+        following: [],
+        createdAt: serverTimestamp()
+      });
+
+      alert('Реєстрація успішна! Увійдіть.');
+      document.getElementById('toLogin').click();
+    } catch (e) {
+      if (e.code === 'auth/email-already-in-use') {
+        alert('Такий псевдонім вже зайнятий');
+      } else {
+        alert(e.message);
       }
-    });
-    localStorage.setItem('users', JSON.stringify(users));
-    loadPosts();
-  }
-};
-
-// ──────────────────────────────────────────────
-// Створення поста
-// ──────────────────────────────────────────────
-
-document.getElementById('addPost').onclick = () => {
-  const text = document.getElementById('postText').value.trim();
-  if (!text) return alert('Напишіть текст поста');
-  if (!currentUser) return alert('Спочатку увійдіть');
-
-  const newPost = {
-    id: Date.now() + Math.random().toString(36).slice(2),
-    text: text,
-    createdAt: Date.now(),
-    likes: [],
-    comments: [],
-    reactions: {}
+    }
   };
 
-  users[currentUser].posts.unshift(newPost);
-  localStorage.setItem('users', JSON.stringify(users));
-  document.getElementById('postText').value = '';
-  loadPosts();
-  updateProfile();
-};
+  document.getElementById('loginBtn').onclick = async () => {
+    const nickname = document.getElementById('loginNickname').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+    if (!nickname || !password) return alert('Заповніть поля');
 
-// ──────────────────────────────────────────────
-// Завантаження стрічки
-// ──────────────────────────────────────────────
+    try {
+      const email = `${nickname.toLowerCase()}@fantasyas.local`;
+      await signInWithEmailAndPassword(auth, email, password);
+      // onAuthStateChanged сам оновить інтерфейс
+    } catch (e) {
+      alert('Невірний псевдонім або пароль');
+    }
+  };
 
-function loadPosts() {
-  feed.innerHTML = '';
+  // ──────────────────────────────────────────────
+  // Слухач авторизації
+  // ──────────────────────────────────────────────
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      currentUserUid = user.uid;
+      authBox.style.display = 'none';
+      newPostBox.style.display = 'block';
 
-  if (!currentUser || !users[currentUser]) return;
+      const userSnap = await getDoc(doc(db, "users", currentUserUid));
+      if (userSnap.exists()) {
+        currentUserData = userSnap.data();
+        profileUsernameDisplay.textContent = currentUserData.nickname;
+        profileBio.textContent = currentUserData.bio || 'Немає опису';
+        profileAvatar.style.backgroundImage = currentUserData.avatar ? `url(${currentUserData.avatar})` : '';
+        loadProfile();
+        subscribeToFeed();
+      }
+    } else {
+      currentUserUid = null;
+      currentUserData = null;
+      authBox.style.display = 'block';
+      newPostBox.style.display = 'none';
+      feed.innerHTML = '';
+      if (unsubscribeFeed) unsubscribeFeed();
+      if (unsubscribeChat) unsubscribeChat();
+    }
+  });
 
-  const me = users[currentUser];
-  const accountsToShow = [currentUser, ...me.following];
+  // ──────────────────────────────────────────────
+  // Створення поста
+  // ──────────────────────────────────────────────
+  document.getElementById('addPost').onclick = async () => {
+    if (!currentUserUid) return alert('Спочатку увійдіть');
 
-  let postsToShow = [];
+    const text = document.getElementById('postText').value.trim();
+    if (!text) return alert('Напишіть текст поста');
 
-  accountsToShow.forEach(username => {
-    const user = users[username];
-    if (!user) return;
+    try {
+      const postRef = await addDoc(collection(db, "posts"), {
+        author: currentUserUid,
+        text,
+        createdAt: serverTimestamp(),
+        likes: [],
+        comments: [],
+        reactions: {}
+      });
 
-    user.posts.forEach(postObj => {
-      postsToShow.push({
-        author: username,
-        avatar: user.avatar || '',
-        post: postObj,
-        time: postObj.createdAt
+      await updateDoc(doc(db, "users", currentUserUid), {
+        posts: arrayUnion(postRef.id)
+      });
+
+      document.getElementById('postText').value = '';
+    } catch (e) {
+      alert('Помилка: ' + e.message);
+    }
+  };
+
+  // ──────────────────────────────────────────────
+  // Стрічка (пости)
+  // ──────────────────────────────────────────────
+  function subscribeToFeed() {
+    if (unsubscribeFeed) unsubscribeFeed();
+
+    getDoc(doc(db, "users", currentUserUid)).then(snap => {
+      const following = snap.data()?.following || [];
+      const uids = [currentUserUid, ...following];
+
+      // Firebase "in" обмежує 10 елементів → якщо більше — потрібно розбити на кілька запитів
+      if (uids.length > 10) {
+        feed.innerHTML = '<p style="text-align:center;color:var(--text-secondary);">Занадто багато підписок — показуємо лише частину</p>';
+        uids = uids.slice(0,10);
+      }
+
+      const q = query(
+        collection(db, "posts"),
+        where("author", "in", uids),
+        orderBy("createdAt", "desc")
+      );
+
+      unsubscribeFeed = onSnapshot(q, snapshot => {
+        feed.innerHTML = '';
+        let index = 0;
+        snapshot.forEach(async postDoc => {
+          const post = postDoc.data();
+          const postId = postDoc.id;
+
+          const authorSnap = await getDoc(doc(db, "users", post.author));
+          const author = authorSnap.exists() ? authorSnap.data() : {nickname:"?"};
+
+          const postEl = document.createElement('div');
+          postEl.className = 'post';
+          postEl.innerHTML = `
+            <div class="post-header">
+              <div class="avatar" style="${author.avatar ? `background-image:url(${author.avatar})` : ''}"></div>
+              <div class="username">@${author.nickname}</div>
+            </div>
+            <div class="post-content">${(post.text || '').replace(/\n/g, '<br>')}</div>
+            <div class="post-footer">
+              <button>❤️ ${post.likes?.length || 0}</button>
+              <button>💬 ${post.comments?.length || 0}</button>
+            </div>
+          `;
+          feed.appendChild(postEl);
+          setTimeout(() => postEl.classList.add('show'), 50 * index++);
+        });
       });
     });
-  });
+  }
 
-  postsToShow.sort((a, b) => b.time - a.time);
+  // ──────────────────────────────────────────────
+  // Профіль (оновлення лічильників)
+  // ──────────────────────────────────────────────
+  async function loadProfile() {
+    if (!currentUserUid) return;
+    const snap = await getDoc(doc(db, "users", currentUserUid));
+    if (!snap.exists()) return;
+    const d = snap.data();
+    postsCount.textContent = `Пости: ${d.posts?.length || 0}`;
+    followersCount.textContent = `Підписники: ${d.followers?.length || 0}`;
+    followingCount.textContent = `Підписки: ${d.following?.length || 0}`;
+  }
 
-  postsToShow.forEach((p, i) => {
-    const postEl = document.createElement('div');
-    postEl.className = 'post';
-    postEl.dataset.postId = p.post.id;
-    postEl.dataset.author = p.author;
+  // ──────────────────────────────────────────────
+  // Редагування біо
+  // ──────────────────────────────────────────────
+  document.getElementById('editProfileBtn').onclick = () => {
+    document.getElementById('editProfileModal').classList.add('active');
+    editBio.value = currentUserData?.bio || '';
+  };
 
-    let reactionsHtml = '';
-    Object.entries(p.post.reactions || {}).forEach(([emoji, usersArr]) => {
-      if (usersArr.length > 0) {
-        reactionsHtml += `<span class="reaction-badge">${emoji} ${usersArr.length}</span>`;
-      }
-    });
+  document.getElementById('closeModal').onclick = () => {
+    document.getElementById('editProfileModal').classList.remove('active');
+  };
 
-    postEl.innerHTML = `
-      <div class="post-header">
-        <div class="avatar" style="${p.avatar ? `background-image: url(${p.avatar});` : ''}"></div>
-        <div class="username">@${p.author}</div>
-        <div style="margin-left:auto; position:relative;">
-          <button class="more-btn" style="background:none;border:none;font-size:1.4rem;color:var(--text-secondary);cursor:pointer;">⋯</button>
-          <div class="reaction-menu" style="display:none;position:absolute;right:0;top:30px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:8px;z-index:10;display:flex;flex-wrap:wrap;gap:6px;width:180px;">
-            <button class="emoji-btn" data-emoji="❤️">❤️</button>
-            <button class="emoji-btn" data-emoji="😂">😂</button>
-            <button class="emoji-btn" data-emoji="😮">😮</button>
-            <button class="emoji-btn" data-emoji="😢">😢</button>
-            <button class="emoji-btn" data-emoji="👍">👍</button>
-            <button class="emoji-btn" data-emoji="🔥">🔥</button>
-          </div>
-        </div>
-      </div>
-      <div class="post-content">${p.post.text.replace(/\n/g, '<br>')}</div>
+  document.getElementById('saveProfileEdit').onclick = async () => {
+    if (!currentUserUid) return;
+    const newBio = editBio.value.trim();
+    await updateDoc(doc(db, "users", currentUserUid), { bio: newBio });
+    currentUserData.bio = newBio;
+    profileBio.textContent = newBio || 'Немає опису';
+    document.getElementById('editProfileModal').classList.remove('active');
+  };
 
-      <div class="post-footer" style="justify-content:space-between;align-items:center;">
-        <div style="display:flex;gap:24px;">
-          <button class="like-btn" style="background:none;border:none;color:${p.post.likes.includes(currentUser)?'red':'var(--text-secondary)'};cursor:pointer;">
-            ${p.post.likes.includes(currentUser) ? '❤️' : '♡'} ${p.post.likes.length}
-          </button>
-          <button class="comment-btn" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;">
-            Коментар ${p.post.comments.length}
-          </button>
-        </div>
-        <div class="reactions-preview" style="font-size:0.9rem;">${reactionsHtml}</div>
-      </div>
+  // ──────────────────────────────────────────────
+  // Пошук користувачів (спрощена версія)
+  // ──────────────────────────────────────────────
+  async function loadSearchUsers(search = '') {
+    const userList = document.getElementById('userList');
+    userList.innerHTML = '';
 
-      <div class="comments-section" style="margin-top:12px;display:none;border-top:1px solid var(--card-border);padding-top:12px;">
-        <div class="comments-list"></div>
-        <div style="margin-top:8px;display:flex;gap:8px;">
-          <input type="text" class="comment-input" placeholder="Напишіть відповідь..." style="flex:1;background:var(--input-bg);border:1px solid var(--input-border);border-radius:10px;padding:8px;color:var(--text);"/>
-          <button class="send-comment" style="background:var(--btn-bg);color:white;padding:8px 16px;border-radius:10px;cursor:pointer;">Відправити</button>
-        </div>
-      </div>
-    `;
+    const q = query(
+      collection(db, "users"),
+      where("nickname", ">=", search),
+      where("nickname", "<=", search + '\uf8ff'),
+      limit(12)
+    );
 
-    feed.appendChild(postEl);
-    setTimeout(() => postEl.classList.add('show'), 50 * i);
-
-    postEl.querySelector('.like-btn').onclick = () => {
-      const targetPost = users[p.author].posts.find(po => po.id === p.post.id);
-      if (targetPost.likes.includes(currentUser)) {
-        targetPost.likes = targetPost.likes.filter(u => u !== currentUser);
-      } else {
-        targetPost.likes.push(currentUser);
-      }
-      localStorage.setItem('users', JSON.stringify(users));
-      loadPosts();
-    };
-
-    const moreBtn = postEl.querySelector('.more-btn');
-    const menu = postEl.querySelector('.reaction-menu');
-    moreBtn.onclick = (e) => {
-      e.stopPropagation();
-      menu.style.display = menu.style.display === 'none' || !menu.style.display ? 'flex' : 'none';
-    };
-    document.addEventListener('click', e => {
-      if (!moreBtn.contains(e.target) && !menu.contains(e.target)) menu.style.display = 'none';
-    });
-
-    menu.querySelectorAll('.emoji-btn').forEach(btn => {
-      btn.onclick = () => {
-        const emoji = btn.dataset.emoji;
-        const targetPost = users[p.author].posts.find(po => po.id === p.post.id);
-        if (!targetPost.reactions) targetPost.reactions = {};
-        if (!targetPost.reactions[emoji]) targetPost.reactions[emoji] = [];
-
-        if (targetPost.reactions[emoji].includes(currentUser)) {
-          targetPost.reactions[emoji] = targetPost.reactions[emoji].filter(u => u !== currentUser);
-          if (!targetPost.reactions[emoji].length) delete targetPost.reactions[emoji];
-        } else {
-          targetPost.reactions[emoji].push(currentUser);
-        }
-        localStorage.setItem('users', JSON.stringify(users));
-        loadPosts();
-      };
-    });
-
-    const commentBtn = postEl.querySelector('.comment-btn');
-    const commentsSec = postEl.querySelector('.comments-section');
-    commentBtn.onclick = () => {
-      commentsSec.style.display = commentsSec.style.display === 'none' ? 'block' : 'none';
-      renderComments(postEl);
-    };
-
-    const sendBtn = postEl.querySelector('.send-comment');
-    const input = postEl.querySelector('.comment-input');
-    sendBtn.onclick = () => {
-      const txt = input.value.trim();
-      if (!txt) return;
-      const targetPost = users[p.author].posts.find(po => po.id === p.post.id);
-      targetPost.comments.push({ user: currentUser, text: txt, createdAt: Date.now() });
-      localStorage.setItem('users', JSON.stringify(users));
-      input.value = '';
-      renderComments(postEl);
-      loadPosts();
-    };
-  });
-}
-
-function renderComments(postEl) {
-  const list = postEl.querySelector('.comments-list');
-  const postId = postEl.dataset.postId;
-  const author = postEl.dataset.author;
-  const post = users[author].posts.find(p => p.id === postId);
-
-  list.innerHTML = '';
-  (post.comments || []).forEach(c => {
-    const div = document.createElement('div');
-    div.style.margin = '8px 0';
-    div.innerHTML = `<strong>@${c.user}</strong>: ${c.text}`;
-    list.appendChild(div);
-  });
-}
-
-// ──────────────────────────────────────────────
-// Пошук користувачів
-// ──────────────────────────────────────────────
-
-function loadSearchUsers(query = '') {
-  const userList = document.getElementById('userList');
-  userList.innerHTML = '';
-
-  Object.entries(users).forEach(([nick, data]) => {
-    if (nick !== currentUser && nick.toLowerCase().includes(query.toLowerCase())) {
-      const timeAgo = Math.floor((Date.now() - data.lastOnline) / 60000);
-      const status = timeAgo < 60 ? `${timeAgo} хв тому` : `${Math.floor(timeAgo / 60)} год тому`;
+    const snap = await getDocs(q);
+    snap.forEach(docSnap => {
+      const data = docSnap.data();
+      if (docSnap.id === currentUserUid) return;
 
       const item = document.createElement('div');
       item.className = 'user-item';
       item.innerHTML = `
-        <div class="avatar" style="${data.avatar ? `background-image: url(${data.avatar});` : ''}"></div>
+        <div class="avatar" style="${data.avatar ? `background-image:url(${data.avatar})` : ''}"></div>
         <div>
-          <div class="name">@${nick}</div>
-          <div class="status">У мережі ${status}</div>
+          <div class="name">@${data.nickname}</div>
         </div>
       `;
-      item.onclick = () => openChat(nick);
+      item.onclick = () => openChat(data.nickname, docSnap.id);
       userList.appendChild(item);
+    });
+  }
+
+  document.getElementById('searchInput').oninput = e => loadSearchUsers(e.target.value.trim());
+
+  // ──────────────────────────────────────────────
+  // Месенджер (спрощена базова логіка)
+  // ──────────────────────────────────────────────
+  function getChatId(uid1, uid2) {
+    return [uid1, uid2].sort().join('_');
+  }
+
+  async function loadChatList() {
+    const chatListEl = document.getElementById('chatList');
+    chatListEl.innerHTML = '';
+
+    // Для простоти показуємо всіх, на кого підписаний + себе
+    const snap = await getDoc(doc(db, "users", currentUserUid));
+    const following = snap.data()?.following || [];
+
+    for (const uid of following) {
+      const userSnap = await getDoc(doc(db, "users", uid));
+      if (!userSnap.exists()) continue;
+      const d = userSnap.data();
+
+      const item = document.createElement('div');
+      item.className = 'chat-item';
+      item.innerHTML = `
+        <div class="avatar" style="${d.avatar ? `background-image:url(${d.avatar})` : ''}"></div>
+        <div>
+          <div class="name">@${d.nickname}</div>
+        </div>
+      `;
+      item.onclick = () => openChat(d.nickname, uid);
+      chatListEl.appendChild(item);
     }
-  });
-}
+  }
 
-document.getElementById('searchInput').oninput = (e) => loadSearchUsers(e.target.value);
-
-// ──────────────────────────────────────────────
-// Месенджер
-// ──────────────────────────────────────────────
-
-let currentChatUser = null;
-
-function loadChatList() {
-  const chatList = document.getElementById('chatList');
-  chatList.innerHTML = '';
-
-  const myMessages = users[currentUser].messages || {};
-
-  Object.keys(myMessages).forEach(other => {
-    const lastMsg = myMessages[other][myMessages[other].length - 1] || {text: ''};
-    const item = document.createElement('div');
-    item.className = 'chat-item';
-    item.innerHTML = `
-      <div class="avatar" style="${users[other].avatar ? `background-image: url(${users[other].avatar});` : ''}"></div>
-      <div>
-        <div class="name">@${other}</div>
-        <div class="status">${lastMsg.text.slice(0, 20)}...</div>
-      </div>
+  function openChat(nickname, uid) {
+    currentChatPartnerUid = uid;
+    document.getElementById('chatWindow').style.display = 'flex';
+    document.getElementById('chatHeader').innerHTML = `
+      <div class="avatar" style="background:${uid ? '#555' : ''}"></div>
+      <div class="name">@${nickname}</div>
     `;
-    item.onclick = () => openChat(other);
-    chatList.appendChild(item);
-  });
-}
+    subscribeToChat(uid);
+  }
 
-function openChat(otherUser) {
-  currentChatUser = otherUser;
-  const chatWindow = document.getElementById('chatWindow');
-  const chatHeader = document.getElementById('chatHeader');
-  const chatMessages = document.getElementById('chatMessages');
+  function subscribeToChat(otherUid) {
+    if (unsubscribeChat) unsubscribeChat();
 
-  chatWindow.style.display = 'flex';
+    const chatId = getChatId(currentUserUid, otherUid);
+    const q = query(collection(db, `messages/${chatId}/chat`), orderBy("createdAt"));
 
-  chatHeader.innerHTML = `
-    <div class="avatar" style="${users[otherUser].avatar ? `background-image: url(${users[otherUser].avatar});` : ''}"></div>
-    <div class="name">@${otherUser}</div>
-  `;
+    unsubscribeChat = onSnapshot(q, snap => {
+      const messagesEl = document.getElementById('chatMessages');
+      messagesEl.innerHTML = '';
+      snap.forEach(m => {
+        const msg = m.data();
+        const div = document.createElement('div');
+        div.className = `message ${msg.from === currentUserUid ? 'sent' : 'received'}`;
+        div.textContent = msg.text;
+        messagesEl.appendChild(div);
+      });
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    });
+  }
 
-  renderChatMessages();
-}
+  document.getElementById('sendMessage').onclick = async () => {
+    if (!currentChatPartnerUid || !currentUserUid) return;
 
-function renderChatMessages() {
-  const chatMessages = document.getElementById('chatMessages');
-  chatMessages.innerHTML = '';
+    const text = document.getElementById('chatText').value.trim();
+    if (!text) return;
 
-  const conversation = users[currentUser].messages[currentChatUser] || [];
+    const chatId = getChatId(currentUserUid, currentChatPartnerUid);
 
-  conversation.forEach(msg => {
-    const div = document.createElement('div');
-    div.className = `message ${msg.from === currentUser ? 'sent' : 'received'}`;
-    div.textContent = msg.text;
-    chatMessages.appendChild(div);
-  });
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
+    await addDoc(collection(db, `messages/${chatId}/chat`), {
+      from: currentUserUid,
+      text,
+      createdAt: serverTimestamp()
+    });
 
-document.getElementById('sendMessage').onclick = () => {
-  const text = document.getElementById('chatText').value.trim();
-  if (!text || !currentChatUser) return;
-
-  const msg = { from: currentUser, to: currentChatUser, text, createdAt: Date.now() };
-
-  if (!users[currentUser].messages[currentChatUser]) users[currentUser].messages[currentChatUser] = [];
-  users[currentUser].messages[currentChatUser].push(msg);
-
-  if (!users[currentChatUser].messages[currentUser]) users[currentChatUser].messages[currentUser] = [];
-  users[currentChatUser].messages[currentUser].push(msg);
-
-  localStorage.setItem('users', JSON.stringify(users));
-  document.getElementById('chatText').value = '';
-  renderChatMessages();
-  loadChatList();
-};
-
-// ──────────────────────────────────────────────
-// Профіль, аватар, біо, тема
-// ──────────────────────────────────────────────
-
-function updateProfile() {
-  if (!currentUser) return;
-  const u = users[currentUser];
-  document.getElementById('postsCount').textContent     = `Пости: ${u.posts.length}`;
-  document.getElementById('followersCount').textContent = `Підписники: ${u.followers.length}`;
-  document.getElementById('followingCount').textContent = `Підписки: ${u.following.length}`;
-  document.getElementById('profileBio').textContent     = u.bio || 'Немає опису';
-  document.getElementById('profileAvatar').style.backgroundImage = u.avatar ? `url(${u.avatar})` : 'none';
-}
-
-document.getElementById('profileAvatar').onclick = () => document.getElementById('avatarInput').click();
-
-document.getElementById('avatarInput').onchange = e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    users[currentUser].avatar = ev.target.result;
-    localStorage.setItem('users', JSON.stringify(users));
-    updateProfile();
-    loadPosts();
+    document.getElementById('chatText').value = '';
   };
-  reader.readAsDataURL(file);
-};
 
-const modal = document.getElementById('editProfileModal');
-document.getElementById('editProfileBtn').onclick = () => modal.classList.add('active');
-document.getElementById('closeModal').onclick = () => modal.classList.remove('active');
-document.getElementById('saveProfileEdit').onclick = () => {
-  users[currentUser].bio = document.getElementById('editBio').value.trim();
-  localStorage.setItem('users', JSON.stringify(users));
-  updateProfile();
-  modal.classList.remove('active');
-};
+  // ──────────────────────────────────────────────
+  // Тема (залишаємо як було)
+  // ──────────────────────────────────────────────
+  document.getElementById('toggleTheme').onclick = () => {
+    document.body.classList.toggle('light');
+    localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+  };
 
-document.getElementById('toggleTheme').onclick = () => {
-  document.body.classList.toggle('light');
-  localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
-};
+  if (localStorage.getItem('theme') === 'light') {
+    document.body.classList.add('light');
+  }
 
-if (localStorage.getItem('theme') === 'light') document.body.classList.add('light');
-
-if (currentUser && users[currentUser]) {
-  authBox.style.display = 'none';
-  newPostBox.style.display = 'block';
-  document.getElementById('profileUsernameDisplay').textContent = currentUser;
-  updateProfile();
-  loadPosts();
-}
 </script>
 </body>
 </html>

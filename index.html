@@ -37,11 +37,11 @@
     * { margin:0; padding:0; box-sizing:border-box; font-family:'Manrope',sans-serif; }
     body { background:var(--bg); color:var(--text); min-height:100vh; transition:background 0.4s, color 0.4s; }
 
-    .top-bar { position:fixed; top:0; left:0; right:0; height:70px; display:flex; align-items:center; justify-content:space-between; padding:0 20px; background:rgba(0,0,0,0.6); backdrop-filter:blur(8px); z-index:1000; transition:background 0.3s; }
+    .top-bar { position:fixed; top:0; left:0; right:0; height:70px; display:flex; align-items:center; justify-content:space-between; padding:0 20px; background:rgba(0,0,0,0.6); backdrop-filter:blur(8px); z-index:1000; }
     body.light .top-bar { background:rgba(255,255,255,0.92); }
 
-    .site-name { font-size:1.8rem; font-weight:800; background:linear-gradient(90deg,#ffffff,#bbbbbb); -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; }
-    body.light .site-name { background:linear-gradient(90deg,#111111,#444444); -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; }
+    .site-name { font-size:1.8rem; font-weight:800; background:linear-gradient(90deg,#ffffff,#bbbbbb); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    body.light .site-name { background:linear-gradient(90deg,#111111,#444444); -webkit-background-clip:text; background-clip:text; color:transparent; }
 
     .burger { width:32px; height:24px; display:flex; flex-direction:column; justify-content:space-between; cursor:pointer; }
     .burger span { height:3px; width:100%; background:var(--text); border-radius:2px; transition:all 0.35s ease; }
@@ -53,7 +53,7 @@
     body.light .sidebar { background:rgba(255,255,255,0.5); }
     .sidebar.active { left:0; }
 
-    .sidebar a { display:block; color:var(--text-secondary); text-decoration:none; font-size:1.22rem; font-weight:600; margin:1.4rem 0; transition:all 0.25s; }
+    .sidebar a { display:block; color:var(--text-secondary); text-decoration:none; font-size:1.22rem; font-weight:600; margin:1.4rem 0; transition:all 0.25s; cursor:pointer; }
     .sidebar a:hover { color:var(--text); transform:translateX(8px); }
 
     .main-content { margin-top:90px; padding:20px; max-width:720px; margin-left:auto; margin-right:auto; }
@@ -61,7 +61,7 @@
     .section { display:none; opacity:0; transform:translateY(12px); transition:opacity 0.35s, transform 0.35s; }
     .section.active { display:block; opacity:1; transform:translateY(0); }
 
-    .card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:14px; padding:20px; margin-bottom:20px; transition:all 0.2s; }
+    .card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:14px; padding:20px; margin-bottom:20px; }
 
     input, textarea { width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--input-border); background:var(--input-bg); color:var(--text); font-size:1rem; outline:none; transition:border-color 0.2s; }
     input:focus, textarea:focus { border-color:var(--accent); }
@@ -69,8 +69,7 @@
     ::placeholder { color:var(--text-secondary); opacity:0.7; }
 
     button { padding:11px 20px; border:none; border-radius:10px; background:var(--btn-bg); color:white; font-weight:700; cursor:pointer; transition:all 0.22s; box-shadow:0 2px 8px rgba(0,0,0,0.2); }
-    button:hover { background:var(--btn-hover); opacity:0.92; transform:scale(1.03); }
-    button:active { transform:scale(0.97); }
+    button:hover { background:var(--btn-hover); transform:scale(1.03); }
 
     .feed { display:flex; flex-direction:column; gap:18px; }
 
@@ -78,64 +77,32 @@
     .post.show { opacity:1; transform:translateY(0); }
 
     .post-header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+    .avatar { width:48px; height:48px; border-radius:50%; background:#555; background-size:cover; background-position:center; flex-shrink:0; border:1px solid var(--card-border); cursor:pointer; }
+    .username { font-weight:700; font-size:1.05rem; cursor:pointer; color:var(--accent); }
 
-    .avatar { width:48px; height:48px; border-radius:50%; background:#555; background-size:cover; background-position:center; flex-shrink:0; border:1px solid var(--card-border); }
-    body.light .avatar { background:#ccc; }
-
-    .username { font-weight:700; font-size:1.05rem; }
-
-    .post-content { line-height:1.5; word-break:break-word; color:var(--text); }
-
+    .post-content { line-height:1.5; word-break:break-word; }
     .post-media img, .post-media video { width:100%; border-radius:12px; margin-top:12px; }
 
-    .post-footer { display:flex; gap:24px; margin-top:12px; }
-    .post-footer button { background:none; color:var(--text-secondary); font-size:0.95rem; padding:0; box-shadow:none; }
-    .post-footer button:hover { color:var(--text); transform:scale(1.1); }
-    .post-footer .like-btn { display:flex; align-items:center; gap:4px; }
-    .post-footer .like-btn.pulsed lottie-player { animation: pulse 0.5s; }
+    .post-footer { display:flex; gap:24px; margin-top:12px; flex-wrap:wrap; }
+    .post-footer button { background:none; color:var(--text-secondary); font-size:0.95rem; padding:0; }
+    .post-footer button:hover { color:var(--text); }
 
-    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
-
-    .modal { position:fixed; inset:0; background:rgba(0,0,0,0.75); display:none; align-items:center; justify-content:center; z-index:2000; }
-    body.light .modal { background:rgba(255,255,255,0.75); }
-    .modal.active { display:flex; }
-
-    .modal-content { background:var(--card-bg); border:1px solid var(--card-border); color:var(--text); width:92%; max-width:520px; border-radius:16px; padding:28px 24px; position:relative; }
-
-    .modal-content h2 { color:var(--text); margin-bottom:20px; }
-
-    .close-modal { position:absolute; top:16px; right:20px; font-size:2rem; cursor:pointer; color:var(--text-secondary); }
+    .chat-list, .user-list { display:flex; flex-direction:column; gap:12px; }
+    .chat-item, .user-item { display:flex; align-items:center; gap:12px; padding:12px; border-radius:12px; background:var(--card-bg); border:1px solid var(--card-border); cursor:pointer; transition:0.2s; }
+    .chat-item:hover, .user-item:hover { background:rgba(255,255,255,0.08); }
+    .chat-item .last-msg { font-size:0.9rem; color:var(--text-secondary); margin-top:3px; }
 
     .profile-header { display:flex; flex-wrap:wrap; gap:24px; align-items:flex-start; margin-bottom:32px; }
-
-    .profile-avatar { width:110px; height:110px; border-radius:50%; background:#444; background-size:cover; background-position:center; border:2px solid var(--card-border); cursor:pointer; transition:transform 0.2s; }
-    .profile-avatar:hover { transform:scale(1.05); }
+    .profile-avatar { width:110px; height:110px; border-radius:50%; background:#444; background-size:cover; border:2px solid var(--card-border); cursor:pointer; }
     body.light .profile-avatar { background:#ddd; }
 
-    .search-input { margin-bottom:20px; }
-    .user-list { display:flex; flex-direction:column; gap:12px; }
-    .user-item { display:flex; align-items:center; gap:12px; padding:8px; border-radius:10px; background:var(--card-bg); border:1px solid var(--card-border); cursor:pointer; }
-    .user-item:hover { background:var(--input-bg); }
-    .user-item .avatar { width:50px; height:50px; }
-    .user-item .name { font-weight:600; }
-    .user-item .follow-btn { margin-left:auto; padding:6px 12px; font-size:0.9rem; background:var(--accent); color:white; border-radius:8px; }
-
-    .chat-list { display:flex; flex-direction:column; gap:12px; }
-    .chat-item { display:flex; align-items:center; gap:12px; padding:8px; border-radius:10px; background:var(--card-bg); border:1px solid var(--card-border); cursor:pointer; }
-    .chat-item:hover { background:var(--input-bg); }
-
-    .chat-window { display:none; flex-direction:column; height:400px; border:1px solid var(--card-border); border-radius:12px; overflow:hidden; }
-    .chat-header { padding:12px; border-bottom:1px solid var(--card-border); display:flex; align-items:center; gap:8px; }
-    .chat-messages { flex:1; padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
-    .message { padding:8px 12px; border-radius:10px; max-width:80%; }
-    .message.sent { background:var(--accent); color:white; align-self:flex-end; }
-    .message.received { background:var(--input-bg); align-self:flex-start; }
-    .chat-input { display:flex; padding:12px; border-top:1px solid var(--card-border); }
-    .chat-input input { flex:1; margin-right:8px; }
-    .chat-input button { display:flex; align-items:center; gap:4px; }
+    .modal { position:fixed; inset:0; background:rgba(0,0,0,0.75); display:none; align-items:center; justify-content:center; z-index:2000; }
+    .modal.active { display:flex; }
+    .modal-content { background:var(--card-bg); border:1px solid var(--card-border); width:92%; max-width:520px; border-radius:16px; padding:28px 24px; position:relative; }
+    .close-modal { position:absolute; top:16px; right:20px; font-size:2.2rem; cursor:pointer; color:var(--text-secondary); }
 
     @media (max-width:900px) {
-      .sidebar { width:100%; left:-100%; border-right:none; }
+      .sidebar { width:100%; left:-100%; }
       .main-content { padding:16px; margin-top:80px; }
       .profile-header { flex-direction:column; align-items:center; text-align:center; }
     }
@@ -151,7 +118,7 @@
 <nav class="sidebar" id="sidebar">
   <a data-section="home">Головна</a>
   <a data-section="search">Пошук</a>
-  <a data-section="profile">Профіль</a>
+  <a data-section="profile">Мій профіль</a>
   <a data-section="chats">Чати</a>
   <a data-section="settings">Налаштування</a>
 </nav>
@@ -161,19 +128,20 @@
   <div id="home" class="section active">
     <div class="card" id="authBox">
       <div id="loginForm">
-        <input type="text" id="loginNickname" placeholder="Псевдонім" autocomplete="off"/>
+        <input type="text" id="loginNickname" placeholder="Псевдонім або email" autocomplete="off"/>
         <input type="password" id="loginPassword" placeholder="Пароль"/>
         <button id="loginBtn">Увійти</button>
-        <button id="googleLoginBtn" style="background:#4285F4; color:white; margin-top:12px; width:100%; padding:12px; border:none; border-radius:10px;">Увійти через Google</button>
-        <button id="appleLoginBtn" style="background:black; color:white; margin-top:12px; width:100%; padding:12px; border:none; border-radius:10px;">Увійти через Apple</button>
-        <p style="margin-top:12px;">Немає акаунта? <span id="toRegister" style="color:var(--accent);cursor:pointer;">Зареєструватися</span></p>
+        <button id="googleLoginBtn" style="background:#4285F4; margin:12px 0 8px; width:100%;">Google</button>
+        <button id="appleLoginBtn" style="background:#000; margin:0; width:100%;">Apple</button>
+        <p style="margin-top:16px; text-align:center;">Немає акаунта? <span id="toRegister" style="color:var(--accent);cursor:pointer;">Зареєструватися</span></p>
       </div>
 
       <div id="registerForm" style="display:none;">
-        <input type="text" id="registerNickname" placeholder="Псевдонім" autocomplete="off"/>
-        <input type="password" id="registerPassword" placeholder="Пароль"/>
+        <input type="text" id="registerNickname" placeholder="Псевдонім (унікальний)" autocomplete="off"/>
+        <input type="email" id="registerEmail" placeholder="Email (опціонально)"/>
+        <input type="password" id="registerPassword" placeholder="Пароль (мін. 6 символів)"/>
         <button id="registerBtn">Зареєструватися</button>
-        <p style="margin-top:12px;">Вже є акаунт? <span id="toLogin" style="color:var(--accent);cursor:pointer;">Увійти</span></p>
+        <p style="margin-top:16px; text-align:center;">Вже є акаунт? <span id="toLogin" style="color:var(--accent);cursor:pointer;">Увійти</span></p>
       </div>
     </div>
 
@@ -187,39 +155,22 @@
   </div>
 
   <div id="search" class="section">
-    <input type="text" id="searchInput" class="search-input" placeholder="Пошук користувачів..."/>
+    <input type="text" id="searchInput" class="search-input" placeholder="Пошук за @ніком..."/>
     <div class="user-list" id="userList"></div>
   </div>
 
   <div id="profile" class="section">
-    <div class="card profile-header">
-      <div class="profile-avatar" id="profileAvatar"></div>
-      <input type="file" id="avatarInput" accept="image/*" style="display:none;"/>
-      <div style="flex:1;">
-        <h2 id="profileUsernameDisplay"></h2>
-        <p id="profileBio" style="margin:8px 0;color:var(--text-secondary);">Немає опису</p>
-        <p id="profileStatus" style="margin:8px 0;color:var(--accent);">Онлайн</p>
-        <div style="display:flex;gap:20px;font-weight:600;color:var(--text-secondary);">
-          <span id="postsCount">Пости: 0</span>
-          <span id="followersCount">Підписники: 0</span>
-          <span id="followingCount">Підписки: 0</span>
-        </div>
-      </div>
-      <button id="editProfileBtn">Редагувати профіль</button>
-    </div>
+    <div class="card profile-header" id="profileContent"></div>
   </div>
 
   <div id="chats" class="section">
     <div class="chat-list" id="chatList"></div>
-    <div class="chat-window" id="chatWindow" style="display:none;">
+    <div class="chat-window" id="chatWindow" style="display:none; margin-top:20px;">
       <div class="chat-header" id="chatHeader"></div>
-      <div class="chat-messages" id="chatMessages"></div>
-      <div class="chat-input">
-        <input type="text" id="chatText" placeholder="Напишіть повідомлення..."/>
-        <button id="sendMessage">
-          <lottie-player src="https://lottie.host/4c45f979-7b26-4d5b-a930-90d4f5a1f7a6/5W9G0tXg7x.json" background="transparent" speed="1" style="width:24px; height:24px;" hover></lottie-player>
-          Відправити
-        </button>
+      <div class="chat-messages" id="chatMessages" style="height:380px; overflow-y:auto; padding:12px; background:var(--card-bg); border-radius:0 0 12px 12px;"></div>
+      <div class="chat-input" style="display:flex; padding:12px; border-top:1px solid var(--card-border);">
+        <input type="text" id="chatText" placeholder="Напишіть повідомлення..." style="flex:1; margin-right:8px;"/>
+        <button id="sendMessage">→</button>
       </div>
     </div>
   </div>
@@ -237,48 +188,25 @@
     <span class="close-modal" id="closeModal">×</span>
     <h2>Редагувати профіль</h2>
     <input type="text" id="editNickname" placeholder="Псевдонім"/>
-    <textarea id="editBio" placeholder="Розкажи про себе..." rows="5"></textarea>
-    <button id="saveProfileEdit" style="margin-top:16px;">Зберегти</button>
+    <textarea id="editBio" placeholder="Про себе..." rows="4"></textarea>
+    <button id="saveProfileEdit" style="margin-top:16px; width:100%;">Зберегти</button>
   </div>
 </div>
 
 <script type="module">
-  // ──────────────────────────────────────────────
-  // Firebase SDK (модульний, саме той config, що ти скинув)
-  // ──────────────────────────────────────────────
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
   import {
-    getAuth,
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    onAuthStateChanged,
-    signOut,
-    GoogleAuthProvider,
-    OAuthProvider,
-    signInWithPopup
+    getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+    onAuthStateChanged, signOut, GoogleAuthProvider, OAuthProvider, signInWithPopup,
+    updateProfile
   } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
   import {
-    getFirestore,
-    doc,
-    setDoc,
-    getDoc,
-    getDocs,
-    updateDoc,
-    collection,
-    addDoc,
-    query,
-    where,
-    onSnapshot,
-    orderBy,
-    serverTimestamp,
-    arrayUnion,
-    arrayRemove
+    getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc,
+    query, where, onSnapshot, orderBy, serverTimestamp, arrayUnion, arrayRemove,
+    runTransaction
   } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
   import {
-    getStorage,
-    ref,
-    uploadBytes,
-    getDownloadURL
+    getStorage, ref, uploadBytes, getDownloadURL
   } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
   const firebaseConfig = {
@@ -297,61 +225,73 @@
 
   let currentUser = null;
   let currentChatPartner = null;
+  let currentChatId = null;
   let unsubscribeFeed = null;
+  let unsubscribeChats = null;
   let unsubscribeChat = null;
 
-  // ──────────────────────────────────────────────
-  // Burger + sidebar
-  // ──────────────────────────────────────────────
+  // ─── Burger & Navigation ────────────────────────────────────────
   document.getElementById('burger').onclick = () => {
     document.getElementById('burger').classList.toggle('active');
     document.getElementById('sidebar').classList.toggle('active');
   };
 
-  document.querySelectorAll('[data-section]').forEach(link => {
-    link.onclick = () => {
+  document.querySelectorAll('[data-section]').forEach(a => {
+    a.onclick = () => {
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      document.getElementById(link.dataset.section).classList.add('active');
+      document.getElementById(a.dataset.section).classList.add('active');
       document.getElementById('sidebar').classList.remove('active');
       document.getElementById('burger').classList.remove('active');
-      if (link.dataset.section === 'search') loadSearchUsers();
-      if (link.dataset.section === 'chats') loadChatList();
-      if (link.dataset.section === 'profile') loadProfile();
+
+      if (a.dataset.section === 'search') loadSearchUsers();
+      if (a.dataset.section === 'chats') loadChatList();
+      if (a.dataset.section === 'profile') loadMyProfile();
     };
   });
 
-  // ──────────────────────────────────────────────
-  // Перемикання форм
-  // ──────────────────────────────────────────────
+  // ─── Auth Forms Toggle ──────────────────────────────────────────
   document.getElementById('toRegister').onclick = () => {
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('registerForm').style.display = 'block';
   };
-
   document.getElementById('toLogin').onclick = () => {
     document.getElementById('registerForm').style.display = 'none';
     document.getElementById('loginForm').style.display = 'block';
   };
 
-  // ──────────────────────────────────────────────
-  // Реєстрація (псевдонім → email)
-  // ──────────────────────────────────────────────
+  // ─── Registration ───────────────────────────────────────────────
   document.getElementById('registerBtn').onclick = async () => {
-    const nickname = document.getElementById('registerNickname').value.trim();
-    const password = document.getElementById('registerPassword').value.trim();
+    const nick = document.getElementById('registerNickname').value.trim();
+    const email = document.getElementById('registerEmail').value.trim() || null;
+    const pass = document.getElementById('registerPassword').value;
 
-    if (!nickname) return alert('Введіть псевдонім');
-    if (password.length < 6) return alert('Пароль мінімум 6 символів');
+    if (!nick) return alert("Вкажіть псевдонім");
+    if (pass.length < 6) return alert("Пароль мінімум 6 символів");
 
     try {
-      const safeNick = nickname.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const email = `${safeNick}@fantasyas.local`;
+      let cred;
+      if (email) {
+        cred = await createUserWithEmailAndPassword(auth, email, pass);
+      } else {
+        const fakeEmail = `${nick.toLowerCase().replace(/[^a-z0-9]/g,'')}@fantasy.local`;
+        cred = await createUserWithEmailAndPassword(auth, fakeEmail, pass);
+      }
 
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
       const uid = cred.user.uid;
 
+      // Унікальність ніку
+      await runTransaction(db, async (transaction) => {
+        const usernameRef = doc(db, "usernames", nick.toLowerCase());
+        if ((await transaction.get(usernameRef)).exists()) {
+          throw new Error("Такий псевдонім вже зайнятий");
+        }
+        transaction.set(usernameRef, { uid });
+      });
+
       await setDoc(doc(db, "users", uid), {
-        nickname,
+        nickname: nick,
+        nickname_lower: nick.toLowerCase(),
+        email: cred.user.email,
         bio: "",
         avatar: "",
         posts: [],
@@ -360,188 +300,121 @@
         createdAt: serverTimestamp()
       });
 
-      alert('Реєстрація успішна! Увійдіть.');
+      alert("Реєстрація успішна!");
       document.getElementById('toLogin').click();
-      document.getElementById('loginNickname').value = nickname;
     } catch (e) {
-      if (e.code === 'auth/email-already-in-use') alert('Такий псевдонім вже зайнятий');
-      else alert(e.message || 'Помилка');
+      alert(e.message.includes("зайнятий") ? "Псевдонім вже використовується" : e.message);
     }
   };
 
-  // ──────────────────────────────────────────────
-  // Вхід (псевдонім + пароль)
-  // ──────────────────────────────────────────────
+  // ─── Login ──────────────────────────────────────────────────────
   document.getElementById('loginBtn').onclick = async () => {
-    const nickname = document.getElementById('loginNickname').value.trim();
-    const password = document.getElementById('loginPassword').value.trim();
+    let identifier = document.getElementById('loginNickname').value.trim();
+    const pass = document.getElementById('loginPassword').value;
 
-    if (!nickname || !password) return alert('Заповніть поля');
+    if (!identifier || !pass) return alert("Заповніть поля");
 
     try {
-      const safeNick = nickname.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const email = `${safeNick}@fantasyas.local`;
-
-      await signInWithEmailAndPassword(auth, email, password);
+      let email = identifier;
+      if (!identifier.includes("@")) {
+        const q = query(collection(db, "users"), where("nickname_lower", "==", identifier.toLowerCase()));
+        const snap = await getDocs(q);
+        if (snap.empty) throw new Error("Користувача не знайдено");
+        email = snap.docs[0].data().email;
+      }
+      await signInWithEmailAndPassword(auth, email, pass);
     } catch (e) {
-      alert('Невірний псевдонім або пароль');
+      alert("Невірний логін/пароль або користувача не знайдено");
     }
   };
 
-  // ──────────────────────────────────────────────
-  // Google Login
-  // ──────────────────────────────────────────────
+  // Google & Apple
   document.getElementById('googleLoginBtn').onclick = async () => {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (!userDoc.exists()) {
-        await setDoc(doc(db, "users", user.uid), {
-          nickname: user.displayName || user.email.split('@')[0],
-          bio: "",
-          avatar: user.photoURL || "",
-          posts: [],
-          followers: [],
-          following: [],
-          createdAt: serverTimestamp()
-        });
-      }
-    } catch (e) {
-      alert('Помилка Google: ' + e.message);
-    }
+      await handleSocialLogin(result.user);
+    } catch (e) { alert("Google: " + e.message); }
   };
 
-  // ──────────────────────────────────────────────
-  // Apple Login
-  // ──────────────────────────────────────────────
   document.getElementById('appleLoginBtn').onclick = async () => {
     const provider = new OAuthProvider('apple.com');
-    provider.addScope('email name');
     try {
       const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (!userDoc.exists()) {
-        await setDoc(doc(db, "users", user.uid), {
-          nickname: user.displayName || user.email.split('@')[0],
-          bio: "",
-          avatar: user.photoURL || "",
-          posts: [],
-          followers: [],
-          following: [],
-          createdAt: serverTimestamp()
-        });
-      }
-    } catch (e) {
-      alert('Помилка Apple: ' + e.message);
-    }
+      await handleSocialLogin(result.user);
+    } catch (e) { alert("Apple: " + e.message); }
   };
 
-  // ──────────────────────────────────────────────
-  // Слухач авторизації
-  // ──────────────────────────────────────────────
-  onAuthStateChanged(auth, async (user) => {
+  async function handleSocialLogin(user) {
+    const userRef = doc(db, "users", user.uid);
+    const snap = await getDoc(userRef);
+    if (!snap.exists()) {
+      const nick = user.displayName?.split(" ")[0] || user.email.split("@")[0];
+      let finalNick = nick;
+      let counter = 1;
+      while (true) {
+        const usernameRef = doc(db, "usernames", finalNick.toLowerCase());
+        if (!(await getDoc(usernameRef)).exists()) break;
+        finalNick = `${nick}${counter++}`;
+      }
+
+      await runTransaction(db, async t => {
+        t.set(doc(db, "usernames", finalNick.toLowerCase()), { uid: user.uid });
+      });
+
+      await setDoc(userRef, {
+        nickname: finalNick,
+        nickname_lower: finalNick.toLowerCase(),
+        email: user.email,
+        bio: "",
+        avatar: user.photoURL || "",
+        posts: [],
+        followers: [],
+        following: [],
+        createdAt: serverTimestamp()
+      });
+    }
+  }
+
+  onAuthStateChanged(auth, user => {
+    currentUser = user;
     if (user) {
-      currentUser = user;
       document.getElementById('authBox').style.display = 'none';
       document.getElementById('newPostBox').style.display = 'block';
-
       subscribeToFeed();
-      loadProfile();
+      loadMyProfile();
     } else {
-      currentUser = null;
       document.getElementById('authBox').style.display = 'block';
       document.getElementById('newPostBox').style.display = 'none';
       if (unsubscribeFeed) unsubscribeFeed();
     }
   });
 
-  // ──────────────────────────────────────────────
-  // Публікація поста з медіа
-  // ──────────────────────────────────────────────
-  document.getElementById('addPost').onclick = async () => {
-    if (!currentUser) return alert('Спочатку увійдіть');
-
-    const text = document.getElementById('postText').value.trim();
-    const file = document.getElementById('postMedia').files[0];
-
-    if (!text && !file) return alert('Додайте текст або медіа');
-
-    try {
-      let mediaUrl = '';
-      if (file) {
-        const storageRef = ref(storage, `posts/${currentUser.uid}/${Date.now()}_${file.name}`);
-        await uploadBytes(storageRef, file);
-        mediaUrl = await getDownloadURL(storageRef);
-      }
-
-      const postRef = await addDoc(collection(db, "posts"), {
-        author: currentUser.uid,
-        text,
-        mediaUrl,
-        mediaType: file ? file.type.split('/')[0] : '',
-        createdAt: serverTimestamp(),
-        likes: [],
-        comments: []
-      });
-
-      await updateDoc(doc(db, "users", currentUser.uid), {
-        posts: arrayUnion(postRef.id)
-      });
-
-      document.getElementById('postText').value = '';
-      document.getElementById('postMedia').value = '';
-      alert('Пост опубліковано!');
-    } catch (e) {
-      alert('Помилка: ' + e.message);
-    }
-  };
-
-  // ──────────────────────────────────────────────
-  // Стрічка постів
-  // ──────────────────────────────────────────────
+  // ─── Feed ───────────────────────────────────────────────────────
   function subscribeToFeed() {
     if (unsubscribeFeed) unsubscribeFeed();
-
     const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-    unsubscribeFeed = onSnapshot(q, async (snapshot) => {
+    unsubscribeFeed = onSnapshot(q, async snap => {
       const feed = document.getElementById('feed');
       feed.innerHTML = '';
       let delay = 0;
-
-      for (const docSnap of snapshot.docs) {
-        const post = docSnap.data();
+      for (const d of snap.docs) {
+        const post = d.data();
         const authorSnap = await getDoc(doc(db, "users", post.author));
-        const author = authorSnap.exists() ? authorSnap.data() : { nickname: 'Користувач' };
-        const id = docSnap.id;
-        const isOwn = post.author === currentUser?.uid;
-        const liked = post.likes?.includes(currentUser?.uid) || false;
+        const author = authorSnap.exists() ? authorSnap.data() : { nickname:"—", avatar:"" };
 
         const postEl = document.createElement('div');
         postEl.className = 'post';
         postEl.innerHTML = `
           <div class="post-header">
-            <div class="avatar" style="background-image:url(${author.avatar || ''})"></div>
-            <div class="username">@${author.nickname}</div>
-            ${isOwn ? `<button class="menu-btn" data-post-id="${id}">⋯</button>` : ''}
+            <div class="avatar" style="background-image:url(${author.avatar})" data-uid="${post.author}"></div>
+            <div class="username" data-uid="${post.author}">@${author.nickname}</div>
           </div>
-          <div class="post-content">${post.text.replace(/\n/g, '<br>')}</div>
-          ${post.mediaUrl ? `
-            ${post.mediaType === 'image' ? `<img src="${post.mediaUrl}" class="post-media">` : 
-              `<video src="${post.mediaUrl}" controls class="post-media"></video>`}
-          ` : ''}
+          <div class="post-content">${(post.text||'').replace(/\n/g,'<br>')}</div>
+          ${post.mediaUrl ? (post.mediaType==='image' ? `<img src="${post.mediaUrl}" class="post-media">` : `<video src="${post.mediaUrl}" controls class="post-media"></video>`) : ''}
           <div class="post-footer">
-            <button class="like-btn ${liked ? 'liked' : ''}" data-post-id="${id}">
-              <lottie-player id="like-player-${id}" src="https://lottie.host/4c45f979-7b26-4d5b-a930-90d4f5a1f7a6/5W9G0tXg7x.json" background="transparent" speed="1" style="width:24px; height:24px;"></lottie-player>
-              ${post.likes?.length || 0}
-            </button>
+            <button>❤️ ${post.likes?.length || 0}</button>
             <button>💬 ${post.comments?.length || 0}</button>
-            <button>🔗 Поділитися</button>
-            <button>😀 Емоджі</button>
           </div>
         `;
 
@@ -552,127 +425,91 @@
     });
   }
 
-  // Event delegation for likes and menu
-  document.getElementById('feed').addEventListener('click', async (e) => {
-    if (e.target.closest('.like-btn')) {
-      const btn = e.target.closest('.like-btn');
-      const postId = btn.dataset.postId;
-      const player = document.getElementById(`like-player-${postId}`);
-      player.play();
-      btn.classList.add('pulsed');
-      setTimeout(() => btn.classList.remove('pulsed'), 500);
-      await toggleLike(postId);
-    } else if (e.target.closest('.menu-btn')) {
-      const postId = e.target.closest('.menu-btn').dataset.postId;
-      if (confirm('Видалити пост?')) {
-        await deleteDoc(doc(db, "posts", postId));
-        await updateDoc(doc(db, "users", currentUser.uid), { posts: arrayRemove(postId) });
-      }
-    }
+  // ─── Profile (my & others) ──────────────────────────────────────
+  document.getElementById('feed').addEventListener('click', e => {
+    const uid = e.target.dataset.uid;
+    if (uid) openProfile(uid);
   });
 
-  async function toggleLike(postId) {
-    const postRef = doc(db, "posts", postId);
-    const snap = await getDoc(postRef);
-    const likes = snap.data().likes || [];
-    if (likes.includes(currentUser.uid)) {
-      await updateDoc(postRef, { likes: arrayRemove(currentUser.uid) });
+  async function openProfile(uid) {
+    if (uid === currentUser?.uid) {
+      loadMyProfile();
+      document.querySelector('[data-section="profile"]').click();
+      return;
+    }
+
+    const userSnap = await getDoc(doc(db, "users", uid));
+    if (!userSnap.exists()) return alert("Користувача не знайдено");
+
+    const data = userSnap.data();
+    renderProfile(data, uid, false);
+  }
+
+  async function loadMyProfile() {
+    if (!currentUser) return;
+    const snap = await getDoc(doc(db, "users", currentUser.uid));
+    if (snap.exists()) renderProfile(snap.data(), currentUser.uid, true);
+  }
+
+  function renderProfile(data, uid, isOwn) {
+    const container = document.getElementById('profileContent');
+    container.innerHTML = `
+      <div class="profile-avatar" id="profileAvatar" style="background-image:url(${data.avatar||''})"></div>
+      <div style="flex:1;">
+        <h2>@${data.nickname}</h2>
+        <p style="margin:8px 0; color:var(--text-secondary);">${data.bio || 'Немає опису'}</p>
+        <div style="display:flex; gap:24px; font-weight:600; color:var(--text-secondary);">
+          <span>Пости: ${data.posts?.length || 0}</span>
+          <span>Підписники: ${data.followers?.length || 0}</span>
+          <span>Підписки: ${data.following?.length || 0}</span>
+        </div>
+      </div>
+      ${isOwn ? `<button id="editProfileBtn">Редагувати</button>` : `<button id="followBtn">${data.followers?.includes(currentUser?.uid) ? 'Відписатися' : 'Підписатися'}</button>`}
+    `;
+
+    if (isOwn) {
+      document.getElementById('profileAvatar').onclick = () => document.getElementById('avatarInput')?.click?.();
+      document.getElementById('editProfileBtn').onclick = () => {
+        document.getElementById('editNickname').value = data.nickname;
+        document.getElementById('editBio').value = data.bio || '';
+        document.getElementById('editProfileModal').classList.add('active');
+      };
     } else {
-      await updateDoc(postRef, { likes: arrayUnion(currentUser.uid) });
+      document.getElementById('followBtn').onclick = () => toggleFollow(uid);
     }
   }
 
-  // ──────────────────────────────────────────────
-  // Профіль та аватар
-  // ──────────────────────────────────────────────
-  document.getElementById('profileAvatar').onclick = () => {
-    if (!currentUser) return alert('Увійдіть');
-    document.getElementById('avatarInput').click();
-  };
+  // ─── Edit Profile ───────────────────────────────────────────────
+  document.getElementById('saveProfileEdit').onclick = async () => {
+    const nick = document.getElementById('editNickname').value.trim();
+    const bio = document.getElementById('editBio').value.trim();
 
-  document.getElementById('avatarInput').onchange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    if (!nick) return alert("Псевдонім не може бути порожнім");
 
     try {
-      const storageRef = ref(storage, `avatars/${currentUser.uid}`);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
+      if (nick.toLowerCase() !== currentUser.displayName?.toLowerCase()) {
+        await runTransaction(db, async t => {
+          const oldRef = doc(db, "usernames", currentUser.displayName?.toLowerCase() || "");
+          const newRef = doc(db, "usernames", nick.toLowerCase());
+          if ((await t.get(newRef)).exists()) throw new Error("Нік зайнятий");
+          if (oldRef.id) t.delete(oldRef);
+          t.set(newRef, { uid: currentUser.uid });
+        });
+      }
 
-      await updateDoc(doc(db, "users", currentUser.uid), { avatar: url });
-      document.getElementById('profileAvatar').style.backgroundImage = `url(${url})`;
-    } catch (err) {
-      alert('Помилка завантаження');
+      await updateDoc(doc(db, "users", currentUser.uid), { nickname: nick, nickname_lower: nick.toLowerCase(), bio });
+      document.getElementById('editProfileModal').classList.remove('active');
+      loadMyProfile();
+    } catch (e) {
+      alert(e.message.includes("зайнятий") ? "Такий псевдонім вже використовується" : e.message);
     }
   };
 
-  async function loadProfile() {
-    if (!currentUser) return;
-    const userRef = doc(db, "users", currentUser.uid);
-    const snap = await getDoc(userRef);
-    if (snap.exists()) {
-      const data = snap.data();
-      document.getElementById('profileUsernameDisplay').textContent = data.nickname;
-      document.getElementById('profileBio').textContent = data.bio || 'Немає опису';
-      document.getElementById('profileAvatar').style.backgroundImage = `url(${data.avatar || ''})`;
-      document.getElementById('postsCount').textContent = `Пости: ${data.posts?.length || 0}`;
-      document.getElementById('followersCount').textContent = `Підписники: ${data.followers?.length || 0}`;
-      document.getElementById('followingCount').textContent = `Підписки: ${data.following?.length || 0}`;
-    }
-  }
+  document.getElementById('closeModal').onclick = () => document.getElementById('editProfileModal').classList.remove('active');
 
-  // ──────────────────────────────────────────────
-  // Пошук користувачів
-  // ──────────────────────────────────────────────
-  function debounce(fn, ms) {
-    let t;
-    return () => {
-      clearTimeout(t);
-      t = setTimeout(fn, ms);
-    };
-  }
-
-  async function loadSearchUsers() {
-    const input = document.getElementById('searchInput');
-    const userList = document.getElementById('userList');
-
-    const myRef = doc(db, "users", currentUser.uid);
-    const mySnap = await getDoc(myRef);
-    const myFollowing = mySnap.data().following || [];
-
-    input.oninput = debounce(async () => {
-      const val = input.value.trim().toLowerCase();
-      if (!val) {
-        userList.innerHTML = '';
-        return;
-      }
-
-      const q = query(collection(db, "users"), where("nickname", ">=", val), where("nickname", "<=", val + '\uf8ff'));
-      const snap = await getDocs(q);
-      userList.innerHTML = '';
-
-      snap.forEach((docSnap) => {
-        if (docSnap.id === currentUser.uid) return;
-        const data = docSnap.data();
-        const isFollowing = myFollowing.includes(docSnap.id);
-        const item = document.createElement('div');
-        item.className = 'user-item';
-        item.innerHTML = `
-          <div class="avatar" style="background-image:url(${data.avatar || ''})"></div>
-          <div class="name">@${data.nickname}</div>
-          <button class="follow-btn">${isFollowing ? 'Відписатися' : 'Підписатися'}</button>
-        `;
-        item.querySelector('.follow-btn').onclick = async () => {
-          await toggleFollow(docSnap.id);
-          loadSearchUsers();
-        };
-        item.onclick = () => openChat(data.nickname, docSnap.id);
-        userList.appendChild(item);
-      });
-    }, 300);
-  }
-
+  // ─── Follow / Unfollow ──────────────────────────────────────────
   async function toggleFollow(targetUid) {
+    if (!currentUser) return alert("Увійдіть");
     const myRef = doc(db, "users", currentUser.uid);
     const targetRef = doc(db, "users", targetUid);
 
@@ -686,108 +523,191 @@
       await updateDoc(myRef, { following: arrayUnion(targetUid) });
       await updateDoc(targetRef, { followers: arrayUnion(currentUser.uid) });
     }
+
+    // оновлюємо профіль, якщо відкритий
+    if (document.getElementById('profile').classList.contains('active')) {
+      openProfile(targetUid);
+    }
   }
 
-  // ──────────────────────────────────────────────
-  // Чати (1-на-1)
-  // ──────────────────────────────────────────────
-  function getChatId(uid1, uid2) {
-    return [uid1, uid2].sort().join('_');
+  // ─── Search ─────────────────────────────────────────────────────
+  function debounce(fn, ms = 350) {
+    let timer;
+    return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), ms); };
   }
 
+  const searchHandler = debounce(async () => {
+    const val = document.getElementById('searchInput').value.trim().toLowerCase();
+    const list = document.getElementById('userList');
+    list.innerHTML = '';
+
+    if (val.length < 2) return;
+
+    const q = query(
+      collection(db, "users"),
+      where("nickname_lower", ">=", val),
+      where("nickname_lower", "<=", val + '\uf8ff')
+    );
+
+    const snap = await getDocs(q);
+    snap.forEach(d => {
+      if (d.id === currentUser?.uid) return;
+      const data = d.data();
+      const item = document.createElement('div');
+      item.className = 'user-item';
+      item.innerHTML = `
+        <div class="avatar" style="background-image:url(${data.avatar||''})" data-uid="${d.id}"></div>
+        <div>@${data.nickname}</div>
+        <button style="margin-left:auto; padding:6px 14px; font-size:0.9rem;" data-uid="${d.id}">
+          ${data.followers?.includes(currentUser?.uid) ? 'Відписатися' : 'Підписатися'}
+        </button>
+      `;
+      item.querySelector('button').onclick = e => {
+        e.stopPropagation();
+        toggleFollow(d.id);
+      };
+      item.onclick = () => openProfile(d.id);
+      list.appendChild(item);
+    });
+  });
+
+  document.getElementById('searchInput').oninput = searchHandler;
+
+  // ─── Chats ──────────────────────────────────────────────────────
   async function loadChatList() {
-    const chatList = document.getElementById('chatList');
-    chatList.innerHTML = '';
+    if (unsubscribeChats) unsubscribeChats();
 
-    // Приклад: показуємо всіх користувачів (можна оптимізувати)
-    const q = query(collection(db, "users"));
-    onSnapshot(q, snapshot => {
-      chatList.innerHTML = '';
-      snapshot.forEach(docSnap => {
-        if (docSnap.id === currentUser.uid) return;
-        const data = docSnap.data();
+    const myChatsQ = query(
+      collection(db, "chats"),
+      where("participants", "array-contains", currentUser.uid),
+      orderBy("lastMessageTime", "desc")
+    );
+
+    unsubscribeChats = onSnapshot(myChatsQ, async snap => {
+      const container = document.getElementById('chatList');
+      container.innerHTML = '';
+
+      if (snap.empty) {
+        container.innerHTML = '<p style="text-align:center; color:var(--text-secondary);">Ще немає чатів</p>';
+        return;
+      }
+
+      for (const d of snap.docs) {
+        const chat = d.data();
+        const otherId = chat.participants.find(id => id !== currentUser.uid);
+        const otherSnap = await getDoc(doc(db, "users", otherId));
+        const other = otherSnap.exists() ? otherSnap.data() : { nickname:"—", avatar:"" };
+
         const item = document.createElement('div');
         item.className = 'chat-item';
         item.innerHTML = `
-          <div class="avatar" style="background-image:url(${data.avatar || ''})"></div>
-          <div><div class="name">@${data.nickname}</div></div>
+          <div class="avatar" style="background-image:url(${other.avatar})"></div>
+          <div>
+            <div>@${other.nickname}</div>
+            <div class="last-msg">${(chat.lastMessage?.text || "Немає повідомлень").substring(0,38)}${(chat.lastMessage?.text?.length > 38)?'...':''}</div>
+          </div>
         `;
-        item.onclick = () => openChat(data.nickname, docSnap.id);
-        chatList.appendChild(item);
-      });
+        item.onclick = () => openChat(other.nickname, otherId, d.id);
+        container.appendChild(item);
+      }
     });
   }
 
-  function openChat(name, uid) {
+  function openChat(name, uid, chatId) {
     currentChatPartner = uid;
-    document.getElementById('chatWindow').style.display = 'flex';
-    document.getElementById('chatHeader').innerHTML = `<div class="name">@${name}</div>`;
-    subscribeToChat(uid);
-  }
+    currentChatId = chatId;
+    document.getElementById('chatWindow').style.display = 'block';
+    document.getElementById('chatHeader').textContent = `@${name}`;
 
-  function subscribeToChat(otherUid) {
     if (unsubscribeChat) unsubscribeChat();
 
-    const chatId = getChatId(currentUser.uid, otherUid);
-    const q = query(collection(db, `messages/${chatId}/chat`), orderBy("createdAt"));
-
-    unsubscribeChat = onSnapshot(q, snap => {
-      const messages = document.getElementById('chatMessages');
-      messages.innerHTML = '';
+    const msgQ = query(collection(db, `chats/${chatId}/messages`), orderBy("createdAt"));
+    unsubscribeChat = onSnapshot(msgQ, snap => {
+      const container = document.getElementById('chatMessages');
+      container.innerHTML = '';
       snap.forEach(m => {
         const msg = m.data();
         const div = document.createElement('div');
-        div.className = `message ${msg.from === currentUser.uid ? 'sent' : 'received'}`;
+        div.style.cssText = `
+          align-self: ${msg.from === currentUser.uid ? 'flex-end' : 'flex-start'};
+          background: ${msg.from === currentUser.uid ? 'var(--accent)' : 'var(--input-bg)'};
+          color: ${msg.from === currentUser.uid ? '#fff' : 'var(--text)'};
+          padding: 9px 14px;
+          border-radius: 18px;
+          max-width: 76%;
+          margin: 4px 0;
+        `;
         div.textContent = msg.text;
-        messages.appendChild(div);
+        container.appendChild(div);
       });
-      messages.scrollTop = messages.scrollHeight;
+      container.scrollTop = container.scrollHeight;
     });
   }
 
   document.getElementById('sendMessage').onclick = async () => {
     const text = document.getElementById('chatText').value.trim();
-    if (!text || !currentChatPartner) return;
+    if (!text || !currentChatId) return;
 
-    const chatId = getChatId(currentUser.uid, currentChatPartner);
-    await addDoc(collection(db, `messages/${chatId}/chat`), {
+    const msgRef = collection(db, `chats/${currentChatId}/messages`);
+    await addDoc(msgRef, {
       from: currentUser.uid,
       text,
       createdAt: serverTimestamp()
     });
+
+    await updateDoc(doc(db, "chats", currentChatId), {
+      lastMessage: { text, from: currentUser.uid, createdAt: serverTimestamp() },
+      lastMessageTime: serverTimestamp()
+    });
+
     document.getElementById('chatText').value = '';
   };
 
-  // ──────────────────────────────────────────────
-  // Інші функції (тема, вихід, редагування біо)
-  // ──────────────────────────────────────────────
+  // ─── New Post ───────────────────────────────────────────────────
+  document.getElementById('addPost').onclick = async () => {
+    if (!currentUser) return;
+
+    const text = document.getElementById('postText').value.trim();
+    const file = document.getElementById('postMedia').files[0];
+
+    if (!text && !file) return alert("Додайте текст або медіа");
+
+    let mediaUrl = '';
+    if (file) {
+      const r = ref(storage, `posts/${currentUser.uid}/${Date.now()}_${file.name}`);
+      await uploadBytes(r, file);
+      mediaUrl = await getDownloadURL(r);
+    }
+
+    const postRef = await addDoc(collection(db, "posts"), {
+      author: currentUser.uid,
+      text,
+      mediaUrl,
+      mediaType: file ? file.type.split('/')[0] : '',
+      createdAt: serverTimestamp(),
+      likes: [],
+      comments: []
+    });
+
+    await updateDoc(doc(db, "users", currentUser.uid), {
+      posts: arrayUnion(postRef.id)
+    });
+
+    document.getElementById('postText').value = '';
+    document.getElementById('postMedia').value = '';
+  };
+
+  // ─── Theme & Logout ─────────────────────────────────────────────
   document.getElementById('toggleTheme').onclick = () => {
     document.body.classList.toggle('light');
     localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
   };
-
   if (localStorage.getItem('theme') === 'light') document.body.classList.add('light');
 
   document.getElementById('logoutBtn').onclick = () => signOut(auth);
 
-  // Редагування профілю (біо + ім'я)
-  document.getElementById('editProfileBtn').onclick = () => {
-    document.getElementById('editNickname').value = document.getElementById('profileUsernameDisplay').textContent;
-    document.getElementById('editBio').value = document.getElementById('profileBio').textContent !== 'Немає опису' ? document.getElementById('profileBio').textContent : '';
-    document.getElementById('editProfileModal').classList.add('active');
-  };
-  document.getElementById('closeModal').onclick = () => document.getElementById('editProfileModal').classList.remove('active');
-
-  document.getElementById('saveProfileEdit').onclick = async () => {
-    const nickname = document.getElementById('editNickname').value.trim();
-    const bio = document.getElementById('editBio').value.trim();
-    if (!nickname) return alert('Псевдонім не може бути порожнім');
-    await updateDoc(doc(db, "users", currentUser.uid), { nickname, bio });
-    loadProfile();
-    document.getElementById('editProfileModal').classList.remove('active');
-  };
-
+  // Початкове завантаження профілю після авторизації
+  loadMyProfile();
 </script>
 </body>
 </html>
-```-4

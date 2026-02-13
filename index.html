@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>FANTASYAS · чорно-білий</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <script src="https://unpkg.com/@lottiefiles/lottie-player@1.7.1/dist/lottie-player.js"></script>
   <style>
     * {
       margin: 0;
@@ -221,8 +220,18 @@
       background-size: cover;
       background-position: center;
       border: 2px solid var(--border);
+      cursor: pointer;
+      transition: 0.2s;
     }
-    .username { font-weight: 700; font-size: 1.15rem; }
+    .avatar:hover { border-color: var(--accent); }
+    .username {
+      font-weight: 700;
+      font-size: 1.15rem;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .username:hover { text-decoration: underline; }
     .menu-btn {
       margin-left: auto;
       font-size: 2rem;
@@ -266,13 +275,22 @@
     }
     .post-footer button:hover { background: var(--hover); color: var(--text); border: none; }
 
-    /* Анімований лайк */
-    .like-btn lottie-player {
-      width: 32px;
-      height: 32px;
+    /* Кнопка підписки під постом */
+    .subscribe-post-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      padding: 6px 16px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-left: 16px;
+      cursor: pointer;
+      transition: 0.2s;
     }
-    .like-btn.liked lottie-player {
-      filter: drop-shadow(0 0 6px #aaa);
+    .subscribe-post-btn:hover {
+      background: var(--accent);
+      color: black;
+      border-color: var(--accent);
     }
 
     /* Коментарі */
@@ -299,7 +317,8 @@
       flex: 1;
       border: 1px solid var(--border);
     }
-    .comment-author { font-weight: 700; margin-right: 8px; }
+    .comment-author { font-weight: 700; margin-right: 8px; cursor: pointer; }
+    .comment-author:hover { text-decoration: underline; }
 
     .comment-input-area {
       display: flex;
@@ -357,6 +376,7 @@
       font-weight: 700;
       padding: 8px 22px;
       border-radius: 40px;
+      border: none;
     }
 
     /* Чат */
@@ -374,7 +394,11 @@
       padding: 20px;
       border-bottom: 1px solid var(--border);
       font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
+    .chat-header .avatar { width: 40px; height: 40px; }
     .chat-messages {
       flex: 1;
       padding: 20px;
@@ -413,7 +437,7 @@
     }
     .chat-input input { flex: 1; margin-right: 16px; border-radius: 40px; }
 
-    /* Профіль */
+    /* Профіль (свій та чужий) */
     .profile-header {
       display: flex;
       flex-wrap: wrap;
@@ -531,23 +555,9 @@
     <div class="user-list" id="userList"></div>
   </div>
 
-  <!-- ПРОФІЛЬ -->
+  <!-- ПРОФІЛЬ (динамічний) -->
   <div id="profile" class="section">
-    <div class="card profile-header">
-      <div class="profile-avatar" id="profileAvatar"></div>
-      <input type="file" id="avatarInput" accept="image/*" style="display:none;"/>
-      <div style="flex:1;">
-        <h2 id="profileUsernameDisplay"></h2>
-        <p id="profileBio" style="color:var(--text-sec); margin:10px 0;">Опис відсутній</p>
-        <p id="profileStatus" style="color:var(--accent);">🟢 Онлайн</p>
-        <div style="display:flex; gap:25px; font-weight:600;">
-          <span id="postsCount">0 постів</span>
-          <span id="followersCount">0 підписників</span>
-          <span id="followingCount">0 підписок</span>
-        </div>
-      </div>
-      <button id="editProfileBtn">Редагувати</button>
-    </div>
+    <!-- профіль буде заповнюватись динамічно, але поки заглушка -->
   </div>
 
   <!-- ЧАТИ -->
@@ -617,6 +627,7 @@
   let unsubscribeFeed = null;
   let unsubscribeChat = null;
   let currentEditPostId = null;
+  let viewingProfileUid = null; // uid користувача, чий профіль зараз переглядаємо
 
   // helpers
   const getChatId = (uid1, uid2) => [uid1, uid2].sort().join('_');
@@ -630,13 +641,22 @@
   // навігація
   document.querySelectorAll('[data-section]').forEach(link => {
     link.onclick = () => {
+      const sectionId = link.dataset.section;
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      document.getElementById(link.dataset.section).classList.add('active');
+      document.getElementById(sectionId).classList.add('active');
       document.getElementById('sidebar').classList.remove('active');
       document.getElementById('burger').classList.remove('active');
-      if (link.dataset.section === 'search') loadSearchUsers();
-      if (link.dataset.section === 'chats') loadChatList();
-      if (link.dataset.section === 'profile') loadProfile();
+      if (sectionId === 'search') loadSearchUsers();
+      if (sectionId === 'chats') loadChatList();
+      if (sectionId === 'profile') {
+        // якщо не вибрано іншого користувача, показуємо свій профіль
+        if (!viewingProfileUid || viewingProfileUid === currentUser?.uid) {
+          viewingProfileUid = currentUser?.uid;
+          loadMyProfile();
+        } else {
+          loadUserProfile(viewingProfileUid);
+        }
+      }
     };
   });
 
@@ -724,7 +744,7 @@
       document.getElementById('authBox').style.display = 'none';
       document.getElementById('newPostBox').style.display = 'block';
       subscribeToFeed();
-      loadProfile();
+      loadMyProfile();
     } else {
       currentUser = null;
       document.getElementById('authBox').style.display = 'block';
@@ -759,9 +779,13 @@
         mediaUrl = await getDownloadURL(storageRef);
         mediaType = file.type.split('/')[0];
       }
-      await addDoc(collection(db, "posts"), {
+      const postRef = await addDoc(collection(db, "posts"), {
         author: currentUser.uid, text, mediaUrl, mediaType,
         createdAt: serverTimestamp(), likes: [], commentsCount: 0
+      });
+      // додати пост в масив постів користувача
+      await updateDoc(doc(db, "users", currentUser.uid), {
+        posts: arrayUnion(postRef.id)
       });
       document.getElementById('postText').value = '';
       document.getElementById('postMedia').value = '';
@@ -782,6 +806,13 @@
         const isOwn = post.author === currentUser?.uid;
         const liked = post.likes?.includes(currentUser?.uid) || false;
 
+        // чи підписаний поточний на автора
+        let isFollowing = false;
+        if (currentUser && post.author !== currentUser.uid) {
+          const currentUserSnap = await getDoc(doc(db, "users", currentUser.uid));
+          isFollowing = currentUserSnap.data().following?.includes(post.author) || false;
+        }
+
         // коментарі
         const commentsQuery = query(collection(db, "posts", postId, "comments"), orderBy("createdAt", "desc"));
         const commentsSnap = await getDocs(commentsQuery);
@@ -792,19 +823,20 @@
         postEl.className = 'post';
         postEl.innerHTML = `
           <div class="post-header">
-            <div class="avatar" style="background-image:url(${author.avatar || ''})"></div>
-            <span class="username">@${author.nickname}</span>
+            <div class="avatar" style="background-image:url(${author.avatar || ''})" data-uid="${post.author}"></div>
+            <span class="username" data-uid="${post.author}">@${author.nickname}</span>
             ${isOwn ? `<button class="menu-btn" data-post-id="${postId}">⋯</button>` : ''}
+            ${!isOwn && currentUser ? `<button class="subscribe-post-btn" data-author-uid="${post.author}">${isFollowing ? 'Відписатися' : 'Підписатися'}</button>` : ''}
           </div>
           <div class="post-content">${post.text ? post.text.replace(/\n/g,'<br>') : ''}</div>
           ${post.mediaUrl ? (post.mediaType==='image' ? `<img src="${post.mediaUrl}" class="post-media">` : `<video src="${post.mediaUrl}" controls class="post-media"></video>`) : ''}
           <div class="post-footer">
             <button class="like-btn ${liked ? 'liked' : ''}" data-post-id="${postId}">
-              <lottie-player src="https://assets2.lottiefiles.com/packages/lf20_t9vz0c1s.json" background="transparent" speed="1" style="width:32px;height:32px;" loop></lottie-player>
+              <span style="font-size:1.4rem;">${liked ? '❤️' : '🤍'}</span>
               <span>${post.likes?.length || 0}</span>
             </button>
             <button class="comments-toggle" data-post-id="${postId}">
-              <span>💬</span> <span>${post.commentsCount || 0}</span>
+              <span style="font-size:1.4rem;">💬</span> <span>${post.commentsCount || 0}</span>
             </button>
           </div>
           <div class="comments-section" id="comments-${postId}" style="display:none;">
@@ -825,8 +857,10 @@
         if (listDiv) {
           listDiv.innerHTML = comments.reverse().map(c => `
             <div class="comment">
-              <div class="avatar" style="background-image:url(${c.authorAvatar || ''})"></div>
-              <div class="comment-content"><span class="comment-author">@${c.authorNickname || 'невідомо'}</span> ${c.text}</div>
+              <div class="avatar" style="background-image:url(${c.authorAvatar || ''})" data-uid="${c.author}"></div>
+              <div class="comment-content">
+                <span class="comment-author" data-uid="${c.author}">@${c.authorNickname || 'невідомо'}</span> ${c.text}
+              </div>
             </div>
           `).join('');
         }
@@ -837,17 +871,12 @@
     });
   }
 
-  // лайки, коментарі, меню
+  // лайки, коментарі, меню, підписка, клік на аватар/ім'я
   document.getElementById('feed').addEventListener('click', async (e) => {
-    // лайк з анімацією
+    // лайк
     if (e.target.closest('.like-btn')) {
       const btn = e.target.closest('.like-btn');
       const postId = btn.dataset.postId;
-      const player = btn.querySelector('lottie-player');
-      if (player) player.play();
-      btn.classList.add('liked');
-      setTimeout(() => btn.classList.remove('liked'), 600);
-
       const postRef = doc(db, "posts", postId);
       const snap = await getDoc(postRef);
       const likes = snap.data().likes || [];
@@ -869,7 +898,13 @@
         currentEditPostId = postId;
         document.getElementById('editPostModal').classList.add('active');
       } else if (action === '2') {
-        if (confirm('Видалити пост?')) await deleteDoc(doc(db, "posts", postId));
+        if (confirm('Видалити пост?')) {
+          await deleteDoc(doc(db, "posts", postId));
+          // видалити з масиву постів автора
+          const postSnap = await getDoc(postRef);
+          const author = postSnap.data().author;
+          await updateDoc(doc(db, "users", author), { posts: arrayRemove(postId) });
+        }
       }
     }
 
@@ -892,7 +927,9 @@
       await addDoc(collection(db, "posts", postId, "comments"), {
         author: currentUser.uid, authorNickname: userData.nickname, authorAvatar: userData.avatar || '', text, createdAt: serverTimestamp()
       });
-      await updateDoc(doc(db, "posts", postId), { commentsCount: arrayUnion('dummy') }); // тригер
+      // збільшити лічильник коментарів
+      const postRef = doc(db, "posts", postId);
+      await updateDoc(postRef, { commentsCount: arrayUnion('dummy') }); // просто тригер
       textarea.value = '';
     }
 
@@ -912,6 +949,35 @@
       const textarea = document.getElementById(`comment-text-${postId}`);
       textarea.value += span.textContent;
       picker.style.display = 'none';
+    }
+
+    // підписка з поста
+    if (e.target.closest('.subscribe-post-btn')) {
+      const btn = e.target.closest('.subscribe-post-btn');
+      const authorUid = btn.dataset.authorUid;
+      await toggleFollow(authorUid);
+      // оновити текст кнопки
+      const isFollowing = (await getDoc(doc(db, "users", currentUser.uid))).data().following.includes(authorUid);
+      btn.textContent = isFollowing ? 'Відписатися' : 'Підписатися';
+    }
+
+    // клік на аватар або ім'я
+    if (e.target.closest('.avatar, .username, .comment-author')) {
+      const el = e.target.closest('[data-uid]');
+      if (!el) return;
+      const uid = el.dataset.uid;
+      if (uid === currentUser.uid) {
+        viewingProfileUid = currentUser.uid;
+        loadMyProfile();
+      } else {
+        viewingProfileUid = uid;
+        loadUserProfile(uid);
+      }
+      // перейти на секцію профілю
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById('profile').classList.add('active');
+      document.getElementById('sidebar').classList.remove('active');
+      document.getElementById('burger').classList.remove('active');
     }
   });
 
@@ -954,7 +1020,15 @@
         await toggleFollow(d.id);
         loadSearchUsers();
       };
-      div.onclick = () => openChat(data.nickname, d.id);
+      div.onclick = () => {
+        // відкрити профіль користувача
+        viewingProfileUid = d.id;
+        loadUserProfile(d.id);
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('profile').classList.add('active');
+        document.getElementById('sidebar').classList.remove('active');
+        document.getElementById('burger').classList.remove('active');
+      };
       userList.appendChild(div);
     });
   }
@@ -974,50 +1048,97 @@
     }
   }
 
-  // профіль + аватар
-  document.getElementById('profileAvatar').onclick = () => {
-    if (currentUser) document.getElementById('avatarInput').click();
-    else alert('Увійдіть');
-  };
-  document.getElementById('avatarInput').onchange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    try {
-      const storageRef = ref(storage, `avatars/${currentUser.uid}`);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
-      await updateDoc(doc(db, "users", currentUser.uid), { avatar: url });
-      document.getElementById('profileAvatar').style.backgroundImage = `url(${url})`;
-    } catch { alert('Помилка'); }
-  };
-
-  async function loadProfile() {
+  // Завантаження свого профілю
+  async function loadMyProfile() {
     if (!currentUser) return;
     const snap = await getDoc(doc(db, "users", currentUser.uid));
     if (snap.exists()) {
       const data = snap.data();
-      document.getElementById('profileUsernameDisplay').textContent = data.nickname;
-      document.getElementById('profileBio').textContent = data.bio || 'Опис відсутній';
-      document.getElementById('profileAvatar').style.backgroundImage = `url(${data.avatar || ''})`;
-      document.getElementById('postsCount').textContent = data.posts?.length + ' постів' || '0 постів';
-      document.getElementById('followersCount').textContent = (data.followers?.length || 0) + ' підписників';
-      document.getElementById('followingCount').textContent = (data.following?.length || 0) + ' підписок';
+      renderProfile(data, currentUser.uid, true);
+    }
+  }
+
+  // Завантаження чужого профілю
+  async function loadUserProfile(uid) {
+    const snap = await getDoc(doc(db, "users", uid));
+    if (snap.exists()) {
+      const data = snap.data();
+      const isOwn = uid === currentUser?.uid;
+      renderProfile(data, uid, isOwn);
+    }
+  }
+
+  function renderProfile(data, uid, isOwn) {
+    const profileDiv = document.getElementById('profile');
+    const isFollowing = !isOwn && currentUser ? (data.followers?.includes(currentUser.uid) || false) : false;
+    profileDiv.innerHTML = `
+      <div class="card profile-header">
+        <div class="profile-avatar" style="background-image:url(${data.avatar || ''})" data-uid="${uid}"></div>
+        ${isOwn ? '<input type="file" id="avatarInput" accept="image/*" style="display:none;"/>' : ''}
+        <div style="flex:1;">
+          <h2>@${data.nickname}</h2>
+          <p style="color:var(--text-sec); margin:10px 0;">${data.bio || 'Опис відсутній'}</p>
+          <p style="color:var(--accent);">🟢 Онлайн</p>
+          <div style="display:flex; gap:25px; font-weight:600;">
+            <span>${data.posts?.length || 0} постів</span>
+            <span>${data.followers?.length || 0} підписників</span>
+            <span>${data.following?.length || 0} підписок</span>
+          </div>
+          ${!isOwn && currentUser ? `
+            <div style="margin-top:16px; display:flex; gap:10px;">
+              <button id="profileFollowBtn">${isFollowing ? 'Відписатися' : 'Підписатися'}</button>
+              <button id="profileMessageBtn">Написати</button>
+            </div>
+          ` : ''}
+          ${isOwn ? '<button id="editProfileBtn" style="margin-top:16px;">Редагувати профіль</button>' : ''}
+        </div>
+      </div>
+    `;
+
+    if (!isOwn && currentUser) {
+      document.getElementById('profileFollowBtn').onclick = async () => {
+        await toggleFollow(uid);
+        loadUserProfile(uid); // перезавантажити профіль
+      };
+      document.getElementById('profileMessageBtn').onclick = () => {
+        // відкрити чат з цим користувачем
+        openChat(data.nickname, uid);
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('chats').classList.add('active');
+      };
+    }
+
+    if (isOwn) {
+      document.getElementById('profileAvatar').onclick = () => {
+        document.getElementById('avatarInput').click();
+      };
+      document.getElementById('avatarInput').onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+          const storageRef = ref(storage, `avatars/${currentUser.uid}`);
+          await uploadBytes(storageRef, file);
+          const url = await getDownloadURL(storageRef);
+          await updateDoc(doc(db, "users", currentUser.uid), { avatar: url });
+          document.querySelector('.profile-avatar').style.backgroundImage = `url(${url})`;
+        } catch { alert('Помилка'); }
+      };
+      document.getElementById('editProfileBtn').onclick = () => {
+        document.getElementById('editNickname').value = data.nickname;
+        document.getElementById('editBio').value = data.bio || '';
+        document.getElementById('editProfileModal').classList.add('active');
+      };
     }
   }
 
   // редагування профілю
-  document.getElementById('editProfileBtn').onclick = () => {
-    document.getElementById('editNickname').value = document.getElementById('profileUsernameDisplay').textContent;
-    document.getElementById('editBio').value = document.getElementById('profileBio').textContent !== 'Опис відсутній' ? document.getElementById('profileBio').textContent : '';
-    document.getElementById('editProfileModal').classList.add('active');
-  };
   document.getElementById('closeModal').onclick = () => document.getElementById('editProfileModal').classList.remove('active');
   document.getElementById('saveProfileEdit').onclick = async () => {
     const nickname = document.getElementById('editNickname').value.trim();
     const bio = document.getElementById('editBio').value.trim();
     if (!nickname) return alert('Псевдонім обов’язковий');
     await updateDoc(doc(db, "users", currentUser.uid), { nickname, nickname_lower: nickname.toLowerCase(), bio });
-    loadProfile();
+    loadMyProfile();
     document.getElementById('editProfileModal').classList.remove('active');
   };
 
@@ -1043,7 +1164,16 @@
   function openChat(name, uid) {
     currentChatPartner = uid;
     document.getElementById('chatWindow').style.display = 'flex';
-    document.getElementById('chatHeader').innerHTML = `<span>@${name}</span>`;
+    document.getElementById('chatHeader').innerHTML = `
+      <div class="avatar" style="background-image:url(${''})"></div>
+      <span>@${name}</span>
+    `;
+    // завантажити аватар співрозмовника
+    getDoc(doc(db, "users", uid)).then(snap => {
+      if (snap.exists()) {
+        document.querySelector('#chatHeader .avatar').style.backgroundImage = `url(${snap.data().avatar || ''})`;
+      }
+    });
     subscribeToChat(uid);
   }
 

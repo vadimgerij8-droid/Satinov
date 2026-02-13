@@ -85,7 +85,7 @@
     .post-media img, .post-media video { width:100%; border-radius:12px; margin-top:12px; }
 
     .post-footer { display:flex; gap:24px; margin-top:12px; }
-    .post-footer button { background:none; color:var(--text-secondary); font-size:0.95rem; padding:0; }
+    .post-footer button { background:none; color:var(--text-secondary); font-size:0.95rem; padding:0; cursor:pointer; }
     .post-footer button:hover { color:var(--text); }
 
     .modal { position:fixed; inset:0; background:rgba(0,0,0,0.75); display:none; align-items:center; justify-content:center; z-index:2000; }
@@ -109,6 +109,7 @@
     .user-item:hover { background:var(--input-bg); }
     .user-item .avatar { width:50px; height:50px; }
     .user-item .name { font-weight:600; }
+    .user-item .status { color:var(--text-secondary); font-size:0.9rem; }
 
     .chat-list { display:flex; flex-direction:column; gap:12px; }
     .chat-item { display:flex; align-items:center; gap:12px; padding:8px; border-radius:10px; background:var(--card-bg); border:1px solid var(--card-border); cursor:pointer; }
@@ -153,7 +154,6 @@
         <input type="text" id="loginNickname" placeholder="Псевдонім" autocomplete="off"/>
         <input type="password" id="loginPassword" placeholder="Пароль"/>
         <button id="loginBtn">Увійти</button>
-        <button id="googleLoginBtn" style="background:#4285F4; color:white; margin-top:12px; width:100%; padding:12px; border:none; border-radius:10px;">Увійти через Google</button>
         <p style="margin-top:12px;">Немає акаунта? <span id="toRegister" style="color:var(--accent);cursor:pointer;">Зареєструватися</span></p>
       </div>
 
@@ -227,18 +227,14 @@
 </div>
 
 <script type="module">
-  // ──────────────────────────────────────────────
-  // Firebase SDK (модульний, саме той config, що ти скинув)
-  // ──────────────────────────────────────────────
+  // Firebase імпорти (10.14.1 — стабільна версія)
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
   import {
     getAuth,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     onAuthStateChanged,
-    signOut,
-    GoogleAuthProvider,
-    signInWithPopup
+    signOut
   } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
   import {
     getFirestore,
@@ -250,10 +246,13 @@
     addDoc,
     query,
     where,
+    getDocs,
     onSnapshot,
     orderBy,
     serverTimestamp,
-    arrayUnion
+    arrayUnion,
+    arrayRemove,
+    limit
   } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
   import {
     getStorage,
@@ -277,12 +276,12 @@
   const storage = getStorage(app);
 
   let currentUser = null;
-  let currentChatPartner = null;
   let unsubscribeFeed = null;
   let unsubscribeChat = null;
+  let currentChatPartner = null;
 
   // ──────────────────────────────────────────────
-  // Burger + sidebar
+  // Burger + sidebar (без змін)
   // ──────────────────────────────────────────────
   document.getElementById('burger').onclick = () => {
     document.getElementById('burger').classList.toggle('active');
@@ -315,7 +314,7 @@
   };
 
   // ──────────────────────────────────────────────
-  // Реєстрація (псевдонім → email)
+  // Реєстрація
   // ──────────────────────────────────────────────
   document.getElementById('registerBtn').onclick = async () => {
     const nickname = document.getElementById('registerNickname').value.trim();
@@ -326,6 +325,7 @@
 
     try {
       const safeNick = nickname.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (!safeNick) return alert('Псевдонім може містити тільки латинські літери та цифри');
       const email = `${safeNick}@fantasyas.local`;
 
       const cred = await createUserWithEmailAndPassword(auth, email, password);
@@ -346,12 +346,12 @@
       document.getElementById('loginNickname').value = nickname;
     } catch (e) {
       if (e.code === 'auth/email-already-in-use') alert('Такий псевдонім вже зайнятий');
-      else alert(e.message || 'Помилка');
+      else alert(e.message || 'Помилка реєстрації');
     }
   };
 
   // ──────────────────────────────────────────────
-  // Вхід (псевдонім + пароль)
+  // Вхід
   // ──────────────────────────────────────────────
   document.getElementById('loginBtn').onclick = async () => {
     const nickname = document.getElementById('loginNickname').value.trim();
@@ -366,32 +366,6 @@
       await signInWithEmailAndPassword(auth, email, password);
     } catch (e) {
       alert('Невірний псевдонім або пароль');
-    }
-  };
-
-  // ──────────────────────────────────────────────
-  // Google Login
-  // ──────────────────────────────────────────────
-  document.getElementById('googleLoginBtn').onclick = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (!userDoc.exists()) {
-        await setDoc(doc(db, "users", user.uid), {
-          nickname: user.displayName || user.email.split('@')[0],
-          bio: "",
-          avatar: user.photoURL || "",
-          posts: [],
-          followers: [],
-          following: [],
-          createdAt: serverTimestamp()
-        });
-      }
-    } catch (e) {
-      alert('Помилка Google: ' + e.message);
     }
   };
 
@@ -418,11 +392,12 @@
       document.getElementById('authBox').style.display = 'block';
       document.getElementById('newPostBox').style.display = 'none';
       if (unsubscribeFeed) unsubscribeFeed();
+      if (unsubscribeChat) unsubscribeChat();
     }
   });
 
   // ──────────────────────────────────────────────
-  // Публікація поста з медіа
+  // Публікація поста
   // ──────────────────────────────────────────────
   document.getElementById('addPost').onclick = async () => {
     if (!currentUser) return alert('Спочатку увійдіть');
@@ -434,17 +409,19 @@
 
     try {
       let mediaUrl = '';
+      let mediaType = '';
       if (file) {
         const storageRef = ref(storage, `posts/${currentUser.uid}/${Date.now()}_${file.name}`);
         await uploadBytes(storageRef, file);
         mediaUrl = await getDownloadURL(storageRef);
+        mediaType = file.type.split('/')[0];
       }
 
       await addDoc(collection(db, "posts"), {
         author: currentUser.uid,
         text,
         mediaUrl,
-        mediaType: file ? file.type.split('/')[0] : '',
+        mediaType,
         createdAt: serverTimestamp(),
         likes: [],
         comments: []
@@ -452,57 +429,147 @@
 
       document.getElementById('postText').value = '';
       document.getElementById('postMedia').value = '';
-      alert('Пост опубліковано!');
     } catch (e) {
-      alert('Помилка: ' + e.message);
+      alert('Помилка публікації: ' + e.message);
     }
   };
 
   // ──────────────────────────────────────────────
-  // Стрічка постів
+  // Стрічка постів (всіх користувачів)
   // ──────────────────────────────────────────────
   function subscribeToFeed() {
     if (unsubscribeFeed) unsubscribeFeed();
 
-    const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+    const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(50));
+
     unsubscribeFeed = onSnapshot(q, async (snapshot) => {
       const feed = document.getElementById('feed');
       feed.innerHTML = '';
-      let delay = 0;
 
+      let index = 0;
       for (const docSnap of snapshot.docs) {
         const post = docSnap.data();
         const authorSnap = await getDoc(doc(db, "users", post.author));
-        const author = authorSnap.exists() ? authorSnap.data() : { nickname: 'Користувач' };
+        const author = authorSnap.exists() ? authorSnap.data() : { nickname: 'Анонім' };
 
         const postEl = document.createElement('div');
         postEl.className = 'post';
         postEl.innerHTML = `
           <div class="post-header">
-            <div class="avatar" style="background-image:url(${author.avatar || ''})"></div>
+            <div class="avatar" style="background-image:url('${author.avatar || ''}')"></div>
             <div class="username">@${author.nickname}</div>
           </div>
-          <div class="post-content">${post.text.replace(/\n/g, '<br>')}</div>
+          <div class="post-content">${(post.text || '').replace(/\n/g, '<br>')}</div>
           ${post.mediaUrl ? `
             ${post.mediaType === 'image' ? `<img src="${post.mediaUrl}" class="post-media">` : 
               `<video src="${post.mediaUrl}" controls class="post-media"></video>`}
           ` : ''}
           <div class="post-footer">
-            <button>❤️ ${post.likes?.length || 0}</button>
-            <button>💬 ${post.comments?.length || 0}</button>
+            <button class="like-btn" data-id="${docSnap.id}">
+              ❤️ ${post.likes?.length || 0}
+            </button>
+            <button class="comment-btn" data-id="${docSnap.id}">
+              💬 ${post.comments?.length || 0}
+            </button>
           </div>
         `;
 
         feed.appendChild(postEl);
-        setTimeout(() => postEl.classList.add('show'), delay);
-        delay += 80;
+        setTimeout(() => postEl.classList.add('show'), 60 * index++);
+
+        // Лайк
+        postEl.querySelector('.like-btn').onclick = async (e) => {
+          const postId = e.target.dataset.id;
+          const postRef = doc(db, "posts", postId);
+          const postSnap = await getDoc(postRef);
+          const likes = postSnap.data().likes || [];
+
+          if (likes.includes(currentUser.uid)) {
+            await updateDoc(postRef, { likes: arrayRemove(currentUser.uid) });
+          } else {
+            await updateDoc(postRef, { likes: arrayUnion(currentUser.uid) });
+          }
+        };
+
+        // Коментар (спрощено)
+        postEl.querySelector('.comment-btn').onclick = async (e) => {
+          const postId = e.target.dataset.id;
+          const text = prompt('Ваш коментар:');
+          if (!text) return;
+
+          const postRef = doc(db, "posts", postId);
+          await updateDoc(postRef, {
+            comments: arrayUnion({
+              user: currentUser.uid,
+              text,
+              createdAt: serverTimestamp()
+            })
+          });
+        };
       }
     });
   }
 
   // ──────────────────────────────────────────────
-  // Профіль та аватар
+  // Пошук користувачів
   // ──────────────────────────────────────────────
+  async function loadSearchUsers(term = '') {
+    const list = document.getElementById('userList');
+    list.innerHTML = '';
+
+    try {
+      let q = query(collection(db, "users"), limit(20));
+      if (term.trim()) {
+        const start = term.toLowerCase();
+        q = query(collection(db, "users"),
+          where("nickname", ">=", start),
+          where("nickname", "<=", start + '\uf8ff'),
+          limit(20)
+        );
+      }
+
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        list.innerHTML = '<p>Нічого не знайдено</p>';
+        return;
+      }
+
+      snap.forEach(docSnap => {
+        if (docSnap.id === currentUser?.uid) return;
+        const data = docSnap.data();
+        const item = document.createElement('div');
+        item.className = 'user-item';
+        item.innerHTML = `
+          <div class="avatar" style="background-image:url('${data.avatar || ''}')"></div>
+          <div>
+            <div class="name">@${data.nickname}</div>
+          </div>
+        `;
+        item.onclick = () => alert(`Чат з @${data.nickname} (поки що просто alert)`);
+        list.appendChild(item);
+      });
+    } catch (e) {
+      console.error(e);
+      list.innerHTML = '<p>Помилка пошуку</p>';
+    }
+  }
+
+  document.getElementById('searchInput').oninput = e => loadSearchUsers(e.target.value);
+
+  // ──────────────────────────────────────────────
+  // Профіль
+  // ──────────────────────────────────────────────
+  async function loadProfile() {
+    if (!currentUser) return;
+    const snap = await getDoc(doc(db, "users", currentUser.uid));
+    if (snap.exists()) {
+      const data = snap.data();
+      document.getElementById('profileUsernameDisplay').textContent = data.nickname;
+      document.getElementById('profileBio').textContent = data.bio || 'Немає опису';
+      document.getElementById('profileAvatar').style.backgroundImage = data.avatar ? `url(${data.avatar})` : '';
+    }
+  }
+
   document.getElementById('profileAvatar').onclick = () => {
     if (!currentUser) return alert('Увійдіть');
     document.getElementById('avatarInput').click();
@@ -513,10 +580,9 @@
     if (!file) return;
 
     try {
-      const storageRef = ref(storage, `avatars/${currentUser.uid}`);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
-
+      const refFile = ref(storage, `avatars/${currentUser.uid}`);
+      await uploadBytes(refFile, file);
+      const url = await getDownloadURL(refFile);
       await updateDoc(doc(db, "users", currentUser.uid), { avatar: url });
       document.getElementById('profileAvatar').style.backgroundImage = `url(${url})`;
     } catch (err) {
@@ -525,76 +591,50 @@
   };
 
   // ──────────────────────────────────────────────
-  // Чати (1-на-1)
+  // Редагування біо
   // ──────────────────────────────────────────────
-  function getChatId(uid1, uid2) {
-    return [uid1, uid2].sort().join('_');
-  }
+  document.getElementById('editProfileBtn').onclick = () => document.getElementById('editProfileModal').classList.add('active');
+  document.getElementById('closeModal').onclick = () => document.getElementById('editProfileModal').classList.remove('active');
 
-  async function loadChatList() {
-    const chatList = document.getElementById('chatList');
-    chatList.innerHTML = '';
-
-    // Приклад: показуємо всіх користувачів (можна оптимізувати)
-    const q = query(collection(db, "users"));
-    onSnapshot(q, snapshot => {
-      snapshot.forEach(docSnap => {
-        if (docSnap.id === currentUser.uid) return;
-        const data = docSnap.data();
-        const item = document.createElement('div');
-        item.className = 'chat-item';
-        item.innerHTML = `
-          <div class="avatar" style="background-image:url(${data.avatar || ''})"></div>
-          <div><div class="name">@${data.nickname}</div></div>
-        `;
-        item.onclick = () => openChat(data.nickname, docSnap.id);
-        chatList.appendChild(item);
-      });
-    });
-  }
-
-  function openChat(name, uid) {
-    currentChatPartner = uid;
-    document.getElementById('chatWindow').style.display = 'flex';
-    document.getElementById('chatHeader').innerHTML = `<div class="name">@${name}</div>`;
-    subscribeToChat(uid);
-  }
-
-  function subscribeToChat(otherUid) {
-    if (unsubscribeChat) unsubscribeChat();
-
-    const chatId = getChatId(currentUser.uid, otherUid);
-    const q = query(collection(db, `messages/${chatId}/chat`), orderBy("createdAt"));
-
-    unsubscribeChat = onSnapshot(q, snap => {
-      const messages = document.getElementById('chatMessages');
-      messages.innerHTML = '';
-      snap.forEach(m => {
-        const msg = m.data();
-        const div = document.createElement('div');
-        div.className = `message ${msg.from === currentUser.uid ? 'sent' : 'received'}`;
-        div.textContent = msg.text;
-        messages.appendChild(div);
-      });
-      messages.scrollTop = messages.scrollHeight;
-    });
-  }
-
-  document.getElementById('sendMessage').onclick = async () => {
-    const text = document.getElementById('chatText').value.trim();
-    if (!text || !currentChatPartner) return;
-
-    const chatId = getChatId(currentUser.uid, currentChatPartner);
-    await addDoc(collection(db, `messages/${chatId}/chat`), {
-      from: currentUser.uid,
-      text,
-      createdAt: serverTimestamp()
-    });
-    document.getElementById('chatText').value = '';
+  document.getElementById('saveProfileEdit').onclick = async () => {
+    const bio = document.getElementById('editBio').value.trim();
+    if (currentUser) {
+      await updateDoc(doc(db, "users", currentUser.uid), { bio });
+      document.getElementById('profileBio').textContent = bio || 'Немає опису';
+    }
+    document.getElementById('editProfileModal').classList.remove('active');
   };
 
   // ──────────────────────────────────────────────
-  // Інші функції (тема, вихід, редагування біо)
+  // Чати (поки спрощено)
+  // ──────────────────────────────────────────────
+  async function loadChatList() {
+    const list = document.getElementById('chatList');
+    list.innerHTML = '<p>Завантаження чатів...</p>';
+
+    // Показуємо всіх користувачів як приклад
+    const q = query(collection(db, "users"), limit(20));
+    const snap = await getDocs(q);
+    list.innerHTML = '';
+
+    snap.forEach(docSnap => {
+      if (docSnap.id === currentUser?.uid) return;
+      const data = docSnap.data();
+      const item = document.createElement('div');
+      item.className = 'chat-item';
+      item.innerHTML = `
+        <div class="avatar" style="background-image:url('${data.avatar || ''}')"></div>
+        <div><div class="name">@${data.nickname}</div></div>
+      `;
+      item.onclick = () => {
+        alert(`Чат з @${data.nickname} — функціонал в розробці`);
+      };
+      list.appendChild(item);
+    });
+  }
+
+  // ──────────────────────────────────────────────
+  // Налаштування
   // ──────────────────────────────────────────────
   document.getElementById('toggleTheme').onclick = () => {
     document.body.classList.toggle('light');
@@ -604,17 +644,6 @@
   if (localStorage.getItem('theme') === 'light') document.body.classList.add('light');
 
   document.getElementById('logoutBtn').onclick = () => signOut(auth);
-
-  // Редагування профілю (біо)
-  document.getElementById('editProfileBtn').onclick = () => document.getElementById('editProfileModal').classList.add('active');
-  document.getElementById('closeModal').onclick = () => document.getElementById('editProfileModal').classList.remove('active');
-
-  document.getElementById('saveProfileEdit').onclick = async () => {
-    const bio = document.getElementById('editBio').value.trim();
-    await updateDoc(doc(db, "users", currentUser.uid), { bio });
-    document.getElementById('profileBio').textContent = bio || 'Немає опису';
-    document.getElementById('editProfileModal').classList.remove('active');
-  };
 
 </script>
 </body>

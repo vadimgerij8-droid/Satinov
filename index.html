@@ -9,121 +9,136 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
-:root{
---bg:#0a0a0a;
---glass:rgba(20,20,20,.6);
---card:#141414ee;
---text:#f2f2f2;
---muted:#9a9a9a;
---border:#222;
+:root {
+  --bg: #000;
+  --card: #111;
+  --text: #fff;
+  --muted: #aaa;
+  --border: #333;
 }
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-font-family:Manrope,sans-serif;
-background:var(--bg);
-color:var(--text);
+
+* {margin:0;padding:0;box-sizing:border-box}
+body {
+  font-family: Manrope, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.4s ease, color 0.4s ease;
 }
 
 /* TOP */
-.top{
-position:fixed;top:0;left:0;right:0;height:64px;
-display:flex;align-items:center;justify-content:space-between;
-padding:0 20px;
-background:var(--glass);
-backdrop-filter:blur(20px);
-border-bottom:1px solid var(--border);
-z-index:1000;
+.top {
+  position:fixed;top:0;left:0;right:0;height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;
+  background:rgba(20,20,20,.6);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  z-index:1000;
 }
 .burger{cursor:pointer}
 .burger i{font-size:1.4rem}
 
 /* SIDEBAR */
-.sidebar{
-position:fixed;top:0;left:-80px;width:80px;height:100%;
-background:var(--glass);
-backdrop-filter:blur(20px);
-border-right:1px solid var(--border);
-padding-top:90px;
-display:flex;flex-direction:column;align-items:center;gap:16px;
-transition:.4s;
+.sidebar {
+  position:fixed;top:0;left:-80px;width:80px;height:100%;
+  background:rgba(20,20,20,.6);
+  backdrop-filter:blur(20px);
+  border-right:1px solid var(--border);
+  padding-top:90px;
+  display:flex;flex-direction:column;align-items:center;gap:16px;
+  transition:.4s;
 }
 .sidebar.active{left:0}
-.sidebar button{
-width:48px;height:48px;
-border-radius:14px;
-background:none;border:none;
-color:var(--muted);
-font-size:1.2rem;
-cursor:pointer;
+.sidebar button {
+  width:48px;height:48px;
+  border-radius:14px;
+  background:none;border:none;
+  color:var(--muted);
+  font-size:1.2rem;
+  cursor:pointer;
+  transition:all .3s ease;
 }
 .sidebar button.active,
-.sidebar button:hover{
-background:rgba(255,255,255,.08);
-color:var(--text);
+.sidebar button:hover {
+  background:rgba(255,255,255,.08);
+  color:var(--text);
 }
 
 /* MAIN */
-main{padding:90px 20px;max-width:900px;margin:auto}
+main {padding:90px 20px;max-width:900px;margin:auto}
 .section{display:none}
 .section.active{display:block}
 
-.card{
-background:var(--card);
-border-radius:22px;
-padding:18px;
-border:1px solid var(--border);
-margin-bottom:20px;
+/* CARD */
+.card {
+  background: var(--card);
+  border-radius: 22px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  margin-bottom: 20px;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.6s forwards;
+}
+@keyframes fadeInUp {
+  to {opacity:1;transform:translateY(0);}
 }
 
 /* PROFILE */
-.profile-head{
-display:flex;gap:16px;align-items:center;
+.profile-head {
+  display:flex;gap:16px;align-items:center;
 }
-.avatar{
-width:90px;height:90px;border-radius:50%;
-background:#333;
-overflow:hidden;
-display:flex;align-items:center;justify-content:center;
+.avatar {
+  width:90px;height:90px;border-radius:50%;
+  background:#333;
+  overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
 }
 .avatar img{width:100%;height:100%;object-fit:cover}
-input,textarea{
-width:100%;
-background:#000;
-border:1px solid var(--border);
-border-radius:14px;
-padding:12px;
-color:var(--text);
+input,textarea {
+  width:100%;
+  background:#000;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px;
+  color:var(--text);
 }
-button{
-background:#000;
-border:1px solid var(--border);
-border-radius:12px;
-padding:8px 12px;
-color:var(--text);
-cursor:pointer;
+button {
+  background:#000;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px 16px;
+  color:var(--text);
+  cursor:pointer;
+  transition:all 0.3s ease;
+  font-size:1rem;
+}
+button:hover {
+  background:#fff;
+  color:#000;
 }
 
 /* POST */
-.post-header{
-display:flex;justify-content:space-between;align-items:center;
+.post-header {
+  display:flex;justify-content:space-between;align-items:center;
 }
 .menu{position:relative}
-.menu-box{
-position:absolute;right:0;top:24px;
-background:var(--glass);
-border:1px solid var(--border);
-border-radius:12px;
-display:none;
-flex-direction:column;
+.menu-box {
+  position:absolute;right:0;top:24px;
+  background:rgba(20,20,20,.9);
+  border:1px solid var(--border);
+  border-radius:12px;
+  display:none;
+  flex-direction:column;
 }
 .menu-box button{text-align:left}
 
 /* COMMENTS */
-.comment{
-margin-top:8px;
-padding-left:12px;
-border-left:2px solid var(--border);
-font-size:.9rem;
+.comment {
+  margin-top:8px;
+  padding-left:12px;
+  border-left:2px solid var(--border);
+  font-size:.9rem;
 }
 </style>
 </head>
@@ -131,151 +146,146 @@ font-size:.9rem;
 <body>
 
 <div class="top">
-<div class="burger" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></div>
-<b>FANTASYAS</b>
+  <div class="burger" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></div>
+  <b>FANTASYAS</b>
 </div>
 
 <div class="sidebar" id="sidebar">
-<button onclick="openSection('feed')" class="active"><i class="fa-solid fa-house"></i></button>
-<button onclick="openSection('profile')"><i class="fa-solid fa-user"></i></button>
+  <button onclick="openSection('feed')" class="active"><i class="fa-solid fa-house"></i></button>
+  <button onclick="openSection('profile')"><i class="fa-solid fa-user"></i></button>
 </div>
 
 <main>
 
 <!-- FEED -->
 <section id="feed" class="section active">
-<div class="card">
-<textarea id="postText" placeholder="Що нового?"></textarea>
-<button onclick="addPost()">Опублікувати</button>
-</div>
-<div id="feedPosts"></div>
+  <div class="card">
+    <textarea id="postText" placeholder="Що нового?"></textarea>
+    <button onclick="addPost()">Опублікувати</button>
+  </div>
+  <div id="feedPosts"></div>
 </section>
 
 <!-- PROFILE -->
 <section id="profile" class="section">
-<div class="card profile-head">
-<div class="avatar" id="avatar"></div>
-<div>
-<input type="file" id="avatarInput">
-<textarea id="bio" placeholder="Про себе"></textarea>
-<button onclick="saveProfile()">Зберегти</button>
-</div>
-</div>
+  <div class="card profile-head">
+    <div class="avatar" id="avatar"></div>
+    <div>
+      <input type="file" id="avatarInput">
+      <textarea id="bio" placeholder="Про себе"></textarea>
+      <button onclick="saveProfile()">Зберегти</button>
+    </div>
+  </div>
 
-<div class="card">
-<h3>Фото-пост</h3>
-<input type="file" id="photoInput">
-<textarea id="photoText" placeholder="Опис фото"></textarea>
-<button onclick="addPhotoPost()">Додати</button>
-</div>
+  <div class="card">
+    <h3>Фото-пост</h3>
+    <input type="file" id="photoInput">
+    <textarea id="photoText" placeholder="Опис фото"></textarea>
+    <button onclick="addPhotoPost()">Додати</button>
+  </div>
 
-<div id="profilePosts"></div>
+  <div id="profilePosts"></div>
 </section>
 
 </main>
 
 <script>
 const currentUser='you';
-let user={
-avatar:null,
-bio:''
-};
-
+let user={avatar:null,bio:''};
 let posts=[];
 
 function toggleSidebar(){
-sidebar.classList.toggle('active');
+  sidebar.classList.toggle('active');
 }
 
 function openSection(id){
-document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-document.getElementById(id).classList.add('active');
-document.querySelectorAll('.sidebar button').forEach(b=>b.classList.remove('active'));
-event.target.closest('button').classList.add('active');
-sidebar.classList.remove('active');
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.sidebar button').forEach(b=>b.classList.remove('active'));
+  event.target.closest('button').classList.add('active');
+  sidebar.classList.remove('active');
 }
 
 function addPost(){
-const t=postText.value.trim();
-if(!t)return;
-posts.unshift({text:t,author:currentUser,comments:[]});
-postText.value='';
-render();
+  const t=postText.value.trim();
+  if(!t)return;
+  posts.unshift({text:t,author:currentUser,comments:[]});
+  postText.value='';
+  saveData();
+  render();
 }
 
 function addComment(i){
-const input=document.getElementById('c-'+i);
-const t=input.value.trim();
-if(!t)return;
-posts[i].comments.push({text:t,author:currentUser});
-render();
+  const input=document.getElementById('c-'+i);
+  const t=input.value.trim();
+  if(!t)return;
+  posts[i].comments.push({text:t,author:currentUser});
+  saveData();
+  render();
 }
 
 function toggleMenu(id){
-document.querySelectorAll('.menu-box').forEach(m=>m.style.display='none');
-document.getElementById(id).style.display='flex';
+  document.querySelectorAll('.menu-box').forEach(m=>m.style.display='none');
+  document.getElementById(id).style.display='flex';
 }
 
 function deletePost(i){
-posts.splice(i,1);
-render();
+  posts.splice(i,1);
+  saveData();
+  render();
 }
 
 function render(){
-feedPosts.innerHTML='';
-posts.forEach((p,i)=>{
-feedPosts.innerHTML+=`
-<div class="card">
-<div class="post-header">
-<b>@${p.author}</b>
-${p.author===currentUser?`
-<div class="menu">
-<button onclick="toggleMenu('m-${i}')"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-<div class="menu-box" id="m-${i}">
-<button onclick="deletePost(${i})">Видалити</button>
-</div>
-</div>`:''}
-</div>
+  feedPosts.innerHTML='';
+  posts.forEach((p,i)=>{
+    feedPosts.innerHTML+=`
+    <div class="card">
+      <div class="post-header">
+        <b>@${p.author}</b>
+        ${p.author===currentUser?`
+        <div class="menu">
+          <button onclick="toggleMenu('m-${i}')"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+          <div class="menu-box" id="m-${i}">
+            <button onclick="deletePost(${i})">Видалити</button>
+          </div>
+        </div>`:''}
+      </div>
+      <p>${p.text}</p>
+      <div>
+        ${p.comments.map(c=>`<div class="comment">@${c.author}: ${c.text}</div>`).join('')}
+        <input id="c-${i}" placeholder="Відповісти">
+        <button onclick="addComment(${i})">OK</button>
+      </div>
+    </div>`;
+  });
 
-<p>${p.text}</p>
-
-<div>
-${p.comments.map(c=>`<div class="comment">@${c.author}: ${c.text}</div>`).join('')}
-<input id="c-${i}" placeholder="Відповісти">
-<button onclick="addComment(${i})">OK</button>
-</div>
-</div>`;
-});
+  if(user.avatar){
+    avatar.innerHTML=`<img src="${user.avatar}">`;
+  }
+  bio.value=user.bio;
 }
 
 function saveProfile(){
-user.bio=bio.value;
-const file=avatarInput.files[0];
-if(file){
-const r=new FileReader();
-r.onload=e=>{
-avatar.innerHTML=`<img src="${e.target.result}">`;
-};
-r.readAsDataURL(file);
-}
+  user.bio=bio.value;
+  const file=avatarInput.files[0];
+  if(file){
+    const r=new FileReader();
+    r.onload=e=>{
+      avatar.innerHTML=`<img src="${e.target.result}">`;
+      user.avatar=e.target.result;
+      saveData();
+    };
+    r.readAsDataURL(file);
+  } else {
+    saveData();
+  }
 }
 
 function addPhotoPost(){
-const file=photoInput.files[0];
-if(!file)return;
-const r=new FileReader();
-r.onload=e=>{
-profilePosts.innerHTML=`
-<div class="card">
-<img src="${e.target.result}" style="width:100%;border-radius:16px">
-<p>${photoText.value}</p>
-</div>`+profilePosts.innerHTML;
-};
-r.readAsDataURL(file);
-photoText.value='';
-photoInput.value='';
-}
-</script>
-
-</body>
-</html>
+  const file=photoInput.files[0];
+  if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    profilePosts.innerHTML=`
+    <div class="card">
+      <img src="${e.target.result}" style="width:

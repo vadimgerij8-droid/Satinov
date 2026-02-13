@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FANTASYAS - Соціальна Мережа</title>
+  <title>FANTASYAS</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
@@ -11,30 +11,37 @@
       --bg: #0a0a0a;
       --text: #f0f0f0;
       --text-sec: #a0a0a0;
-      --card: #1a1a1a;
-      --border: #333;
-      --shadow: 0 4px 20px rgba(0,0,0,0.3);
-      --my-message: #6b46c1;
-      --other-message: #2a2a2a;
+      --card: rgba(26, 26, 26, 0.45);
+      --border: rgba(80, 80, 80, 0.6);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      --blur: blur(12px);
+      --glass-border: 1px solid rgba(255, 255, 255, 0.08);
     }
     body.light {
-      --bg: #fff;
+      --bg: #f8f8f8;
       --text: #1a1a1a;
       --text-sec: #666;
-      --card: #f4f4f4;
-      --border: #ccc;
-      --shadow: 0 4px 20px rgba(0,0,0,0.1);
-      --my-message: #d1d1ff;
-      --other-message: #e8e8e8;
+      --card: rgba(255, 255, 255, 0.55);
+      --border: rgba(200, 200, 200, 0.6);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      --blur: blur(16px);
+      --glass-border: 1px solid rgba(0, 0, 0, 0.08);
     }
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:'Manrope',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; transition:all 0.5s ease; }
-    body.tv-mode { font-size:1.4rem; --card:#222; padding:40px; }
-    body.tv-mode .main-content { max-width:1600px; padding:40px; }
-    body.tv-mode .card, body.tv-mode .post { padding:35px; font-size:1.3rem; border-radius:28px; }
-    body.tv-mode input, body.tv-mode textarea, body.tv-mode button { padding:18px; font-size:1.3rem; border-radius:20px; }
-    body.tv-mode .sidebar { width:380px; padding:100px 30px 30px; }
-    body.tv-mode .sidebar a { font-size:1.5rem; padding:18px 20px; }
+    body {
+      font-family:'Manrope',sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height:100vh;
+      transition: all 0.5s ease;
+    }
+    body.tv-mode {
+      font-size: 1.4rem;
+      --card: rgba(34,34,34,0.85);
+    }
+    body.tv-mode .main-content { max-width: 1200px; padding: 40px; }
+    body.tv-mode .card, body.tv-mode .post { padding: 35px; font-size: 1.3rem; border-radius: 28px; }
+    body.tv-mode input, body.tv-mode textarea, body.tv-mode button { padding: 18px; font-size: 1.3rem; }
 
     @keyframes fadeIn { 0%{opacity:0} 100%{opacity:1} }
     @keyframes slideInLeft { 0%{opacity:0;transform:translateX(-50px)} 100%{opacity:1;transform:translateX(0)} }
@@ -45,62 +52,216 @@
     .bounce { animation:bounceIn 0.7s ease; }
     .pulse { animation:pulse 1.5s infinite; }
 
-    .top-bar { position:fixed; top:0; left:0; right:0; height:60px; display:flex; align-items:center; justify-content:space-between; padding:0 20px; background:rgba(10,10,10,0.95); backdrop-filter:blur(20px); z-index:1000; box-shadow:var(--shadow); transition:all 0.4s ease; }
-    body.light .top-bar { background:rgba(255,255,255,0.95); }
-    .site-name { font-size:1.8rem; font-weight:800; color:var(--text); }
-    .burger { cursor:pointer; width:30px; height:22px; display:flex; flex-direction:column; justify-content:space-between; }
-    .burger span { height:3px; background:var(--text); transition:all 0.4s; border-radius:2px; }
-    .burger.active span:nth-child(1) { transform:rotate(45deg) translate(6px,6px); }
-    .burger.active span:nth-child(2) { opacity:0; }
-    .burger.active span:nth-child(3) { transform:rotate(-45deg) translate(7px,-7px); }
+    .top-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      background: rgba(10,10,10,0.4);
+      backdrop-filter: var(--blur);
+      border-bottom: var(--glass-border);
+      z-index: 1000;
+      box-shadow: var(--shadow);
+    }
+    body.light .top-bar { background: rgba(255,255,255,0.4); }
 
-    .sidebar { position:fixed; top:0; left:-300px; width:300px; height:100%; background:var(--card); padding:70px 20px 20px; transition:left 0.6s cubic-bezier(0.68,-0.55,0.265,1.55); z-index:900; box-shadow:var(--shadow); }
-    .sidebar.active { left:0; }
-    .sidebar a { display:flex; align-items:center; gap:15px; color:var(--text-sec); text-decoration:none; font-size:1.2rem; font-weight:600; margin:15px 0; padding:10px 15px; border-radius:12px; transition:all 0.3s ease; }
-    .sidebar a:hover { background:var(--border); color:var(--text); transform:translateX(10px); box-shadow:var(--shadow); }
+    .site-name { font-size: 1.8rem; font-weight: 800; color: var(--text); }
+    .burger { cursor: pointer; width: 30px; height: 22px; display: flex; flex-direction: column; justify-content: space-between; }
+    .burger span { height: 3px; background: var(--text); transition: all 0.4s; border-radius: 2px; }
+    .burger.active span:nth-child(1) { transform: rotate(45deg) translate(6px,6px); }
+    .burger.active span:nth-child(2) { opacity: 0; }
+    .burger.active span:nth-child(3) { transform: rotate(-45deg) translate(7px,-7px); }
 
-    .main-content { margin-top:70px; padding:25px; max-width:900px; margin:0 auto; }
-    .section { display:none; }
-    .section.active { display:block; animation:fadeIn 0.8s ease; }
-    .card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:25px; margin-bottom:25px; transition:transform 0.4s ease,box-shadow 0.4s ease; box-shadow:var(--shadow); }
-    .card:hover { transform:translateY(-5px); box-shadow:0 10px 30px rgba(0,0,0,0.2); }
-    input, textarea { width:100%; padding:15px; margin:10px 0; border:1px solid var(--border); border-radius:15px; background:var(--card); color:var(--text); font-size:1rem; transition:all 0.3s ease; }
-    input:focus, textarea:focus { border-color:var(--text-sec); box-shadow:0 0 15px rgba(255,255,255,0.1); outline:none; }
-    button { padding:12px 25px; border:none; border-radius:15px; background:var(--border); color:var(--text); font-weight:700; cursor:pointer; transition:all 0.4s ease; }
-    button:hover { background:var(--text-sec); transform:scale(1.05) rotate(2deg); box-shadow:0 0 20px rgba(255,255,255,0.1); }
+    .sidebar {
+      position: fixed;
+      top: 0; left: -300px;
+      width: 300px; height: 100%;
+      background: var(--card);
+      backdrop-filter: var(--blur);
+      border-right: var(--glass-border);
+      padding: 80px 25px;
+      transition: left 0.6s cubic-bezier(0.68,-0.55,0.265,1.55);
+      z-index: 900;
+      box-shadow: var(--shadow);
+    }
+    .sidebar.active { left: 0; }
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      color: var(--text-sec);
+      text-decoration: none;
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin: 15px 0;
+      padding: 10px 15px;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+    .sidebar a:hover { background: rgba(255,255,255,0.12); color: var(--text); transform: translateX(10px); }
 
-    .feed { display:flex; flex-direction:column; gap:25px; }
-    .post { background:var(--card); border-radius:20px; padding:20px; box-shadow:var(--shadow); transition:all 0.5s ease; animation:slideInLeft 0.6s ease-out; }
-    .post:hover { transform:scale(1.02); box-shadow:0 15px 40px rgba(255,255,255,0.1); }
-    .avatar { width:50px; height:50px; border-radius:50%; background:#444; background-size:cover; border:2px solid var(--border); transition:transform 0.3s ease; }
-    .avatar:hover { transform:rotate(360deg); }
+    .main-content { margin-top: 70px; padding: 25px; max-width: 900px; margin: 0 auto; }
+    .section { display: none; }
+    .section.active { display: block; animation: fadeIn 0.8s ease; }
 
-    /* Чати */
-    .chat-search { margin-bottom:16px; }
-    .chat-search input { margin:0; }
-    .chat-list { display:flex; flex-direction:column; gap:12px; margin-top:16px; }
-    .chat-item { display:flex; align-items:center; gap:12px; padding:12px; border-radius:16px; background:var(--border); cursor:pointer; transition:all 0.2s; }
-    .chat-item:hover { background:var(--text-sec); transform:translateX(4px); }
-    .chat-item .avatar { width:48px; height:48px; }
-    .chat-header { display:flex; align-items:center; gap:12px; padding:12px; border-bottom:1px solid var(--border); background:var(--bg); position:sticky; top:0; z-index:10; }
-    .chat-header button { background:none; border:none; font-size:1.6rem; cursor:pointer; color:var(--text); }
-    .messages { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; min-height:50vh; }
-    .message { max-width:80%; padding:10px 14px; border-radius:20px; line-height:1.4; word-break:break-word; animation:fadeIn 0.3s ease; }
-    .message.sent { align-self:flex-end; background:var(--my-message); color:#fff; }
-    .message.received { align-self:flex-start; background:var(--other-message); }
-    .chat-input-area { display:flex; padding:12px; gap:8px; border-top:1px solid var(--border); background:var(--bg); position:sticky; bottom:0; }
-    .chat-input-area input { flex:1; margin:0; border-radius:50px; }
-    .chat-input-area button { padding:0 20px; border-radius:50px; }
+    .card {
+      background: var(--card);
+      backdrop-filter: var(--blur);
+      border: var(--glass-border);
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 25px;
+      box-shadow: var(--shadow);
+      transition: all 0.4s ease;
+    }
+    .card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
 
-    /* Профіль */
-    .profile-header { text-align:center; padding:50px 20px 40px; background:linear-gradient(to bottom, var(--card), var(--bg)); border-radius:0 0 30px 30px; margin-bottom:20px; }
-    .profile-avatar-wrapper { position:relative; width:160px; height:160px; margin:0 auto 25px; }
-    .profile-avatar-large { width:100%; height:100%; border-radius:50%; background-size:cover; background-position:center; border:5px solid var(--border); box-shadow:var(--shadow); transition:transform 0.3s ease; }
-    .profile-avatar-large:hover { transform:scale(1.06); }
-    .avatar-edit-btn { position:absolute; bottom:8px; right:8px; background:var(--text-sec); color:var(--bg); width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; border:3px solid var(--bg); transition:all 0.3s; }
-    .avatar-edit-btn:hover { background:var(--text); transform:scale(1.15); }
-    #profile-nick-large { font-size:2.4rem; font-weight:700; margin:12px 0 10px; }
-    #profile-bio-large { font-size:1.2rem; color:var(--text-sec); max-width:85%; margin:0 auto 25px; }
+    input, textarea {
+      width: 100%;
+      padding: 15px;
+      margin: 10px 0;
+      border: var(--glass-border);
+      border-radius: 15px;
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      backdrop-filter: var(--blur);
+    }
+    input:focus, textarea:focus {
+      border-color: rgba(255,255,255,0.3);
+      box-shadow: 0 0 15px rgba(255,255,255,0.08);
+      outline: none;
+    }
+
+    button {
+      padding: 12px 25px;
+      border: none;
+      border-radius: 15px;
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      backdrop-filter: var(--blur);
+    }
+    button:hover {
+      background: rgba(255,255,255,0.18);
+      transform: scale(1.04);
+      box-shadow: 0 0 20px rgba(255,255,255,0.1);
+    }
+
+    .feed { display: flex; flex-direction: column; gap: 25px; }
+    .post {
+      background: var(--card);
+      backdrop-filter: var(--blur);
+      border: var(--glass-border);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      animation: slideInLeft 0.6s ease-out;
+    }
+    .post:hover { transform: scale(1.02); box-shadow: 0 15px 40px rgba(255,255,255,0.1); }
+
+    .avatar { width: 50px; height: 50px; border-radius: 50%; background: #444; background-size: cover; border: 2px solid var(--border); transition: transform 0.3s ease; }
+    .avatar:hover { transform: rotate(360deg); }
+
+    .profile-header {
+      text-align: center;
+      padding: 50px 20px 40px;
+      background: var(--card);
+      backdrop-filter: var(--blur);
+      border-radius: 0 0 30px 30px;
+      margin-bottom: 20px;
+      border-bottom: var(--glass-border);
+    }
+    .profile-avatar-wrapper { position: relative; width: 140px; height: 140px; margin: 0 auto 25px; }
+    .profile-avatar-large { width: 100%; height: 100%; border-radius: 50%; background-size: cover; border: 5px solid var(--border); box-shadow: var(--shadow); transition: transform 0.3s ease; }
+    .profile-avatar-large:hover { transform: scale(1.06); }
+    .avatar-edit-btn {
+      position: absolute;
+      bottom: 8px; right: 8px;
+      background: rgba(255,255,255,0.12);
+      color: var(--text);
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 2px solid rgba(255,255,255,0.2);
+      backdrop-filter: var(--blur);
+      transition: all 0.3s;
+    }
+    .avatar-edit-btn:hover { background: rgba(255,255,255,0.25); transform: scale(1.15); }
+
+    .chat-list { display: flex; flex-direction: column; gap: 12px; }
+    .chat-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 16px;
+      background: var(--card);
+      backdrop-filter: var(--blur);
+      border: var(--glass-border);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .chat-item:hover { background: rgba(255,255,255,0.08); transform: translateX(6px); }
+    .chat-header {
+      padding: 12px;
+      background: var(--card);
+      backdrop-filter: var(--blur);
+      border-bottom: var(--glass-border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 50vh;
+    }
+    .message {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 20px;
+      line-height: 1.4;
+      backdrop-filter: var(--blur);
+    }
+    .message.sent {
+      align-self: flex-end;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+    .message.received {
+      align-self: flex-start;
+      background: var(--card);
+      border: var(--glass-border);
+    }
+    .chat-input-area {
+      display: flex;
+      padding: 12px;
+      gap: 8px;
+      background: var(--card);
+      backdrop-filter: var(--blur);
+      border-top: var(--glass-border);
+      position: sticky;
+      bottom: 0;
+    }
+    .chat-input-area input {
+      border-radius: 50px;
+      background: rgba(255,255,255,0.05);
+      border: var(--glass-border);
+    }
   </style>
 </head>
 <body>
@@ -124,19 +285,19 @@
           <input id="login-nick" placeholder="Псевдонім">
           <input id="login-pass" type="password" placeholder="Пароль">
           <button id="login-btn" class="bounce">Увійти</button>
-          <p>Немає акаунта? <span id="to-reg" class="pulse" style="color:#8b5cf6;cursor:pointer;">Зареєструватись</span></p>
+          <p class="fade-in">Немає акаунта? <span id="to-reg" class="pulse" style="color:#ccc;cursor:pointer;">Зареєструватись</span></p>
         </div>
         <div id="reg-form" style="display:none;">
           <h2 class="fade-in">Реєстрація</h2>
           <input id="reg-nick" placeholder="Псевдонім">
           <input id="reg-pass" type="password" placeholder="Пароль">
           <button id="reg-btn" class="bounce">Зареєструватись</button>
-          <p>Є акаунт? <span id="to-login" class="pulse" style="color:#8b5cf6;cursor:pointer;">Увійти</span></p>
+          <p class="fade-in">Є акаунт? <span id="to-login" class="pulse" style="color:#ccc;cursor:pointer;">Увійти</span></p>
         </div>
       </div>
 
       <div class="card" id="post-form" style="display:none;">
-        <textarea id="post-text" placeholder="Що у вас нового?..." rows="4"></textarea>
+        <textarea id="post-text" placeholder="Що нового?..." rows="3"></textarea>
         <button id="submit-post">Опублікувати</button>
       </div>
 
@@ -144,7 +305,7 @@
     </section>
 
     <section id="profile" class="section">
-      <div class="profile-header" id="profile-header">
+      <div class="profile-header">
         <div class="profile-avatar-wrapper">
           <div class="profile-avatar-large" id="profile-avatar-large"></div>
           <label for="avatar-upload" class="avatar-edit-btn"><i class="fas fa-camera"></i></label>
@@ -152,7 +313,7 @@
         </div>
         <h1 id="profile-nick-large">@...</h1>
         <p id="profile-bio-large">Тут короткий опис про себе</p>
-        <button id="edit-profile-btn">Редагувати профіль</button>
+        <button id="edit-profile-btn" class="bounce">Редагувати профіль</button>
       </div>
 
       <div id="edit-profile-form" class="card" style="display:none; max-width:500px; margin:0 auto;">
@@ -160,44 +321,41 @@
         <input id="set-nick" placeholder="Новий псевдонім">
         <input id="set-pass" type="password" placeholder="Новий пароль (опціонально)">
         <textarea id="set-bio" placeholder="Опис про себе" rows="3"></textarea>
-        <div style="display:flex; gap:12px; margin-top:16px;">
-          <button id="save-profile">Зберегти</button>
-          <button id="cancel-edit" style="background:#444;">Скасувати</button>
-        </div>
+        <button id="save-profile">Зберегти</button>
+        <button id="cancel-edit">Скасувати</button>
       </div>
 
       <div class="feed" id="profile-posts"></div>
     </section>
 
     <section id="chat" class="section">
-      <div id="chat-list-view" class="card">
+      <div id="chat-list-view" class="card fade-in">
         <h2>Чати</h2>
         <div class="chat-search">
-          <input id="chat-search-input" placeholder="Шукати в чатах...">
+          <input id="chat-search-input" placeholder="Пошук чатів...">
         </div>
         <div id="chat-list" class="chat-list"></div>
       </div>
 
       <div id="chat-window" style="display:none;">
         <div class="chat-header">
-          <button id="back-to-list"><i class="fas fa-arrow-left"></i></button>
+          <button id="back-to-list">←</button>
           <div class="chat-partner">
             <div class="avatar" id="chat-avatar"></div>
-            <strong id="chat-nick">@...</strong>
+            <strong id="chat-nick"></strong>
           </div>
         </div>
         <div id="messages" class="messages"></div>
         <div class="chat-input-area">
           <input id="message-input" placeholder="Напишіть повідомлення...">
-          <button id="send-message"><i class="fas fa-paper-plane"></i></button>
+          <button id="send-message">➤</button>
         </div>
       </div>
     </section>
 
     <section id="settings" class="section">
-      <div class="card">
+      <div class="card fade-in">
         <h2>Налаштування</h2>
-
         <div style="margin:20px 0;">
           <h3>Акаунт</h3>
           <input id="set-nick" placeholder="Змінити псевдонім">
@@ -205,42 +363,38 @@
           <input id="set-bio" placeholder="Коротко про себе">
           <button id="save-account">Зберегти акаунт</button>
         </div>
-
         <div style="margin:30px 0;">
-          <h3>Режим перегляду</h3>
+          <h3>Режим екрану</h3>
           <div style="display:flex; gap:20px; margin-top:12px;">
-            <button id="mode-phone" style="flex:1; padding:16px; font-size:1.1rem;">
+            <button id="mode-phone" style="flex:1; padding:16px;">
               <i class="fas fa-mobile-alt" style="font-size:2rem; margin-bottom:8px;"></i><br>Телефон
             </button>
-            <button id="mode-tv" style="flex:1; padding:16px; font-size:1.1rem;">
+            <button id="mode-tv" style="flex:1; padding:16px;">
               <i class="fas fa-tv" style="font-size:2rem; margin-bottom:8px;"></i><br>Телевізор
             </button>
           </div>
         </div>
-
         <div style="margin-top:30px;">
           <h3>Тема</h3>
-          <button id="toggle-theme" style="width:100%; margin-top:12px;">Світла / Темна тема</button>
+          <button id="toggle-theme" style="width:100%; margin-top:12px;">Світла / Темна</button>
         </div>
       </div>
     </section>
   </main>
 
   <script>
-    let db, currentUser = localStorage.getItem('user'), currentChatPartner = null;
+    let db, currentUser = localStorage.getItem('user');
 
     const request = indexedDB.open('FantasyasDB', 3);
     request.onupgradeneeded = e => {
       db = e.target.result;
-      if (!db.objectStoreNames.contains('users')) db.createObjectStore('users', {keyPath:'nick'});
-      if (!db.objectStoreNames.contains('posts')) db.createObjectStore('posts', {autoIncrement:true});
-      if (!db.objectStoreNames.contains('messages')) db.createObjectStore('messages', {autoIncrement:true});
+      db.createObjectStore('users', {keyPath: 'nick'});
+      db.createObjectStore('posts', {autoIncrement: true});
+      db.createObjectStore('messages', {autoIncrement: true});
     };
     request.onsuccess = e => { db = e.target.result; initApp(); };
-    request.onerror = e => console.error('IndexedDB error:', e.target.error);
 
     function initApp() {
-      // Меню
       const burger = document.getElementById('burger');
       const sidebar = document.getElementById('sidebar');
       burger.onclick = () => {
@@ -255,11 +409,9 @@
           sidebar.classList.remove('active');
           burger.classList.remove('active');
           if (a.dataset.section === 'profile') loadProfile();
-          if (a.dataset.section === 'chat') loadChatList();
         };
       });
 
-      // Реєстрація / Вхід
       document.getElementById('to-reg').onclick = () => {
         document.getElementById('login-form').style.display = 'none';
         document.getElementById('reg-form').style.display = 'block';
@@ -272,40 +424,31 @@
       document.getElementById('reg-btn').onclick = () => {
         const nick = document.getElementById('reg-nick').value.trim();
         const pass = document.getElementById('reg-pass').value.trim();
-        if (!nick || !pass) return alert('Заповніть обидва поля!');
-        const tx = db.transaction('users', 'readwrite').objectStore('users');
-        tx.get(nick).onsuccess = e => {
-          if (e.target.result) return alert('Такий псевдонім вже зайнятий');
-          tx.add({ nick, pass, bio: '', avatar: '' });
-          alert('Реєстрація успішна! Тепер увійдіть.');
-          document.getElementById('reg-nick').value = '';
-          document.getElementById('reg-pass').value = '';
-          document.getElementById('to-login').click();
-        };
+        if (!nick || !pass) return alert('Заповніть поля');
+        db.transaction('users', 'readwrite').objectStore('users').add({nick, pass, bio:'', avatar:''});
+        alert('Реєстрація успішна! Увійдіть.');
+        document.getElementById('to-login').click();
       };
 
       document.getElementById('login-btn').onclick = () => {
         const nick = document.getElementById('login-nick').value.trim();
         const pass = document.getElementById('login-pass').value.trim();
-        if (!nick || !pass) return alert('Заповніть поля!');
-        const tx = db.transaction('users').objectStore('users');
-        tx.get(nick).onsuccess = e => {
+        db.transaction('users').objectStore('users').get(nick).onsuccess = e => {
           const user = e.target.result;
-          if (!user || user.pass !== pass) return alert('Невірний псевдонім або пароль');
-          currentUser = nick;
-          localStorage.setItem('user', nick);
-          document.getElementById('auth-card').style.display = 'none';
-          document.getElementById('post-form').style.display = 'block';
-          loadPosts();
+          if (user && user.pass === pass) {
+            currentUser = nick;
+            localStorage.setItem('user', nick);
+            document.getElementById('auth-card').style.display = 'none';
+            document.getElementById('post-form').style.display = 'block';
+            loadPosts();
+          } else alert('Невірні дані');
         };
       };
 
-      // Пости
       document.getElementById('submit-post').onclick = () => {
         const text = document.getElementById('post-text').value.trim();
-        if (!text) return alert('Напишіть хоч щось...');
-        const post = { author: currentUser, text, created: Date.now() };
-        db.transaction('posts', 'readwrite').objectStore('posts').add(post);
+        if (!text) return alert('Напишіть пост');
+        db.transaction('posts', 'readwrite').objectStore('posts').add({author: currentUser, text, created: Date.now()});
         document.getElementById('post-text').value = '';
         loadPosts();
       };
@@ -326,14 +469,13 @@
         };
       }
 
-      // Профіль
       function loadProfile() {
         if (!currentUser) return;
         db.transaction('users').objectStore('users').get(currentUser).onsuccess = e => {
           const u = e.target.result;
           document.getElementById('profile-nick-large').textContent = '@' + u.nick;
           document.getElementById('profile-bio-large').textContent = u.bio || 'Тут короткий опис про себе';
-          document.getElementById('profile-avatar-large').style.backgroundImage = u.avatar ? `url(${u.avatar})` : `url('https://via.placeholder.com/160?text=@${u.nick}')`;
+          if (u.avatar) document.getElementById('profile-avatar-large').style.backgroundImage = `url(${u.avatar})`;
         };
       }
 
@@ -343,57 +485,21 @@
         const reader = new FileReader();
         reader.onload = ev => {
           document.getElementById('profile-avatar-large').style.backgroundImage = `url(${ev.target.result})`;
-          localStorage.setItem('tempAvatar', ev.target.result);
+          localStorage.setItem('tempAv', ev.target.result);
         };
         reader.readAsDataURL(file);
       };
 
-      document.getElementById('edit-profile-btn').onclick = () => {
-        document.getElementById('profile-header').style.display = 'none';
-        document.getElementById('edit-profile-form').style.display = 'block';
-      };
-
-      document.getElementById('cancel-edit').onclick = () => {
-        document.getElementById('profile-header').style.display = 'block';
-        document.getElementById('edit-profile-form').style.display = 'none';
-      };
-
       document.getElementById('save-profile').onclick = () => {
-        const nick = document.getElementById('set-nick').value.trim();
-        const pass = document.getElementById('set-pass').value.trim();
         const bio = document.getElementById('set-bio').value.trim();
-        const tempAvatar = localStorage.getItem('tempAvatar');
+        const av = localStorage.getItem('tempAv');
         db.transaction('users', 'readwrite').objectStore('users').get(currentUser).onsuccess = e => {
-          const user = e.target.result;
-          if (nick) user.nick = nick;
-          if (pass) user.pass = pass;
-          if (bio) user.bio = bio;
-          if (tempAvatar) user.avatar = tempAvatar;
-          db.transaction('users', 'readwrite').objectStore('users').put(user);
-          currentUser = user.nick;
-          localStorage.setItem('user', currentUser);
-          localStorage.removeItem('tempAvatar');
-          alert('Профіль збережено!');
-          document.getElementById('profile-header').style.display = 'block';
-          document.getElementById('edit-profile-form').style.display = 'none';
-          loadProfile();
-        };
-      };
-
-      // Налаштування
-      document.getElementById('save-account').onclick = () => {
-        const nick = document.getElementById('set-nick').value.trim();
-        const pass = document.getElementById('set-pass').value.trim();
-        const bio = document.getElementById('set-bio').value.trim();
-        db.transaction('users', 'readwrite').objectStore('users').get(currentUser).onsuccess = e => {
-          const user = e.target.result;
-          if (nick) user.nick = nick;
-          if (pass) user.pass = pass;
-          user.bio = bio;
-          db.transaction('users', 'readwrite').objectStore('users').put(user);
-          currentUser = user.nick;
-          localStorage.setItem('user', currentUser);
-          alert('Акаунт оновлено!');
+          const u = e.target.result;
+          u.bio = bio;
+          if (av) u.avatar = av;
+          db.transaction('users', 'readwrite').objectStore('users').put(u);
+          alert('Збережено');
+          localStorage.removeItem('tempAv');
           loadProfile();
         };
       };
@@ -403,35 +509,15 @@
       document.getElementById('mode-phone').onclick = () => {
         document.body.classList.remove('tv-mode');
         localStorage.setItem('viewMode', 'phone');
-        alert('Режим телефону активовано');
       };
 
       document.getElementById('mode-tv').onclick = () => {
         document.body.classList.add('tv-mode');
         localStorage.setItem('viewMode', 'tv');
-        alert('Режим телевізора активовано');
       };
 
-      // Відновлення режиму
       if (localStorage.getItem('viewMode') === 'tv') document.body.classList.add('tv-mode');
 
-      // Чати (спрощений варіант для стабільності)
-      document.getElementById('send-message').onclick = sendMessage;
-      document.getElementById('message-input').onkeypress = e => { if (e.key === 'Enter') sendMessage(); };
-
-      function sendMessage() {
-        const input = document.getElementById('message-input');
-        const text = input.value.trim();
-        if (!text) return;
-        const msgDiv = document.createElement('div');
-        msgDiv.className = 'message sent';
-        msgDiv.textContent = text;
-        document.getElementById('messages').appendChild(msgDiv);
-        input.value = '';
-        document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
-      }
-
-      // Початкове завантаження
       if (currentUser) {
         document.getElementById('auth-card').style.display = 'none';
         document.getElementById('post-form').style.display = 'block';

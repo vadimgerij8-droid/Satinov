@@ -5,23 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>FANTASYAS</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 
   <style>
     :root {
-      --bg:        #0d0d12;
-      --bg-soft:   linear-gradient(135deg, #0f0f17 0%, #0a0a14 100%);
-      --card:      rgba(22, 22, 35, 0.58);
-      --card-alt:  rgba(30, 28, 45, 0.65);
-      --text:      #f0f0f8;
-      --text-soft: #c8c8d8;
-      --muted:     #8a8aa0;
-      --border:    rgba(120, 110, 160, 0.18);
-      --accent:    #c084fc;
-      --accent-glow:rgba(192, 132, 252, 0.25);
-      --shadow:    0 12px 32px rgba(0,0,0,0.55);
-      --glass-blur: blur(18px);
+      --bg: #0a0a0f;
+      --surface: rgba(25, 25, 35, 0.55);
+      --surface-alt: rgba(35, 35, 50, 0.65);
+      --text: #e8e8f0;
+      --text-secondary: #b0b0c8;
+      --accent: #5288c1;
+      --accent-light: #60a0e0;
+      --border: rgba(120, 140, 180, 0.22);
+      --blur: blur(16px);
+      --radius: 18px;
+      --shadow: 0 8px 32px rgba(0,0,0,0.45);
     }
 
     * {
@@ -32,438 +31,497 @@
 
     body {
       font-family: 'Manrope', system-ui, sans-serif;
-      background: var(--bg-soft);
+      background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      line-height: 1.6;
-      transition: all 0.5s ease;
+      line-height: 1.5;
     }
 
-    /* TOP BAR */
-    .top {
+    /* ─── Header ─── */
+    header {
       position: fixed;
       top: 0; left: 0; right: 0;
-      height: 70px;
+      height: 60px;
+      background: var(--surface);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 24px;
-      background: var(--card);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      border-bottom: 1px solid var(--border);
+      padding: 0 16px;
       z-index: 1000;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
     }
 
-    .burger { 
-      cursor: pointer; 
-      font-size: 1.5rem; 
-      color: var(--muted);
-      transition: color 0.3s;
-    }
-    .burger:hover { color: var(--text); }
-
-    .top b {
-      font-weight: 700;
-      font-size: 1.35rem;
-      letter-spacing: -0.5px;
-      background: linear-gradient(90deg, var(--accent), #a78bfa);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .burger {
+      font-size: 1.4rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 8px;
     }
 
-    /* SIDEBAR */
+    h1 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+
+    /* ─── Sidebar ─── */
     .sidebar {
       position: fixed;
-      top: 0; left: -88px;
-      width: 88px;
+      top: 0; left: -280px;
+      width: 280px;
       height: 100%;
-      background: var(--card);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
+      background: var(--surface);
+      backdrop-filter: var(--blur);
       border-right: 1px solid var(--border);
-      padding-top: 100px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-      transition: left 0.4s cubic-bezier(0.23,1,0.32,1);
-      box-shadow: 4px 0 24px rgba(0,0,0,0.35);
+      transition: left 0.35s ease;
       z-index: 999;
+      padding-top: 70px;
     }
+
     .sidebar.active { left: 0; }
 
-    .sidebar button {
-      width: 56px; height: 56px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 1.4rem;
-      cursor: pointer;
-      transition: all 0.35s ease;
-    }
-    .sidebar button:hover,
-    .sidebar button.active {
-      background: var(--accent-glow);
-      color: var(--accent);
-      transform: scale(1.08) translateY(-2px);
-      box-shadow: 0 8px 24px var(--accent-glow);
+    .sidebar nav {
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
     }
 
-    /* MAIN CONTENT */
+    .sidebar button {
+      width: 100%;
+      padding: 14px 16px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      text-align: left;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+
+    .sidebar button:hover,
+    .sidebar button.active {
+      background: var(--surface-alt);
+      color: var(--text);
+    }
+
+    /* ─── Main ─── */
     main {
-      padding: 100px 24px 60px;
-      max-width: 960px;
+      padding: 76px 16px 90px;
+      max-width: 720px;
       margin: 0 auto;
     }
 
     .section { display: none; }
     .section.active { display: block; }
 
-    /* CARDS */
-    .card {
-      background: var(--card);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
+    /* ─── Input area (як у Telegram) ─── */
+    .composer {
+      background: var(--surface);
+      backdrop-filter: var(--blur);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 20px;
       border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 24px;
-      margin-bottom: 28px;
-      box-shadow: var(--shadow);
-      transition: transform 0.4s ease, box-shadow 0.4s ease;
-      animation: appear 0.7s ease-out forwards;
-      opacity: 0;
-    }
-    .card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 20px 44px rgba(0,0,0,0.5);
     }
 
-    @keyframes appear {
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* PROFILE */
-    .profile-head {
-      text-align: center;
-      margin-bottom: 32px;
-    }
-    .avatar {
-      width: 140px; height: 140px;
-      margin: 0 auto 20px;
-      border-radius: 50%;
-      overflow: hidden;
-      border: 3px solid rgba(192,132,252,0.25);
-      background: rgba(30,28,45,0.7);
-      transition: all 0.4s ease;
-    }
-    .avatar:hover {
-      transform: scale(1.06) rotate(3deg);
-      border-color: var(--accent);
-      box-shadow: 0 0 30px var(--accent-glow);
-    }
-    .avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-    textarea, input {
+    textarea {
       width: 100%;
-      background: rgba(20,20,30,0.5);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 14px 16px;
-      color: var(--text);
-      font-size: 1rem;
-      resize: vertical;
-      min-height: 54px;
-      transition: all 0.3s;
-    }
-    textarea:focus, input:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-
-    button {
-      background: linear-gradient(135deg, #a78bfa, #c084fc);
-      color: #0f0f17;
+      min-height: 48px;
+      background: transparent;
       border: none;
-      border-radius: 16px;
-      padding: 12px 24px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.35s ease;
-    }
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(160, 100, 240, 0.4);
+      color: var(--text);
+      font-size: 1.05rem;
+      resize: none;
+      outline: none;
     }
 
-    /* POST / FEED */
-    .post-header {
+    .composer-actions {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
+      margin-top: 8px;
+    }
+
+    .btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 8px 18px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn:hover { background: var(--accent-light); }
+
+    .btn-icon {
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 1.3rem;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+    }
+
+    /* ─── Message / Post ─── */
+    .message {
+      display: flex;
+      margin: 12px 0;
+      max-width: 80%;
+    }
+
+    .message.own {
+      margin-left: auto;
+      flex-direction: row-reverse;
+    }
+
+    .bubble {
+      background: var(--surface-alt);
+      backdrop-filter: var(--blur);
+      border-radius: 18px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      position: relative;
+    }
+
+    .bubble.own {
+      background: var(--accent);
+      color: white;
+      border-color: transparent;
+    }
+
+    .bubble .text {
+      word-break: break-word;
+    }
+
+    .bubble .time {
+      font-size: 0.78rem;
+      opacity: 0.7;
+      margin-top: 4px;
+      text-align: right;
     }
 
     .media-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 10px;
-      margin: 16px 0;
+      gap: 6px;
+      margin: 8px 0;
     }
+
     .media-item {
-      border-radius: 16px;
+      border-radius: 12px;
       overflow: hidden;
       cursor: pointer;
-      transition: transform 0.35s ease, box-shadow 0.35s;
     }
-    .media-item:hover {
-      transform: scale(1.04);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.6);
-    }
+
     .media-item img, .media-item video {
       width: 100%;
-      height: auto;
       display: block;
     }
 
-    /* COMMENTS */
-    .comment {
-      margin: 12px 0 8px 16px;
-      padding-left: 14px;
-      border-left: 3px solid var(--accent);
-      color: var(--text-soft);
-      font-size: 0.94rem;
-    }
-
-    /* MODAL */
+    /* ─── Modal ─── */
     .modal {
-      display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.92);
+      background: rgba(0,0,0,0.9);
+      display: none;
       align-items: center;
       justify-content: center;
       z-index: 2000;
-      backdrop-filter: blur(8px);
-    }
-    .modal-content {
-      max-width: 92%;
-      max-height: 92vh;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
-    }
-    .close-modal {
-      position: absolute;
-      top: 30px;
-      right: 30px;
-      font-size: 3rem;
-      color: white;
-      cursor: pointer;
-      text-shadow: 0 2px 10px black;
     }
 
-    /* EMOJI PICKER */
-    .emoji-picker {
+    .modal img, .modal video {
+      max-width: 94%;
+      max-height: 94vh;
+      border-radius: 12px;
+    }
+
+    .close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 2.8rem;
+      color: white;
+      cursor: pointer;
+    }
+
+    /* ─── Emoji picker (простий) ─── */
+    #emojiPicker {
       display: none;
       position: absolute;
       bottom: 80px;
       left: 16px;
-      background: var(--card-alt);
-      backdrop-filter: var(--glass-blur);
+      background: var(--surface);
+      backdrop-filter: var(--blur);
       border: 1px solid var(--border);
-      border-radius: 20px;
+      border-radius: 16px;
       padding: 12px;
-      max-height: 220px;
+      max-height: 200px;
       overflow-y: auto;
       box-shadow: var(--shadow);
     }
-    .emoji-picker button {
+
+    #emojiPicker button {
       background: none;
       border: none;
       font-size: 1.8rem;
-      margin: 6px;
+      margin: 4px;
       cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .emoji-picker button:hover { transform: scale(1.3); }
-
-    /* Дрібні покращення */
-    #charCount {
-      position: absolute;
-      bottom: 12px; right: 16px;
-      font-size: 0.82rem;
-      color: var(--muted);
-    }
-
-    .heart-liked { color: #ff5a80 !important; animation: beat 0.4s; }
-    @keyframes beat {
-      0%,100% { transform: scale(1); }
-      50%     { transform: scale(1.3); }
     }
   </style>
 </head>
 <body>
 
-<div class="top">
+<header>
   <div class="burger" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></div>
-  <b>FANTASYAS</b>
-  <button id="themeToggle"><i class="fa-solid fa-sun"></i></button>
-</div>
+  <h1>FANTASYAS</h1>
+  <div></div> <!-- місце для майбутніх іконок -->
+</header>
 
 <div class="sidebar" id="sidebar">
-  <button onclick="openSection('feed')" class="active"><i class="fa-solid fa-house"></i></button>
-  <button onclick="openSection('profile')"><i class="fa-solid fa-user"></i></button>
+  <nav>
+    <button onclick="showSection('feed')" class="active">Стрічка</button>
+    <button onclick="showSection('profile')">Профіль</button>
+  </nav>
 </div>
 
 <main>
 
-  <!-- FEED -->
+  <!-- ─── FEED / Чат-стрічка ─── -->
   <section id="feed" class="section active">
-    <div class="card">
-      <div style="position:relative;">
-        <textarea id="postText" maxlength="500" placeholder="Що у твоїй фантазії сьогодні? ✨"></textarea>
-        <div id="charCount">0/500</div>
-        <button onclick="toggleEmojiPicker('postText')" style="position:absolute;bottom:14px;left:14px;background:none;border:none;color:var(--muted);font-size:1.3rem;">
-          <i class="fa-solid fa-face-smile"></i>
+    <div class="composer">
+      <textarea id="postText" placeholder="Напиши щось..." rows="1"></textarea>
+      <div class="composer-actions">
+        <button class="btn-icon" onclick="toggleEmoji()"><i class="fa-regular fa-face-smile"></i></button>
+        <input type="file" id="mediaInput" multiple accept="image/*,video/*" style="display:none"/>
+        <button class="btn-icon" onclick="document.getElementById('mediaInput').click()">
+          <i class="fa-regular fa-image"></i>
         </button>
+        <button class="btn" onclick="addPost()">Відправити</button>
       </div>
-      <div id="previewMedia" class="media-grid"></div>
-      <input type="file" id="mediaInput" multiple accept="image/*,video/*"/>
-      <button onclick="addPost()">Опублікувати</button>
+      <div id="preview" class="media-grid"></div>
     </div>
 
-    <div style="margin:24px 0; display:flex; gap:12px; flex-wrap:wrap;">
-      <select id="sortFeed">
-        <option value="new">Новіші</option>
-        <option value="old">Старіші</option>
-        <option value="popular">Популярні</option>
-      </select>
-      <button onclick="render()">Оновити стрічку</button>
-    </div>
-
-    <div id="feedPosts"></div>
+    <div id="messages"></div>
   </section>
 
-  <!-- PROFILE -->
+  <!-- ─── PROFILE ─── -->
   <section id="profile" class="section">
-    <div class="card profile-head">
-      <div class="avatar" id="avatar"></div>
-      <textarea id="bio" placeholder="Розкажи про себе... 💜" maxlength="200"></textarea>
-      <input type="file" id="avatarInput" accept="image/*"/>
-      <button onclick="saveProfile()">Зберегти профіль</button>
+    <div class="composer" style="text-align:center;">
+      <div style="width:120px;height:120px;border-radius:50%;overflow:hidden;margin:0 auto 16px;background:#222;border:2px solid var(--border)">
+        <img id="avatarImg" style="width:100%;height:100%;object-fit:cover;" src="" alt="">
+      </div>
+      <input type="file" id="avatarInput" accept="image/*" style="margin:12px 0;"/>
+      <textarea id="bio" placeholder="Про себе..." maxlength="180"></textarea>
+      <button class="btn" style="margin-top:12px;" onclick="saveProfile()">Зберегти</button>
     </div>
 
-    <div class="card">
-      <h3 style="margin-bottom:16px;">Додати до галереї</h3>
-      <input type="file" id="profileMediaInput" multiple accept="image/*,video/*"/>
-      <button onclick="addProfileMedia()">Додати</button>
-      <div id="profileGallery" class="media-grid" style="margin-top:20px;"></div>
-    </div>
-
-    <div id="profilePosts"></div>
+    <div id="profileMessages"></div>
   </section>
 
 </main>
 
-<!-- MODAL -->
-<div class="modal" id="modal" onclick="closeModal(event)">
-  <span class="close-modal" onclick="closeModal()">×</span>
-  <img id="modalContent" class="modal-content"/>
+<div class="modal" id="modal">
+  <span class="close" onclick="closeModal()">×</span>
+  <img id="modalImg" alt="">
+  <video id="modalVideo" controls style="display:none;"></video>
 </div>
 
-<!-- EMOJI PICKER -->
-<div id="emojiPicker" class="emoji-picker"></div>
+<div id="emojiPicker"></div>
 
 <script>
-// ──────────────────────────────────────────────
-const currentUser = 'you';
-let user = { avatar: null, bio: '', gallery: [] };
-let posts = [];
-let draft = '';
-const emojiList = ['😀','😂','❤️','💜','✨','🔥','🌙','🌌','🪐','⚡','🎮','🎨','🧙‍♂️','🧝‍♀️'];
-
-const sidebar = document.getElementById('sidebar');
-const themeToggle = document.getElementById('themeToggle');
+const currentUser = 'Ви';
+let posts = JSON.parse(localStorage.getItem('fantasyPosts') || '[]');
+let user = JSON.parse(localStorage.getItem('fantasyUser') || '{}');
 
 function toggleSidebar() {
-  sidebar.classList.toggle('active');
+  document.getElementById('sidebar').classList.toggle('active');
 }
 
-function openSection(id) {
+function showSection(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 
   document.querySelectorAll('.sidebar button').forEach(b => b.classList.remove('active'));
-  event.target.closest('button').classList.add('active');
+  event.target.classList.add('active');
 
-  sidebar.classList.remove('active');
+  toggleSidebar(); // закриваємо сайдбар
 }
 
-// ─── Темна / світла тема (залишив тільки темну, але можна розширити) ───
-function setTheme(isDark) {
-  // поки тільки темний затишний варіант
-  document.documentElement.style.setProperty('--bg', '#0d0d12');
-  // ... інші змінні вже в :root
-  themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
-  localStorage.setItem('theme', 'dark');
+function addPost() {
+  const text = document.getElementById('postText').value.trim();
+  if (!text) return;
+
+  const media = [];
+  const files = document.getElementById('mediaInput').files;
+  let loaded = 0;
+
+  if (files.length === 0) {
+    createPostObj(text, []);
+    return;
+  }
+
+  Array.from(files).slice(0,4).forEach(file => {
+    const r = new FileReader();
+    r.onload = e => {
+      media.push({type: file.type, url: e.target.result});
+      loaded++;
+      if (loaded === files.length) {
+        createPostObj(text, media);
+      }
+    };
+    r.readAsDataURL(file);
+  });
 }
 
-themeToggle.onclick = () => alert("Поки тільки затишний темний режим 😌");
+function createPostObj(text, media) {
+  const post = {
+    id: Date.now(),
+    text,
+    author: currentUser,
+    media,
+    likes: 0,
+    comments: [],
+    timestamp: Date.now()
+  };
 
-setTheme(true);
-
-// ─── LOCALSTORAGE та решта логіки без змін (лише дрібні покращення) ───
-function loadData() {
-  posts = JSON.parse(localStorage.getItem('posts') || '[]');
-  user  = JSON.parse(localStorage.getItem('user')  || '{}');
-  draft = localStorage.getItem('draft') || '';
-  postText.value = draft;
-  render();
+  posts.unshift(post);
+  save();
+  renderFeed();
+  document.getElementById('postText').value = '';
+  document.getElementById('mediaInput').value = '';
+  document.getElementById('preview').innerHTML = '';
 }
 
-function saveData() {
-  localStorage.setItem('posts', JSON.stringify(posts));
-  localStorage.setItem('user',  JSON.stringify(user));
+function renderFeed() {
+  const container = document.getElementById('messages');
+  container.innerHTML = '';
+
+  posts.forEach(p => {
+    const isOwn = p.author === currentUser;
+    const bubbleClass = isOwn ? 'bubble own' : 'bubble';
+
+    let html = `
+      <div class="message ${isOwn ? 'own' : ''}">
+        <div class="${bubbleClass}">
+          <div class="text">${p.text}</div>
+          ${p.media.map(m => `
+            <div class="media-grid">
+              ${m.type.startsWith('image')
+                ? `<img src="${m.url}" onclick="openModal('${m.url}', false)">`
+                : `<video src="${m.url}" controls onclick="openModal('${m.url}', true)"></video>`}
+            </div>
+          `).join('')}
+          <div class="time">${new Date(p.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+        </div>
+      </div>
+    `;
+
+    container.innerHTML += html;
+  });
+
+  // профільні пости
+  document.getElementById('profileMessages').innerHTML = container.innerHTML;
 }
 
-loadData();
+function openModal(url, isVideo) {
+  const modal = document.getElementById('modal');
+  if (isVideo) {
+    document.getElementById('modalImg').style.display = 'none';
+    const vid = document.getElementById('modalVideo');
+    vid.src = url;
+    vid.style.display = 'block';
+    vid.play();
+  } else {
+    document.getElementById('modalVideo').style.display = 'none';
+    document.getElementById('modalImg').src = url;
+    document.getElementById('modalImg').style.display = 'block';
+  }
+  modal.style.display = 'flex';
+}
 
-postText.oninput = () => {
-  document.getElementById('charCount').textContent = `${postText.value.length}/500`;
-  localStorage.setItem('draft', postText.value);
-};
+function closeModal() {
+  const modal = document.getElementById('modal');
+  modal.style.display = 'none';
+  document.getElementById('modalVideo').pause();
+}
 
-mediaInput.onchange = () => {
-  previewMedia.innerHTML = '';
-  [...mediaInput.files].slice(0,4).forEach(file => {
-    const reader = new FileReader();
-    reader.onload = e => {
+function save() {
+  localStorage.setItem('fantasyPosts', JSON.stringify(posts));
+  localStorage.setItem('fantasyUser', JSON.stringify(user));
+}
+
+// ─── Profile ───
+function saveProfile() {
+  user.bio = document.getElementById('bio').value;
+  const file = document.getElementById('avatarInput').files[0];
+  if (file) {
+    const r = new FileReader();
+    r.onload = e => {
+      user.avatar = e.target.result;
+      document.getElementById('avatarImg').src = user.avatar;
+      save();
+    };
+    r.readAsDataURL(file);
+  } else {
+    save();
+  }
+}
+
+// ─── Emoji (дуже простий) ───
+const emojis = '😀 😂 ❤️ 💜 ✨ 🔥 🌙 🪐 ⚡ 🎮 🎨 🧙'.split(' ');
+
+function toggleEmoji() {
+  const picker = document.getElementById('emojiPicker');
+  if (picker.style.display === 'block') {
+    picker.style.display = 'none';
+    return;
+  }
+
+  picker.innerHTML = emojis.map(e => `<button onclick="insertEmoji('${e}')">${e}</button>`).join('');
+  picker.style.display = 'block';
+}
+
+function insertEmoji(e) {
+  const ta = document.getElementById('postText');
+  ta.value += e;
+  ta.focus();
+}
+
+// ─── Preview медіа ───
+document.getElementById('mediaInput').onchange = e => {
+  const prev = document.getElementById('preview');
+  prev.innerHTML = '';
+  Array.from(e.target.files).slice(0,4).forEach(f => {
+    const r = new FileReader();
+    r.onload = ev => {
       const div = document.createElement('div');
       div.className = 'media-item';
-      div.innerHTML = file.type.startsWith('image')
-        ? `<img src="${e.target.result}">`
-        : `<video src="${e.target.result}" controls></video>`;
-      previewMedia.appendChild(div);
+      if (f.type.startsWith('image')) {
+        div.innerHTML = `<img src="${ev.target.result}">`;
+      } else {
+        div.innerHTML = `<video src="${ev.target.result}" controls></video>`;
+      }
+      prev.appendChild(div);
     };
-    reader.readAsDataURL(file);
+    r.readAsDataURL(f);
   });
 };
 
-// решта функцій (addPost, render, toggleLike, etc.) лишаються майже без змін
-// ... (скопіюй їх з твого оригінального коду, вони працюють)
+// ─── Init ───
+if (user.avatar) document.getElementById('avatarImg').src = user.avatar;
+document.getElementById('bio').value = user.bio || '';
+renderFeed();
 
-// маленьке покращення для лайку
-function toggleLike(i) {
-  // ... твоя логіка ...
-  saveData();
-  render();  // можна оптимізувати пізніше
-}
-
-// запуск рендеру при старті
-render();
+// клік поза емодзі / меню
+document.addEventListener('click', e => {
+  if (!e.target.closest('#emojiPicker') && !e.target.closest('.btn-icon[onclick*="toggleEmoji"]')) {
+    document.getElementById('emojiPicker').style.display = 'none';
+  }
+});
 </script>
 </body>
 </html>

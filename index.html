@@ -886,6 +886,10 @@
 
 <script type="module">
   // ================= Firebase з виправленим authDomain (використовуємо правильний домен для редиректу) =================
+  // Щоб виправити помилку 400: redirect_uri_mismatch, додайте в Google Cloud Console (Credentials -> Web client для вашого проекту) 
+  // наступний redirect URI: https://fantasyasapp.firebaseapp.com/flowName=GeneralOAuthFlow
+  // Якщо домен відрізняється (наприклад, через кастомний домен), додайте відповідний URI з вашим доменом.
+  // Це дозволить SDK використовувати цей ендпоінт. Якщо проблема в типо в домені, перевірте, чи projectId і authDomain збігаються з вашим проектом у Firebase консолі.
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, OAuthProvider, signInWithRedirect, getRedirectResult, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, where, onSnapshot, orderBy, serverTimestamp, arrayUnion, arrayRemove, deleteDoc, getDocs, increment, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
@@ -893,7 +897,7 @@
 
   const firebaseConfig = {
     apiKey: "AIzaSyDRzC-QDE0-UXd-XL0i3iqayFiKcc6wmvc",
-    authDomain: "fantasyasapp.firebaseapp.com", // Виправлено на стандартний домен Firebase для коректної роботи редиректу. Якщо у вас custom domain, налаштуйте в консолі Firebase.
+    authDomain: "fantasyasapp.firebaseapp.com", // Перевірте, чи це правильний домен. Якщо проект називається "fantasyasaapp", виправте на "fantasyasaapp.firebaseapp.com" і оновіть в консолі.
     projectId: "fantasyasapp",
     storageBucket: "fantasyasapp.appspot.com",
     messagingSenderId: "721763921060",
@@ -1172,7 +1176,7 @@
       const userData = userSnap.data();
       
       const postDoc = await addDoc(collection(db, "posts"), {
-        author: currentUser.uid,
+        author: currentUser.uid;
         authorName: userData.nickname,
         authorUserId: userData.userId,
         authorAvatar: userData.avatar || '',

@@ -2,8 +2,8 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FANTASYAS · фінальна робоча версія</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"/>
+  <title>FANTASYAS · мобільна версія</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
     /* ========== ВСІ ВАШІ СТИЛІ (НЕ ЗМІНЮВАЛИСЬ) ========== */
@@ -750,6 +750,9 @@
     @media (max-width: 700px) {
       .main-content { padding: 16px; }
       .profile-header { flex-direction: column; text-align: center; }
+      .post-footer { gap: 16px; }
+      .post-footer button { padding: 6px 8px; }
+      .like-btn svg, .comments-toggle svg { width: 24px; height: 24px; }
     }
   </style>
 </head>
@@ -916,7 +919,7 @@
 
   const firebaseConfig = {
     apiKey: "AIzaSyDRzC-QDE0-UXd-XL0i3iqayFiKcc6wmvc",
-    authDomain: "satinov.pages.dev", // ваш домен
+    authDomain: "satinov.pages.dev",
     projectId: "fantasyasapp",
     storageBucket: "fantasyasapp.firebasestorage.app",
     messagingSenderId: "721763921060",
@@ -963,10 +966,8 @@
       const result = await getRedirectResult(auth);
       if (result) {
         const user = result.user;
-        // Перевіряємо, чи є документ користувача в Firestore
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (!userDoc.exists()) {
-          // Створюємо новий профіль
           const nickname = user.displayName || user.email?.split('@')[0] || 'user';
           let userId = `@${nickname.toLowerCase()}`;
           const q = query(collection(db, "users"), where("userId", "==", userId));
@@ -985,7 +986,6 @@
             createdAt: serverTimestamp()
           });
         }
-        // Автоматично увійде через onAuthStateChanged
       }
     } catch (error) {
       console.error("Помилка після редиректу:", error);
@@ -997,16 +997,13 @@
     }
   }
 
-  // Викликаємо одразу після завантаження сторінки
   handleRedirectResult();
 
-  // Бургер
   document.getElementById('burger').onclick = () => {
     document.getElementById('burger').classList.toggle('active');
     document.getElementById('sidebar').classList.toggle('active');
   };
 
-  // Навігація
   document.querySelectorAll('[data-section]').forEach(link => {
     link.onclick = () => {
       const sectionId = link.dataset.section;
@@ -1038,7 +1035,6 @@
     loadMorePosts();
   }
 
-  // Перемикання між формами
   document.getElementById('toRegister').onclick = () => {
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('registerForm').style.display = 'block';
@@ -1048,7 +1044,6 @@
     document.getElementById('loginForm').style.display = 'block';
   };
 
-  // Реєстрація (email)
   document.getElementById('registerBtn').onclick = async () => {
     const nickname = document.getElementById('registerNickname').value.trim();
     const password = document.getElementById('registerPassword').value.trim();
@@ -1084,7 +1079,6 @@
     } catch (e) { alert(e.message); }
   };
 
-  // Вхід (email)
   document.getElementById('loginBtn').onclick = async () => {
     const nickname = document.getElementById('loginNickname').value.trim();
     const password = document.getElementById('loginPassword').value.trim();
@@ -1096,20 +1090,17 @@
     } catch { alert('Невірний псевдонім або пароль'); }
   };
 
-  // Google (redirect)
   document.getElementById('googleLoginBtn').onclick = async () => {
     const provider = new GoogleAuthProvider();
     await signInWithRedirect(auth, provider);
   };
 
-  // Apple (redirect)
   document.getElementById('appleLoginBtn').onclick = async () => {
     const provider = new OAuthProvider('apple.com');
     provider.addScope('email name');
     await signInWithRedirect(auth, provider);
   };
 
-  // Забули пароль
   document.getElementById('forgotPassword').onclick = async (e) => {
     e.preventDefault();
     const email = prompt('Введіть ваш email (якщо реєструвались через email)');
@@ -1123,7 +1114,6 @@
     }
   };
 
-  // Слухач авторизації
   onAuthStateChanged(auth, (user) => {
     if (user) {
       currentUser = user;
@@ -1155,7 +1145,6 @@
     }
   });
 
-  // Перемикання стрічок
   document.getElementById('feedNewBtn').onclick = () => {
     if (currentFeedType === 'new') return;
     document.getElementById('feedNewBtn').classList.add('active');
@@ -1180,7 +1169,6 @@
     resetPagination();
   });
 
-  // Емодзі для поста
   document.getElementById('emojiPostBtn').onclick = () => {
     const p = document.getElementById('emojiPostPicker');
     p.style.display = p.style.display === 'none' ? 'flex' : 'none';
@@ -1192,7 +1180,6 @@
     };
   });
 
-  // Публікація поста
   document.getElementById('addPost').onclick = async () => {
     if (!currentUser) return alert('Увійдіть');
     const text = document.getElementById('postText').value.trim();
@@ -1229,7 +1216,6 @@
     } catch (e) { alert(e.message); }
   };
 
-  // Інфінітний скрол
   async function loadMorePosts() {
     if (loading || !hasMore || !currentUser) return;
     loading = true;
@@ -1361,7 +1347,6 @@
     }
   }
 
-  // Обробник подій стрічки
   document.getElementById('feed').addEventListener('click', async (e) => {
     if (e.target.closest('.like-btn')) {
       const btn = e.target.closest('.like-btn');
@@ -1714,7 +1699,6 @@
     }
   }
 
-  // Редагування профілю
   document.getElementById('closeModal').onclick = () => document.getElementById('editProfileModal').classList.remove('active');
   document.getElementById('saveProfileEdit').onclick = async () => {
     const nickname = document.getElementById('editNickname').value.trim();
@@ -1846,7 +1830,6 @@
     document.getElementById('chatText').value = '';
   };
 
-  // ========== ТЕМА ТА TV ==========
   document.getElementById('toggleTheme').onclick = () => {
     document.body.classList.toggle('light');
     localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
@@ -1857,10 +1840,8 @@
     document.body.classList.toggle('tv');
   };
 
-  // Вихід
   document.getElementById('logoutBtn').onclick = () => signOut(auth);
 
-  // Інфінітний скрол
   const sentinel = document.getElementById('feedSentinel');
   const observer = new IntersectionObserver((entries) => {
     if (entries[0].isIntersecting) {
@@ -1869,7 +1850,6 @@
   }, { threshold: 0.5 });
   observer.observe(sentinel);
 
-  // Клавіатурна навігація для TV
   let focusableElements = [];
   let currentFocusIndex = -1;
 
@@ -1907,7 +1887,6 @@
     });
   });
 
-  // Початкове завантаження постів
   resetPagination();
 </script>
 </body>

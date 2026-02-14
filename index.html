@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FANTASYAS · оновлений</title>
+  <title>FANTASYAS · фінальна версія</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
+    /* ========== ВСІ ВАШІ СТИЛІ (НЕ ЗМІНЮВАЛИСЬ) ========== */
     * {
       margin: 0;
       padding: 0;
@@ -42,7 +43,6 @@
       --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
 
-    /* ===== ТЕЛЕВІЗОР ===== */
     body.tv {
       --font-scale: 1.6;
       --post-padding: 48px;
@@ -67,12 +67,8 @@
     body.tv .sidebar a { font-size: 2.2rem; margin: 3rem 0; }
     body.tv .card { padding: 48px; }
     body.tv input, body.tv textarea, body.tv button { font-size: 1.6rem; padding: 20px 32px; }
-    body.tv :focus {
-      outline: 4px solid var(--accent);
-      outline-offset: 6px;
-    }
+    body.tv :focus { outline: 4px solid var(--accent); outline-offset: 6px; }
 
-    /* ===== ЗАГАЛЬНІ СТИЛІ ===== */
     body {
       background: var(--bg);
       color: var(--text);
@@ -99,9 +95,7 @@
       z-index: 1000;
       transition: all 0.3s ease;
     }
-    .top-bar:hover {
-      background: var(--hover);
-    }
+    .top-bar:hover { background: var(--hover); }
 
     .site-name {
       font-size: 2rem;
@@ -291,7 +285,6 @@
       border-color: var(--accent);
     }
 
-    /* Скелетон */
     .skeleton-post {
       background: linear-gradient(90deg, var(--card) 25%, var(--hover) 50%, var(--card) 75%);
       background-size: 200% 100%;
@@ -305,7 +298,6 @@
       100% { background-position: -200% 0; }
     }
 
-    /* Стрічка */
     .feed-header {
       display: flex;
       gap: 12px;
@@ -478,7 +470,6 @@
       box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     }
 
-    /* ===== НОВІ ІКОНКИ ЯК В INSTAGRAM ===== */
     .post-footer {
       display: flex;
       gap: 28px;
@@ -505,7 +496,6 @@
       border: none;
     }
 
-    /* like button – сердечко з анімацією */
     .like-btn svg {
       width: 28px;
       height: 28px;
@@ -528,7 +518,6 @@
       100% { transform: scale(1); }
     }
 
-    /* comment button – значок коментаря */
     .comments-toggle svg {
       width: 26px;
       height: 26px;
@@ -614,7 +603,6 @@
     }
     .emoji-panel span:hover { transform: scale(1.3) rotate(15deg); filter: grayscale(0); }
 
-    /* Пошук */
     .search-input {
       margin-bottom: 24px;
       padding: 18px 24px;
@@ -654,7 +642,6 @@
       transform: scale(1.05) rotate(-3deg);
     }
 
-    /* Чат */
     .chat-list { display: flex; flex-direction: column; gap: 8px; max-height: 70vh; overflow-y: auto; }
     .chat-item {
       display: flex; align-items: center; gap: 16px; padding: 16px; border-radius: 24px;
@@ -698,7 +685,6 @@
     .chat-input input { flex: 1; margin-right: 16px; border-radius: 40px; transition: box-shadow 0.3s ease; }
     .chat-input input:focus { box-shadow: 0 0 10px var(--accent); }
 
-    /* Профіль */
     .profile-header { display: flex; flex-wrap: wrap; gap: 28px; align-items: center; position: relative; }
     .profile-header.sticky { position: sticky; top: 70px; background: var(--surface); backdrop-filter: var(--blur); z-index: 900; padding: 16px; border-radius: 28px; }
     .profile-avatar { width: 120px; height: 120px; border-radius: 50%; background: #333; background-size: cover; border: 3px solid var(--border); cursor: pointer; transition: 0.2s; box-shadow: 0 0 15px rgba(255,255,255,0.1); }
@@ -739,7 +725,6 @@
       transform: scale(1.05);
     }
 
-    /* Модалки */
     .modal {
       position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px);
       display: none; align-items: center; justify-content: center; z-index: 3000;
@@ -925,13 +910,13 @@
 <script type="module">
   // ================= Firebase з оновленим authDomain =================
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, OAuthProvider, signInWithPopup, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, OAuthProvider, signInWithRedirect, getRedirectResult, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, where, onSnapshot, orderBy, serverTimestamp, arrayUnion, arrayRemove, deleteDoc, getDocs, increment, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
   import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDRzC-QDE0-UXd-XL0i3iqayFiKcc6wmvc",
-    authDomain: "satinov.pages.dev", // <-- змінено на новий домен
+    authDomain: "satinov.pages.dev", // ваш правильний домен
     projectId: "fantasyasapp",
     storageBucket: "fantasyasapp.firebasestorage.app",
     messagingSenderId: "721763921060",
@@ -953,14 +938,12 @@
   let currentFeedType = 'new';
   let popularSearchTerm = '';
 
-  // Для інфінітного скролу
   let lastVisible = null;
   let loading = false;
   let hasMore = true;
 
   const getChatId = (uid1, uid2) => [uid1, uid2].sort().join('_');
 
-  // TV mode detection
   const tvQuery = window.matchMedia('(min-width: 1200px) and (hover: none) and (pointer: coarse)');
   if (tvQuery.matches) document.body.classList.add('tv');
 
@@ -973,6 +956,43 @@
       badge.style.display = 'none';
     }
   }
+
+  // ========== ОБРОБКА РЕЗУЛЬТАТУ РЕДИРЕКТУ (GOOGLE/APPLE) ==========
+  async function handleRedirectResult() {
+    try {
+      const result = await getRedirectResult(auth);
+      if (result) {
+        const user = result.user;
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (!userDoc.exists()) {
+          const nickname = user.displayName || user.email?.split('@')[0] || 'user';
+          let userId = `@${nickname.toLowerCase()}`;
+          const q = query(collection(db, "users"), where("userId", "==", userId));
+          const snap = await getDocs(q);
+          if (!snap.empty) userId = `@${nickname.toLowerCase()}${Math.floor(Math.random()*1000)}`;
+          await setDoc(doc(db, "users", user.uid), {
+            nickname,
+            userId,
+            nickname_lower: nickname.toLowerCase(),
+            bio: '',
+            avatar: user.photoURL || '',
+            posts: [],
+            likedPosts: [],
+            followers: [],
+            following: [],
+            createdAt: serverTimestamp()
+          });
+        }
+        // Якщо потрібно, можна оновити UI
+      }
+    } catch (error) {
+      console.error("Помилка після редиректу:", error);
+      alert("Не вдалося увійти через " + (error.code === 'auth/account-exists-with-different-credential' ? 'обліковий запис вже існує з іншим методом' : error.message));
+    }
+  }
+
+  // Викликаємо одразу після завантаження
+  handleRedirectResult();
 
   // Бургер
   document.getElementById('burger').onclick = () => {
@@ -1005,7 +1025,6 @@
     };
   });
 
-  // Скидання пагінації
   function resetPagination() {
     lastVisible = null;
     hasMore = true;
@@ -1013,7 +1032,6 @@
     loadMorePosts();
   }
 
-  // Перемикання логін/реєстрація
   document.getElementById('toRegister').onclick = () => {
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('registerForm').style.display = 'block';
@@ -1071,66 +1089,19 @@
     } catch { alert('Невірний псевдонім або пароль'); }
   };
 
-  // Google
+  // Google (redirect)
   document.getElementById('googleLoginBtn').onclick = async () => {
-    try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (!userDoc.exists()) {
-        const nickname = user.displayName || user.email.split('@')[0];
-        let userId = `@${nickname.toLowerCase()}`;
-        const q = query(collection(db, "users"), where("userId", "==", userId));
-        const snap = await getDocs(q);
-        if (!snap.empty) userId = `@${nickname.toLowerCase()}${Math.floor(Math.random()*1000)}`;
-        await setDoc(doc(db, "users", user.uid), {
-          nickname,
-          userId,
-          nickname_lower: nickname.toLowerCase(),
-          bio: '',
-          avatar: user.photoURL || '',
-          posts: [],
-          likedPosts: [],
-          followers: [],
-          following: [],
-          createdAt: serverTimestamp()
-        });
-      }
-    } catch (e) { alert(e.message); }
+    const provider = new GoogleAuthProvider();
+    await signInWithRedirect(auth, provider);
   };
 
-  // Apple
+  // Apple (redirect)
   document.getElementById('appleLoginBtn').onclick = async () => {
-    try {
-      const provider = new OAuthProvider('apple.com');
-      provider.addScope('email name');
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (!userDoc.exists()) {
-        const nickname = user.displayName || user.email.split('@')[0];
-        let userId = `@${nickname.toLowerCase()}`;
-        const q = query(collection(db, "users"), where("userId", "==", userId));
-        const snap = await getDocs(q);
-        if (!snap.empty) userId = `@${nickname.toLowerCase()}${Math.floor(Math.random()*1000)}`;
-        await setDoc(doc(db, "users", user.uid), {
-          nickname,
-          userId,
-          nickname_lower: nickname.toLowerCase(),
-          bio: '',
-          avatar: user.photoURL || '',
-          posts: [],
-          likedPosts: [],
-          followers: [],
-          following: [],
-          createdAt: serverTimestamp()
-        });
-      }
-    } catch (e) { alert(e.message); }
+    const provider = new OAuthProvider('apple.com');
+    provider.addScope('email name');
+    await signInWithRedirect(auth, provider);
   };
 
-  // Забули пароль
   document.getElementById('forgotPassword').onclick = async (e) => {
     e.preventDefault();
     const email = prompt('Введіть ваш email (якщо реєструвались через email)');
@@ -1144,7 +1115,6 @@
     }
   };
 
-  // Слухач авторизації
   onAuthStateChanged(auth, (user) => {
     if (user) {
       currentUser = user;
@@ -1176,7 +1146,6 @@
     }
   });
 
-  // Перемикання стрічок
   document.getElementById('feedNewBtn').onclick = () => {
     if (currentFeedType === 'new') return;
     document.getElementById('feedNewBtn').classList.add('active');
@@ -1196,13 +1165,11 @@
     resetPagination();
   };
 
-  // Пошук у популярному
   document.getElementById('popularSearchInput').addEventListener('input', (e) => {
     popularSearchTerm = e.target.value.trim().toLowerCase();
     resetPagination();
   });
 
-  // Емодзі для поста
   document.getElementById('emojiPostBtn').onclick = () => {
     const p = document.getElementById('emojiPostPicker');
     p.style.display = p.style.display === 'none' ? 'flex' : 'none';
@@ -1214,7 +1181,6 @@
     };
   });
 
-  // Публікація поста
   document.getElementById('addPost').onclick = async () => {
     if (!currentUser) return alert('Увійдіть');
     const text = document.getElementById('postText').value.trim();
@@ -1251,7 +1217,6 @@
     } catch (e) { alert(e.message); }
   };
 
-  // Інфінітний скрол
   async function loadMorePosts() {
     if (loading || !hasMore || !currentUser) return;
     loading = true;
@@ -1281,7 +1246,6 @@
     loading = false;
   }
 
-  // Рендер постів (оновлено: замість Lottie використовуємо SVG heart та comment)
   async function renderPosts(docs) {
     const feed = document.getElementById('feed');
     
@@ -1384,7 +1348,6 @@
     }
   }
 
-  // Обробник подій стрічки (оновлено для роботи з SVG)
   document.getElementById('feed').addEventListener('click', async (e) => {
     if (e.target.closest('.like-btn')) {
       const btn = e.target.closest('.like-btn');
@@ -1538,16 +1501,392 @@
     }
   });
 
-  // Інші функції (профіль, чати, тема тощо) залишаються без змін
-  // (вони ідентичні попередній версії, тому для стислості тут не дублюються,
-  // але в повному коді вони мають бути присутні. В даному відповіді вони опущені,
-  // оскільки не впливають на суть змін.)
-  
-  // … тут мають бути всі інші функції (loadSearchUsers, toggleFollow, loadMyProfile, loadUserProfile, renderProfile, loadProfileFeed, loadChatList, openChat, subscribeToChat, обробники модалок, теми, вихід тощо) без змін …
-  // Оскільки вони ідентичні, а відповідь і так велика, я їх не переписую повторно.
-  // Але в реальному коді вони обов'язково мають бути додані.
+  // ========== ФУНКЦІЇ ПОШУКУ, ПРОФІЛЮ, ЧАТІВ (без змін, але додаємо їх) ==========
+  async function loadSearchUsers() {
+    const val = document.getElementById('searchInput').value.trim().toLowerCase();
+    const userList = document.getElementById('userList');
+    if (!val) { userList.innerHTML = ''; return; }
+    
+    const mySnap = await getDoc(doc(db, "users", currentUser.uid));
+    const myFollowing = mySnap.data().following || [];
+    
+    const q1 = query(collection(db, "users"), where("userId", ">=", val.startsWith('@') ? val : `@${val}`), where("userId", "<=", (val.startsWith('@') ? val : `@${val}`) + '\uf8ff'));
+    const q2 = query(collection(db, "users"), where("nickname_lower", ">=", val), where("nickname_lower", "<=", val + '\uf8ff'));
+    
+    const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+    const usersMap = new Map();
+    snap1.forEach(d => usersMap.set(d.id, d.data()));
+    snap2.forEach(d => usersMap.set(d.id, d.data()));
+    
+    userList.innerHTML = '';
+    usersMap.forEach((data, uid) => {
+      if (uid === currentUser.uid) return;
+      const isFollowing = myFollowing.includes(uid);
+      const div = document.createElement('div');
+      div.className = 'user-item';
+      div.innerHTML = `
+        <div class="avatar" style="background-image:url(${data.avatar || ''})"></div>
+        <div>
+          <div style="font-weight:600;">${data.nickname}</div>
+          <div class="user-id">${data.userId || ''}</div>
+        </div>
+        <button class="follow-btn">${isFollowing ? 'Відписатися' : 'Підписатися'}</button>
+      `;
+      div.querySelector('.follow-btn').onclick = async (e) => {
+        e.stopPropagation();
+        await toggleFollow(uid);
+        loadSearchUsers();
+      };
+      div.onclick = () => {
+        viewingProfileUid = uid;
+        loadUserProfile(uid);
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('profile').classList.add('active');
+        document.getElementById('sidebar').classList.remove('active');
+        document.getElementById('burger').classList.remove('active');
+      };
+      userList.appendChild(div);
+    });
+  }
+  document.getElementById('searchInput').addEventListener('input', loadSearchUsers);
 
-  // Для демонстрації важливих змін я їх тут не наводжу, але в фінальному рішенні вони присутні.
+  async function toggleFollow(targetUid) {
+    const myRef = doc(db, "users", currentUser.uid);
+    const targetRef = doc(db, "users", targetUid);
+    const mySnap = await getDoc(myRef);
+    const following = mySnap.data().following || [];
+    if (following.includes(targetUid)) {
+      await updateDoc(myRef, { following: arrayRemove(targetUid) });
+      await updateDoc(targetRef, { followers: arrayRemove(currentUser.uid) });
+    } else {
+      await updateDoc(myRef, { following: arrayUnion(targetUid) });
+      await updateDoc(targetRef, { followers: arrayUnion(currentUser.uid) });
+    }
+  }
+
+  async function loadMyProfile() {
+    if (!currentUser) return;
+    const snap = await getDoc(doc(db, "users", currentUser.uid));
+    if (snap.exists()) {
+      const data = snap.data();
+      renderProfile(data, currentUser.uid, true);
+    }
+  }
+
+  async function loadUserProfile(uid) {
+    const snap = await getDoc(doc(db, "users", uid));
+    if (snap.exists()) {
+      const data = snap.data();
+      const isOwn = uid === currentUser?.uid;
+      renderProfile(data, uid, isOwn);
+    }
+  }
+
+  function renderProfile(data, uid, isOwn) {
+    const profileDiv = document.getElementById('profile');
+    const isFollowing = !isOwn && currentUser ? (data.followers?.includes(currentUser.uid) || false) : false;
+    
+    profileDiv.innerHTML = `
+      <div class="card profile-header" id="profileHeader">
+        <div class="profile-avatar" style="background-image:url(${data.avatar || ''})" data-uid="${uid}"></div>
+        ${isOwn ? '<input type="file" id="avatarInput" accept="image/*" style="display:none;"/>' : ''}
+        <div style="flex:1;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <h2>${data.nickname}</h2>
+            ${isOwn ? '<button class="edit-profile-btn"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>' : ''}
+          </div>
+          <div class="user-id" style="font-size:1rem; margin:5px 0;">${data.userId || ''}</div>
+          <p style="color:var(--text-sec); margin:10px 0;" id="profileBio">${data.bio || 'Опис відсутній'}</p>
+          <div style="display:flex; gap:25px; font-weight:600;">
+            <span>${data.posts?.length || 0} постів</span>
+            <span>${data.followers?.length || 0} підписників</span>
+            <span>${data.following?.length || 0} підписок</span>
+          </div>
+          ${!isOwn && currentUser ? `
+            <div style="margin-top:16px; display:flex; gap:10px;">
+              <button id="profileFollowBtn">${isFollowing ? 'Відписатися' : 'Підписатися'}</button>
+              <button id="profileMessageBtn">Написати</button>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+      <div class="profile-tabs">
+        <button class="profile-tab active" data-tab="posts">Пости</button>
+        <button class="profile-tab" data-tab="likes">Лайки</button>
+        <button class="profile-tab" data-tab="media">Медіа</button>
+      </div>
+      <div class="feed" id="profileFeed"></div>
+    `;
+    
+    document.querySelectorAll('.profile-tab').forEach(tab => {
+      tab.onclick = () => {
+        document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const tabType = tab.dataset.tab;
+        loadProfileFeed(uid, tabType);
+      };
+    });
+    
+    loadProfileFeed(uid, 'posts');
+    
+    if (!isOwn && currentUser) {
+      document.getElementById('profileFollowBtn').onclick = async () => {
+        await toggleFollow(uid);
+        loadUserProfile(uid);
+      };
+      document.getElementById('profileMessageBtn').onclick = () => {
+        openChat(data.nickname, uid, data.userId);
+      };
+    }
+    
+    if (isOwn) {
+      const avatar = document.querySelector('.profile-avatar');
+      avatar.onclick = () => {
+        document.getElementById('avatarInput').click();
+      };
+      document.getElementById('avatarInput').onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+          const storageRef = ref(storage, `avatars/${currentUser.uid}`);
+          await uploadBytes(storageRef, file);
+          const url = await getDownloadURL(storageRef);
+          await updateDoc(doc(db, "users", currentUser.uid), { avatar: url });
+          avatar.style.backgroundImage = `url(${url})`;
+        } catch { alert('Помилка'); }
+      };
+      
+      const editBtn = document.querySelector('.edit-profile-btn');
+      if (editBtn) {
+        editBtn.onclick = () => {
+          document.getElementById('editNickname').value = data.nickname;
+          document.getElementById('editBio').value = data.bio || '';
+          document.getElementById('editProfileModal').classList.add('active');
+        };
+      }
+    }
+  }
+
+  async function loadProfileFeed(uid, tab) {
+    const feed = document.getElementById('profileFeed');
+    feed.innerHTML = '';
+    
+    let posts = [];
+    if (tab === 'posts') {
+      const userSnap = await getDoc(doc(db, "users", uid));
+      const postIds = userSnap.data().posts || [];
+      for (const id of postIds.slice(0, 20)) {
+        const postSnap = await getDoc(doc(db, "posts", id));
+        if (postSnap.exists()) posts.push({ id: postSnap.id, ...postSnap.data() });
+      }
+    } else if (tab === 'likes') {
+      const userSnap = await getDoc(doc(db, "users", uid));
+      const likedIds = userSnap.data().likedPosts || [];
+      for (const id of likedIds.slice(0, 20)) {
+        const postSnap = await getDoc(doc(db, "posts", id));
+        if (postSnap.exists()) posts.push({ id: postSnap.id, ...postSnap.data() });
+      }
+    } else if (tab === 'media') {
+      const q = query(collection(db, "posts"), where("author", "==", uid), where("mediaUrl", "!=", ""));
+      const snap = await getDocs(q);
+      snap.forEach(doc => posts.push({ id: doc.id, ...doc.data() }));
+    }
+    
+    posts.sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+    
+    for (const post of posts) {
+      feed.innerHTML += `<div class="post">${post.text}</div>`;
+    }
+  }
+
+  document.getElementById('closeModal').onclick = () => document.getElementById('editProfileModal').classList.remove('active');
+  document.getElementById('saveProfileEdit').onclick = async () => {
+    const nickname = document.getElementById('editNickname').value.trim();
+    const bio = document.getElementById('editBio').value.trim();
+    if (!nickname) return alert('Псевдонім обов’язковий');
+    
+    const newUserId = `@${nickname.toLowerCase()}`;
+    const q = query(collection(db, "users"), where("userId", "==", newUserId));
+    const snap = await getDocs(q);
+    if (!snap.empty && snap.docs[0].id !== currentUser.uid) {
+      return alert('Цей ID вже зайнятий');
+    }
+    
+    await updateDoc(doc(db, "users", currentUser.uid), {
+      nickname,
+      userId: newUserId,
+      nickname_lower: nickname.toLowerCase(),
+      bio
+    });
+    loadMyProfile();
+    document.getElementById('editProfileModal').classList.remove('active');
+  };
+
+  async function loadChatList() {
+    const list = document.getElementById('chatList');
+    list.innerHTML = '';
+    const q = query(collection(db, "chats"), where("participants", "array-contains", currentUser.uid), orderBy("updatedAt", "desc"));
+    onSnapshot(q, async (snapshot) => {
+      list.innerHTML = '';
+      for (const docSnap of snapshot.docs) {
+        const chat = docSnap.data();
+        const otherUid = chat.participants.find(uid => uid !== currentUser.uid);
+        const userSnap = await getDoc(doc(db, "users", otherUid));
+        const user = userSnap.data();
+        const unread = chat.unread?.[currentUser.uid] || 0;
+        const lastMsg = chat.lastMessage || '';
+        const time = chat.updatedAt ? new Date(chat.updatedAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+        
+        const item = document.createElement('div');
+        item.className = `chat-item ${unread > 0 ? 'unread' : ''}`;
+        item.dataset.chatId = docSnap.id;
+        item.dataset.otherUid = otherUid;
+        item.innerHTML = `
+          <div class="chat-avatar" style="background-image:url(${user.avatar || ''})"></div>
+          <div class="chat-info">
+            <div class="chat-name">${user.nickname} <span class="chat-userid">${user.userId || ''}</span></div>
+            <div class="chat-last">${lastMsg}</div>
+          </div>
+          <div class="chat-meta">
+            <div class="chat-time">${time}</div>
+            ${unread > 0 ? `<div class="chat-badge">${unread}</div>` : ''}
+          </div>
+        `;
+        item.onclick = () => openChatFromList(docSnap.id, otherUid, user.nickname, user.userId, user.avatar);
+        list.appendChild(item);
+      }
+    });
+  }
+
+  async function openChatFromList(chatId, otherUid, otherName, otherUserId, otherAvatar) {
+    currentChatPartner = otherUid;
+    document.getElementById('chatWindow').style.display = 'flex';
+    document.getElementById('chatName').textContent = otherName;
+    document.getElementById('chatUserId').textContent = otherUserId || '';
+    document.getElementById('chatAvatar').style.backgroundImage = `url(${otherAvatar || ''})`;
+    const chatRef = doc(db, "chats", chatId);
+    await updateDoc(chatRef, { [`unread.${currentUser.uid}`]: 0 });
+    subscribeToChat(chatId);
+  }
+
+  function openChat(otherName, otherUid, otherUserId) {
+    currentChatPartner = otherUid;
+    document.getElementById('chatWindow').style.display = 'flex';
+    document.getElementById('chatName').textContent = otherName;
+    document.getElementById('chatUserId').textContent = otherUserId || '';
+    getDoc(doc(db, "users", otherUid)).then(snap => {
+      if (snap.exists()) {
+        document.getElementById('chatAvatar').style.backgroundImage = `url(${snap.data().avatar || ''})`;
+      }
+    });
+    const chatId = getChatId(currentUser.uid, otherUid);
+    const chatRef = doc(db, "chats", chatId);
+    getDoc(chatRef).then(async (docSnap) => {
+      if (!docSnap.exists()) {
+        await setDoc(chatRef, {
+          participants: [currentUser.uid, otherUid],
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          lastMessage: '',
+          unread: { [currentUser.uid]: 0, [otherUid]: 0 }
+        });
+      } else {
+        await updateDoc(chatRef, { [`unread.${currentUser.uid}`]: 0 });
+      }
+      subscribeToChat(chatId);
+    });
+  }
+
+  function subscribeToChat(chatId) {
+    if (unsubscribeChat) unsubscribeChat();
+    const q = query(collection(db, `chats/${chatId}/messages`), orderBy("createdAt"));
+    unsubscribeChat = onSnapshot(q, (snap) => {
+      const messages = document.getElementById('chatMessages');
+      messages.innerHTML = '';
+      snap.forEach(m => {
+        const msg = m.data();
+        const div = document.createElement('div');
+        div.className = `message ${msg.from === currentUser.uid ? 'sent' : 'received'}`;
+        div.textContent = msg.text;
+        messages.appendChild(div);
+      });
+      messages.scrollTop = messages.scrollHeight;
+    });
+  }
+
+  document.getElementById('sendMessage').onclick = async () => {
+    const text = document.getElementById('chatText').value.trim();
+    if (!text || !currentChatPartner) return;
+    const chatId = getChatId(currentUser.uid, currentChatPartner);
+    const chatRef = doc(db, "chats", chatId);
+    const messageRef = collection(db, `chats/${chatId}/messages`);
+    await addDoc(messageRef, { from: currentUser.uid, text, createdAt: serverTimestamp() });
+    await updateDoc(chatRef, {
+      lastMessage: text,
+      updatedAt: serverTimestamp(),
+      [`unread.${currentChatPartner}`]: increment(1)
+    });
+    document.getElementById('chatText').value = '';
+  };
+
+  document.getElementById('toggleTheme').onclick = () => {
+    document.body.classList.toggle('light');
+    localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+  };
+  if (localStorage.getItem('theme') === 'light') document.body.classList.add('light');
+
+  document.getElementById('toggleTvMode').onclick = () => {
+    document.body.classList.toggle('tv');
+  };
+
+  document.getElementById('logoutBtn').onclick = () => signOut(auth);
+
+  const sentinel = document.getElementById('feedSentinel');
+  const observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) {
+      loadMorePosts();
+    }
+  }, { threshold: 0.5 });
+  observer.observe(sentinel);
+
+  let focusableElements = [];
+  let currentFocusIndex = -1;
+
+  function updateFocusable() {
+    const activeSection = document.querySelector('.section.active');
+    focusableElements = Array.from(activeSection.querySelectorAll('button, a, input, textarea, [tabindex="0"], .avatar, .username, .post'));
+    focusableElements = focusableElements.filter(el => !el.disabled);
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (!document.body.classList.contains('tv')) return;
+    
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (focusableElements.length === 0) updateFocusable();
+      currentFocusIndex = (currentFocusIndex + 1) % focusableElements.length;
+      focusableElements[currentFocusIndex]?.focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (focusableElements.length === 0) updateFocusable();
+      currentFocusIndex = (currentFocusIndex - 1 + focusableElements.length) % focusableElements.length;
+      focusableElements[currentFocusIndex]?.focus();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      document.activeElement?.click();
+    } else if (e.key === 'Escape') {
+      document.querySelector('.modal.active')?.classList.remove('active');
+      document.getElementById('sidebar')?.classList.remove('active');
+    }
+  });
+
+  document.querySelectorAll('[data-section]').forEach(link => {
+    link.addEventListener('click', () => {
+      setTimeout(updateFocusable, 200);
+    });
+  });
+
+  resetPagination();
 </script>
 </body>
 </html>

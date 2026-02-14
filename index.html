@@ -17,20 +17,20 @@
 
     :root {
       --bg: #000000;
-      --surface: rgba(17, 17, 17, 0.7); /* Покращено прозорість для кращого вигляду */
+      --surface: rgba(17, 17, 17, 0.7);
       --card: rgba(26, 26, 26, 0.6);
       --border: rgba(255, 255, 255, 0.15);
       --text: #ffffff;
-      --text-sec: #bbbbbb; /* Трохи світліший для кращої читабельності */
+      --text-sec: #bbbbbb;
       --accent: #999999;
       --hover: rgba(50, 50, 50, 0.8);
-      --shadow: 0 6px 24px rgba(0, 0, 0, 0.4); /* Оптимізовано для продуктивності */
+      --shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
       --blur: blur(12px);
       --font-scale: 1;
       --post-padding: 20px;
       --avatar-size: 48px;
       --font-size-base: 1rem;
-      --transition-fast: 0.2s ease; /* Стандартизовані переходи для оптимізації */
+      --transition-fast: 0.2s ease;
       --transition-slow: 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
     }
 
@@ -78,7 +78,7 @@
       min-height: 100vh;
       transition: background var(--transition-fast), color var(--transition-fast);
       font-size: calc(var(--font-size-base) * var(--font-scale));
-      will-change: background, color; /* Оптимізація для анімацій */
+      will-change: background, color;
     }
 
     .top-bar {
@@ -103,7 +103,7 @@
     .site-name {
       font-size: 1.8rem;
       font-weight: 800;
-      background: linear-gradient(145deg, #ddd, #999); /* Чорно-білий градієнт */
+      background: linear-gradient(145deg, #ddd, #999);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
@@ -461,7 +461,7 @@
       border-radius: 20px;
       margin: 14px 0;
       transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-      loading: lazy; /* Оптимізація завантаження */
+      loading: lazy;
     }
     .post-media:hover {
       transform: scale(1.015);
@@ -885,7 +885,7 @@
 </div>
 
 <script type="module">
-  // ================= Firebase з виправленим authDomain (використовуємо правильний домен для редиректу) =================
+  // ================= Firebase з конфігом, який ви надали =================
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, OAuthProvider, signInWithRedirect, getRedirectResult, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, where, onSnapshot, orderBy, serverTimestamp, arrayUnion, arrayRemove, deleteDoc, getDocs, increment, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
@@ -893,7 +893,7 @@
 
   const firebaseConfig = {
     apiKey: "AIzaSyDRzC-QDE0-UXd-XL0i3iqayFiKcc6wmvc",
-    authDomain: "fantasyasapp.firebaseapp.com", // Виправлено на стандартний домен Firebase для коректної роботи редиректу. Якщо у вас custom domain, налаштуйте в консолі Firebase.
+    authDomain: "satinov.pages.dev",
     projectId: "fantasyasapp",
     storageBucket: "fantasyasapp.appspot.com",
     messagingSenderId: "721763921060",

@@ -770,7 +770,7 @@
               <div id="chatName"></div>
               <div class="chat-meta" id="chatUserId"></div>
             </div>
-            <span id="onlineIndicator" class="online-indicator" style="display:none;"></span>
+            <span id="onlineIndicator" class="online-indicator" style="display:none;">🟢</span>
           </div>
           <div class="chat-messages" id="chatMessages"></div>
           <div class="typing-indicator" id="typingIndicator" style="display:none;">друкує...</div>
@@ -1008,7 +1008,7 @@
       document.getElementById('pageTitle').textContent = item.textContent.trim();
       
       // Завантаження відповідних даних
-      if (section === 'home') resetPagination();
+      if (section === 'home' && currentUser) resetPagination();
       if (section === 'search' && currentUser) loadSearchUsers();
       if (section === 'chats' && currentUser) loadChatList();
       if (section === 'groups' && currentUser) loadGroups();
@@ -1198,6 +1198,12 @@
       document.getElementById('newPostBox').style.display = 'none';
       unreadCount = 0;
       updateUnreadBadge();
+      // Очищуємо контент
+      document.getElementById('feed').innerHTML = '';
+      document.getElementById('chatList').innerHTML = '';
+      document.getElementById('groupList').innerHTML = '';
+      document.getElementById('channelList').innerHTML = '';
+      document.getElementById('profileHeader').innerHTML = '';
     }
   });
 
@@ -1572,7 +1578,7 @@
     const userSnap = await getDoc(doc(db, "users", otherUid));
     const lastOnline = userSnap.data().lastOnline?.seconds || 0;
     const isOnline = (Date.now()/1000 - lastOnline) < 60;
-    document.getElementById('onlineIndicator').style.display = isOnline ? 'inline-block' : 'none';
+    document.getElementById('onlineIndicator').style.display = isOnline ? 'inline' : 'none';
   }
 
   function openChat(otherName, otherUid, otherUserId) {
@@ -1587,7 +1593,7 @@
         document.getElementById('chatAvatar').style.backgroundImage = `url(${snap.data().avatar || ''})`;
         const lastOnline = snap.data().lastOnline?.seconds || 0;
         const isOnline = (Date.now()/1000 - lastOnline) < 60;
-        document.getElementById('onlineIndicator').style.display = isOnline ? 'inline-block' : 'none';
+        document.getElementById('onlineIndicator').style.display = isOnline ? 'inline' : 'none';
       }
     });
     
@@ -2031,6 +2037,13 @@
       const uid = e.target.closest('[data-uid]').dataset.uid;
       viewProfile(uid);
     }
+  });
+
+  // Закриття модалок по кліку на фон
+  document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.remove('active');
+    });
   });
 </script>
 </body>

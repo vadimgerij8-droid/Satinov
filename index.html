@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FANTASYAS · фінальний апдейт</title>
+  <title>FANTASYAS · оптимізований</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
     * {
@@ -15,7 +15,7 @@
 
     :root {
       --bg: #000000;
-      --surface: rgba(17, 17, 17, 0.6); /* Glassmorphism base */
+      --surface: rgba(17, 17, 17, 0.6);
       --card: rgba(26, 26, 26, 0.5);
       --border: rgba(255, 255, 255, 0.1);
       --text: #ffffff;
@@ -40,7 +40,6 @@
       --accent: #666666;
       --hover: rgba(224, 224, 224, 0.7);
       --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-      --blur: blur(10px);
     }
 
     /* ===== ТЕЛЕВІЗОР ===== */
@@ -51,83 +50,23 @@
       --font-size-base: 1.3rem;
     }
 
-    body.tv .post {
-      margin-bottom: 40px;
-    }
-
-    body.tv .post-header {
-      gap: 24px;
-    }
-
-    body.tv .username {
-      font-size: 1.8rem;
-    }
-
-    body.tv .post-content {
-      font-size: 1.6rem;
-      line-height: 1.5;
-    }
-
-    body.tv .post-footer button {
-      font-size: 1.8rem;
-      gap: 16px;
-      padding: 12px 24px;
-    }
-
-    body.tv .subscribe-post-btn {
-      font-size: 1.4rem;
-      padding: 12px 28px;
-    }
-
-    body.tv .comments-section {
-      margin-top: 36px;
-    }
-
-    body.tv .comment .avatar {
-      width: 60px;
-      height: 60px;
-    }
-
-    body.tv .comment-content {
-      font-size: 1.4rem;
-      padding: 16px 24px;
-    }
-
-    body.tv .comment-input-area textarea {
-      font-size: 1.4rem;
-      padding: 16px 24px;
-    }
-
-    body.tv .top-bar {
-      height: 100px;
-    }
-
-    body.tv .site-name {
-      font-size: 2.8rem;
-    }
-
-    body.tv .burger {
-      width: 48px;
-      height: 32px;
-    }
-
-    body.tv .burger span {
-      height: 4px;
-    }
-
-    body.tv .sidebar a {
-      font-size: 2rem;
-      margin: 2.5rem 0;
-    }
-
-    body.tv .card {
-      padding: 36px;
-    }
-
-    body.tv input, body.tv textarea, body.tv button {
-      font-size: 1.4rem;
-      padding: 18px 28px;
-    }
+    body.tv .post { margin-bottom: 40px; }
+    body.tv .post-header { gap: 24px; }
+    body.tv .username { font-size: 1.8rem; }
+    body.tv .post-content { font-size: 1.6rem; line-height: 1.5; }
+    body.tv .post-footer button { font-size: 1.8rem; gap: 16px; padding: 12px 24px; }
+    body.tv .subscribe-post-btn { font-size: 1.4rem; padding: 12px 28px; }
+    body.tv .comments-section { margin-top: 36px; }
+    body.tv .comment .avatar { width: 60px; height: 60px; }
+    body.tv .comment-content { font-size: 1.4rem; padding: 16px 24px; }
+    body.tv .comment-input-area textarea { font-size: 1.4rem; padding: 16px 24px; }
+    body.tv .top-bar { height: 100px; }
+    body.tv .site-name { font-size: 2.8rem; }
+    body.tv .burger { width: 48px; height: 32px; }
+    body.tv .burger span { height: 4px; }
+    body.tv .sidebar a { font-size: 2rem; margin: 2.5rem 0; }
+    body.tv .card { padding: 36px; }
+    body.tv input, body.tv textarea, body.tv button { font-size: 1.4rem; padding: 18px 28px; }
 
     /* ===== ЗАГАЛЬНІ СТИЛІ ===== */
     body {
@@ -244,9 +183,7 @@
       margin-left: auto;
       margin-right: auto;
     }
-    body.tv .main-content {
-      max-width: 1000px;
-    }
+    body.tv .main-content { max-width: 1000px; }
 
     .section { display: none; opacity: 0; transform: translateY(20px); transition: 0.4s; }
     .section.active { display: block; opacity: 1; transform: translateY(0); }
@@ -320,11 +257,7 @@
       border-color: var(--accent);
     }
 
-    /* Пошук у популярному */
-    .popular-search {
-      margin-bottom: 20px;
-    }
-
+    .popular-search { margin-bottom: 20px; }
     .feed { display: flex; flex-direction: column; gap: 24px; }
 
     .post {
@@ -561,7 +494,6 @@
 
     /* Профіль */
     .profile-header { display: flex; flex-wrap: wrap; gap: 28px; align-items: center; }
-
     .profile-avatar { width: 120px; height: 120px; border-radius: 50%; background: #333; background-size: cover; border: 3px solid var(--border); cursor: pointer; transition: 0.2s; }
     .profile-avatar:hover { border-color: var(--accent); transform: scale(1.02); }
 
@@ -573,8 +505,10 @@
     .modal.active { display: flex; }
     .modal-content {
       background: var(--card); border: 1px solid var(--border); border-radius: 40px; padding: 32px;
-      width: 92%; max-width: 480px; box-shadow: var(--shadow); animation: modalPop 0.3s;
+      width: 92%; max-width: 600px; box-shadow: var(--shadow); animation: modalPop 0.3s;
       backdrop-filter: var(--blur);
+      max-height: 80vh;
+      overflow-y: auto;
     }
     @keyframes modalPop {
       from { opacity: 0; transform: scale(0.9); }
@@ -582,7 +516,7 @@
     }
     .close-modal { float: right; font-size: 2.5rem; line-height: 1; cursor: pointer; color: var(--text-sec); }
 
-    /* Анімовані SVG іконки */
+    /* Іконки */
     .icon-svg {
       width: 24px;
       height: 24px;
@@ -619,14 +553,6 @@
     @keyframes commentBounce {
       0% { transform: translateY(0); }
       100% { transform: translateY(-2px); }
-    }
-    .emoji-panel .icon-svg {
-      fill: var(--text-sec);
-      transition: fill 0.2s, transform 0.3s;
-    }
-    .emoji-panel .icon-svg:hover {
-      fill: var(--accent);
-      transform: rotate(15deg) scale(1.2);
     }
 
     @media (max-width: 700px) {
@@ -681,14 +607,7 @@
       <div style="display:flex; gap:12px; align-items:center; margin:15px 0;">
         <button id="emojiPostBtn">😊 Додати емодзі</button>
         <div id="emojiPostPicker" class="emoji-panel" style="display:none;">
-          <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 15a4 4 0 0 0 8 0H8z"/><circle cx="8" cy="8" r="1.5"/><circle cx="16" cy="8" r="1.5"/></svg>
-          <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M6 13c0-3 6 0 6-3s6-3 6 3"/><circle cx="8" cy="8" r="1"/><circle cx="16" cy="8" r="1"/></svg>
-          <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-          <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"/></svg>
-          <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"/></svg>
-          <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"/></svg>
-          <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 15a4 4 0 0 0 8 0H8z"/><circle cx="8" cy="8" r="1.5"/><circle cx="16" cy="8" r="1.5"/></svg>
-          <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M6 13c0-3 6 0 6-3s6-3 6 3"/><circle cx="8" cy="8" r="1"/><circle cx="16" cy="8" r="1"/></svg>
+          <span>😊</span><span>😂</span><span>❤️</span><span>🔥</span><span>👍</span><span>🎉</span><span>😢</span><span>😎</span>
         </div>
       </div>
       <input type="file" id="postMedia" accept="image/*,video/*" style="margin:12px 0;"/>
@@ -705,7 +624,7 @@
       </button>
     </div>
 
-    <!-- Пошук у популярному (з'являється тільки при виборі популярних) -->
+    <!-- Пошук у популярному -->
     <div id="popularSearchContainer" class="popular-search" style="display: none;">
       <input type="text" id="popularSearchInput" placeholder="Пошук за ніком автора..." />
     </div>
@@ -743,11 +662,12 @@
     <h2>Налаштування</h2>
     <button id="toggleTheme" style="margin:20px 0;">Перемкнути тему 🌙/☀️</button>
     <button id="toggleTvMode" style="margin:20px 0;">Режим телевізора 📺</button>
+    <button id="privacyPolicyBtn" style="margin:20px 0;">Політика конфіденційності 📜</button>
     <button id="logoutBtn">Вийти</button>
   </div>
 </main>
 
-<!-- МОДАЛКА РЕДАГУВАННЯ ПОСТА (покращена) -->
+<!-- МОДАЛКА РЕДАГУВАННЯ ПОСТА -->
 <div class="modal" id="editPostModal">
   <div class="modal-content">
     <span class="close-modal" id="closeEditPostModal">&times;</span>
@@ -771,11 +691,31 @@
   </div>
 </div>
 
+<!-- МОДАЛКА ПОЛІТИКИ КОНФІДЕНЦІЙНОСТІ -->
+<div class="modal" id="privacyModal">
+  <div class="modal-content">
+    <span class="close-modal" id="closePrivacyModal">&times;</span>
+    <h2>Політика конфіденційності</h2>
+    <div style="margin: 20px 0; line-height: 1.6;">
+      <p>Ваша конфіденційність важлива для нас. Ця політика пояснює, які дані ми збираємо та як їх використовуємо.</p>
+      <h3>Які дані ми збираємо?</h3>
+      <p>Ми збираємо інформацію, яку ви надаєте при реєстрації: ім'я користувача, електронну пошту (у зашифрованому вигляді), а також дані, які ви публікуєте (пости, коментарі, медіафайли).</p>
+      <h3>Як ми використовуємо ваші дані?</h3>
+      <p>Ваші дані використовуються виключно для забезпечення функціональності сайту: показу постів, коментарів, обміну повідомленнями. Ми не передаємо ваші дані третім особам.</p>
+      <h3>Ваші права</h3>
+      <p>Ви можете в будь-який час видалити свій акаунт та всі пов'язані з ним дані через налаштування профілю.</p>
+      <p>Якщо у вас виникли питання, зв'яжіться з нами через форму зворотного зв'язку.</p>
+      <p>Останнє оновлення: 14 лютого 2026 року.</p>
+    </div>
+    <button id="closePrivacyBtn" style="width:100%;">Закрити</button>
+  </div>
+</div>
+
 <script type="module">
   // Імпорти Firebase
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, OAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, where, onSnapshot, orderBy, serverTimestamp, arrayUnion, arrayRemove, deleteDoc, getDocs, increment } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, where, onSnapshot, orderBy, serverTimestamp, arrayUnion, arrayRemove, deleteDoc, getDocs, increment, limit } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
   import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
   const firebaseConfig = {
@@ -799,8 +739,8 @@
   let currentEditPostId = null;
   let viewingProfileUid = null;
   let unreadCount = 0;
-  let currentFeedType = 'new'; // 'new' або 'popular'
-  let popularSearchTerm = ''; // для фільтрації в популярному
+  let currentFeedType = 'new';
+  let popularSearchTerm = '';
 
   const getChatId = (uid1, uid2) => [uid1, uid2].sort().join('_');
 
@@ -865,8 +805,14 @@
       const email = `${safeNick}@fantasyas.local`;
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       await setDoc(doc(db, "users", cred.user.uid), {
-        nickname, nickname_lower: nickname.toLowerCase(), bio: '', avatar: '', posts: [],
-        followers: [], following: [], createdAt: serverTimestamp()
+        nickname, 
+        nickname_lower: nickname.toLowerCase(), 
+        bio: '', 
+        avatar: '', 
+        posts: [],
+        followers: [], 
+        following: [], 
+        createdAt: serverTimestamp()
       });
       alert('Реєстрація успішна');
       document.getElementById('toLogin').click();
@@ -927,7 +873,7 @@
       currentUser = user;
       document.getElementById('authBox').style.display = 'none';
       document.getElementById('newPostBox').style.display = 'block';
-      subscribeToFeed('new'); // за замовчуванням нові
+      subscribeToFeed('new');
       loadMyProfile();
       if (unsubscribeChatList) unsubscribeChatList();
       const q = query(collection(db, "chats"), where("participants", "array-contains", currentUser.uid));
@@ -976,22 +922,22 @@
   // Пошук у популярному
   document.getElementById('popularSearchInput').addEventListener('input', (e) => {
     popularSearchTerm = e.target.value.trim().toLowerCase();
-    subscribeToFeed('popular'); // перезавантажуємо з фільтром
+    subscribeToFeed('popular');
   });
 
-  // Емодзі для поста
+  // Емодзі для поста (звичайні емодзі)
   document.getElementById('emojiPostBtn').onclick = () => {
     const p = document.getElementById('emojiPostPicker');
     p.style.display = p.style.display === 'none' ? 'flex' : 'none';
   };
-  document.querySelectorAll('#emojiPostPicker .icon-svg').forEach(s => {
+  document.querySelectorAll('#emojiPostPicker span').forEach(s => {
     s.onclick = () => {
-      document.getElementById('postText').value += s.outerHTML; // Додаємо SVG як емодзі (якщо потрібно, адаптуйте)
+      document.getElementById('postText').value += s.textContent;
       document.getElementById('emojiPostPicker').style.display = 'none';
     };
   });
 
-  // Публікація поста
+  // Публікація поста (з денормалізованими полями)
   document.getElementById('addPost').onclick = async () => {
     if (!currentUser) return alert('Увійдіть');
     const text = document.getElementById('postText').value.trim();
@@ -1005,19 +951,34 @@
         mediaUrl = await getDownloadURL(storageRef);
         mediaType = file.type.split('/')[0];
       }
+      
+      // Отримуємо дані автора для денормалізації
+      const userSnap = await getDoc(doc(db, "users", currentUser.uid));
+      const userData = userSnap.data();
+      
       const postRef = await addDoc(collection(db, "posts"), {
-        author: currentUser.uid, text, mediaUrl, mediaType,
-        createdAt: serverTimestamp(), likes: [], likesCount: 0, commentsCount: 0
+        author: currentUser.uid,
+        authorName: userData.nickname,
+        authorAvatar: userData.avatar || '',
+        text, 
+        mediaUrl, 
+        mediaType,
+        createdAt: serverTimestamp(), 
+        likes: [], 
+        likesCount: 0, 
+        commentsCount: 0
       });
+      
       await updateDoc(doc(db, "users", currentUser.uid), {
         posts: arrayUnion(postRef.id)
       });
+      
       document.getElementById('postText').value = '';
       document.getElementById('postMedia').value = '';
     } catch (e) { alert(e.message); }
   };
 
-  // Підписка на стрічку з фільтрацією
+  // Підписка на стрічку (оптимізована)
   function subscribeToFeed(type) {
     if (unsubscribeFeed) unsubscribeFeed();
     let q;
@@ -1026,46 +987,56 @@
     } else {
       q = query(collection(db, "posts"), orderBy("likesCount", "desc"), orderBy("createdAt", "desc"));
     }
+    
     unsubscribeFeed = onSnapshot(q, async (snapshot) => {
       const feed = document.getElementById('feed');
       feed.innerHTML = '';
+      
+      // Фільтруємо пости за пошуковим запитом (якщо є)
       let posts = [];
       for (const docSnap of snapshot.docs) {
         const post = { id: docSnap.id, ...docSnap.data() };
-        const authorSnap = await getDoc(doc(db, "users", post.author));
-        const author = authorSnap.exists() ? authorSnap.data() : { nickname: 'Невідомо', avatar: '' };
-        post.authorData = author;
-
-        // Фільтр за ніком, якщо в популярному і є пошуковий запит
-        if (type === 'popular' && popularSearchTerm && !author.nickname.toLowerCase().includes(popularSearchTerm)) {
-          continue;
+        
+        // Для популярних постів перевіряємо фільтр за автором
+        if (type === 'popular' && popularSearchTerm) {
+          const authorName = post.authorName || '';
+          if (!authorName.toLowerCase().includes(popularSearchTerm)) {
+            continue;
+          }
         }
         posts.push(post);
       }
-
+      
+      // Обмежуємо кількість постів для швидкості (наприклад, 50)
+      posts = posts.slice(0, 50);
+      
       for (const post of posts) {
         const postId = post.id;
-        const author = post.authorData;
         const isOwn = post.author === currentUser?.uid;
         const liked = post.likes?.includes(currentUser?.uid) || false;
-
+        
         let isFollowing = false;
         if (currentUser && post.author !== currentUser.uid) {
           const currentUserSnap = await getDoc(doc(db, "users", currentUser.uid));
           isFollowing = currentUserSnap.data().following?.includes(post.author) || false;
         }
-
-        const commentsQuery = query(collection(db, "posts", postId, "comments"), orderBy("createdAt", "desc"));
+        
+        // Отримуємо тільки останні 5 коментарів для швидкості
+        const commentsQuery = query(
+          collection(db, "posts", postId, "comments"), 
+          orderBy("createdAt", "desc"),
+          limit(5)
+        );
         const commentsSnap = await getDocs(commentsQuery);
         const comments = [];
         commentsSnap.forEach(c => comments.push({ id: c.id, ...c.data() }));
-
+        
         const postEl = document.createElement('div');
         postEl.className = 'post';
         postEl.innerHTML = `
           <div class="post-header">
-            <div class="avatar" style="background-image:url(${author.avatar || ''})" data-uid="${post.author}"></div>
-            <span class="username" data-uid="${post.author}">@${author.nickname}</span>
+            <div class="avatar" style="background-image:url(${post.authorAvatar || ''})" data-uid="${post.author}"></div>
+            <span class="username" data-uid="${post.author}">@${post.authorName || 'Невідомо'}</span>
             ${isOwn ? `<button class="menu-btn" data-post-id="${postId}">⋯</button>` : ''}
             ${!isOwn && currentUser ? `<button class="subscribe-post-btn" data-author-uid="${post.author}">${isFollowing ? 'Відписатися' : 'Підписатися'}</button>` : ''}
           </div>
@@ -1088,17 +1059,12 @@
               <button class="send-comment" data-post-id="${postId}">➤</button>
             </div>
             <div class="emoji-panel" id="emoji-comment-${postId}" style="display:none;">
-              <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 15a4 4 0 0 0 8 0H8z"/><circle cx="8" cy="8" r="1.5"/><circle cx="16" cy="8" r="1.5"/></svg>
-              <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M6 13c0-3 6 0 6-3s6-3 6 3"/><circle cx="8" cy="8" r="1"/><circle cx="16" cy="8" r="1"/></svg>
-              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"/></svg>
-              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"/></svg>
-              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"/></svg>
+              <span>😊</span><span>😂</span><span>❤️</span><span>🔥</span><span>👍</span><span>🎉</span>
             </div>
             <button class="emoji-comment-btn" data-post-id="${postId}">😋 Емодзі</button>
           </div>
         `;
-
+        
         const listDiv = postEl.querySelector(`#comments-list-${postId}`);
         if (listDiv) {
           listDiv.innerHTML = comments.reverse().map(c => `
@@ -1110,7 +1076,7 @@
             </div>
           `).join('');
         }
-
+        
         feed.appendChild(postEl);
         setTimeout(() => postEl.classList.add('show'), 50 * feed.children.length);
       }
@@ -1137,23 +1103,22 @@
         });
       }
     }
-
+    
     if (e.target.closest('.menu-btn')) {
       const postId = e.target.closest('.menu-btn').dataset.postId;
-      // Використовуємо модальне вікно замість prompt
       const postRef = doc(db, "posts", postId);
       const snap = await getDoc(postRef);
       document.getElementById('editPostText').value = snap.data().text || '';
       currentEditPostId = postId;
       document.getElementById('editPostModal').classList.add('active');
     }
-
+    
     if (e.target.closest('.comments-toggle')) {
       const postId = e.target.closest('.comments-toggle').dataset.postId;
       const sec = document.getElementById(`comments-${postId}`);
       sec.style.display = sec.style.display === 'none' ? 'block' : 'none';
     }
-
+    
     if (e.target.closest('.send-comment')) {
       const btn = e.target.closest('.send-comment');
       const postId = btn.dataset.postId;
@@ -1163,28 +1128,32 @@
       const userDoc = await getDoc(doc(db, "users", currentUser.uid));
       const userData = userDoc.data();
       await addDoc(collection(db, "posts", postId, "comments"), {
-        author: currentUser.uid, authorNickname: userData.nickname, authorAvatar: userData.avatar || '', text, createdAt: serverTimestamp()
+        author: currentUser.uid, 
+        authorNickname: userData.nickname, 
+        authorAvatar: userData.avatar || '', 
+        text, 
+        createdAt: serverTimestamp()
       });
       await updateDoc(doc(db, "posts", postId), { commentsCount: increment(1) });
       textarea.value = '';
     }
-
+    
     if (e.target.closest('.emoji-comment-btn')) {
       const btn = e.target.closest('.emoji-comment-btn');
       const postId = btn.dataset.postId;
       const picker = document.getElementById(`emoji-comment-${postId}`);
       picker.style.display = picker.style.display === 'none' ? 'flex' : 'none';
     }
-
-    if (e.target.closest('.emoji-panel .icon-svg')) {
-      const svg = e.target.closest('.emoji-panel .icon-svg');
-      const picker = svg.closest('.emoji-panel');
+    
+    if (e.target.closest('.emoji-panel span')) {
+      const span = e.target.closest('.emoji-panel span');
+      const picker = span.closest('.emoji-panel');
       const postId = picker.id.replace('emoji-comment-', '');
       const textarea = document.getElementById(`comment-text-${postId}`);
-      textarea.value += svg.outerHTML; // Додаємо SVG як емодзі
+      textarea.value += span.textContent;
       picker.style.display = 'none';
     }
-
+    
     if (e.target.closest('.subscribe-post-btn')) {
       const btn = e.target.closest('.subscribe-post-btn');
       const authorUid = btn.dataset.authorUid;
@@ -1192,7 +1161,7 @@
       const isFollowing = (await getDoc(doc(db, "users", currentUser.uid))).data().following.includes(authorUid);
       btn.textContent = isFollowing ? 'Відписатися' : 'Підписатися';
     }
-
+    
     if (e.target.closest('[data-uid]')) {
       const el = e.target.closest('[data-uid]');
       const uid = el.dataset.uid;
@@ -1210,7 +1179,7 @@
     }
   });
 
-  // Редагування поста (через модалку)
+  // Редагування поста
   document.getElementById('savePostEdit').onclick = async () => {
     if (!currentEditPostId) return;
     const newText = document.getElementById('editPostText').value.trim();
@@ -1325,7 +1294,7 @@
         </div>
       </div>
     `;
-
+    
     if (!isOwn && currentUser) {
       document.getElementById('profileFollowBtn').onclick = async () => {
         await toggleFollow(uid);
@@ -1337,7 +1306,7 @@
         document.getElementById('chats').classList.add('active');
       };
     }
-
+    
     if (isOwn) {
       document.getElementById('profileAvatar').onclick = () => {
         document.getElementById('avatarInput').click();
@@ -1367,7 +1336,11 @@
     const nickname = document.getElementById('editNickname').value.trim();
     const bio = document.getElementById('editBio').value.trim();
     if (!nickname) return alert('Псевдонім обов’язковий');
-    await updateDoc(doc(db, "users", currentUser.uid), { nickname, nickname_lower: nickname.toLowerCase(), bio });
+    await updateDoc(doc(db, "users", currentUser.uid), { 
+      nickname, 
+      nickname_lower: nickname.toLowerCase(), 
+      bio 
+    });
     loadMyProfile();
     document.getElementById('editProfileModal').classList.remove('active');
   };
@@ -1387,7 +1360,7 @@
         const unread = chat.unread?.[currentUser.uid] || 0;
         const lastMsg = chat.lastMessage || '';
         const time = chat.updatedAt ? new Date(chat.updatedAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-
+        
         const item = document.createElement('div');
         item.className = `chat-item ${unread > 0 ? 'unread' : ''}`;
         item.dataset.chatId = docSnap.id;
@@ -1470,7 +1443,11 @@
     const chatRef = doc(db, "chats", chatId);
     const messageRef = collection(db, `chats/${chatId}/messages`);
     await addDoc(messageRef, { from: currentUser.uid, text, createdAt: serverTimestamp() });
-    await updateDoc(chatRef, { lastMessage: text, updatedAt: serverTimestamp(), [`unread.${currentChatPartner}`]: increment(1) });
+    await updateDoc(chatRef, { 
+      lastMessage: text, 
+      updatedAt: serverTimestamp(), 
+      [`unread.${currentChatPartner}`]: increment(1) 
+    });
     document.getElementById('chatText').value = '';
   };
 
@@ -1484,6 +1461,23 @@
   document.getElementById('toggleTvMode').onclick = () => {
     document.body.classList.toggle('tv');
   };
+
+  // Політика конфіденційності
+  const privacyModal = document.getElementById('privacyModal');
+  document.getElementById('privacyPolicyBtn').onclick = () => {
+    privacyModal.classList.add('active');
+  };
+  document.getElementById('closePrivacyModal').onclick = () => {
+    privacyModal.classList.remove('active');
+  };
+  document.getElementById('closePrivacyBtn').onclick = () => {
+    privacyModal.classList.remove('active');
+  };
+  window.addEventListener('click', (e) => {
+    if (e.target === privacyModal) {
+      privacyModal.classList.remove('active');
+    }
+  });
 
   // Вихід
   document.getElementById('logoutBtn').onclick = () => signOut(auth);

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FANTASYAS · фінальна версія</title>
+  <title>FANTASYAS · фінальний апдейт</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
     * {
@@ -15,14 +15,15 @@
 
     :root {
       --bg: #000000;
-      --surface: #111111;
-      --card: #1a1a1a;
-      --border: #2a2a2a;
+      --surface: rgba(17, 17, 17, 0.6); /* Glassmorphism base */
+      --card: rgba(26, 26, 26, 0.5);
+      --border: rgba(255, 255, 255, 0.1);
       --text: #ffffff;
       --text-sec: #aaaaaa;
       --accent: #888888;
-      --hover: #2c2c2c;
-      --shadow: 0 12px 30px rgba(0, 0, 0, 0.8);
+      --hover: rgba(44, 44, 44, 0.7);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      --blur: blur(10px);
       --font-scale: 1;
       --post-padding: 24px;
       --avatar-size: 52px;
@@ -31,14 +32,15 @@
 
     body.light {
       --bg: #f8f8f8;
-      --surface: #ffffff;
-      --card: #eeeeee;
-      --border: #d0d0d0;
+      --surface: rgba(255, 255, 255, 0.6);
+      --card: rgba(238, 238, 238, 0.5);
+      --border: rgba(0, 0, 0, 0.1);
       --text: #111111;
       --text-sec: #555555;
       --accent: #666666;
-      --hover: #e0e0e0;
-      --shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+      --hover: rgba(224, 224, 224, 0.7);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      --blur: blur(10px);
     }
 
     /* ===== ТЕЛЕВІЗОР ===== */
@@ -146,13 +148,13 @@
       align-items: center;
       justify-content: space-between;
       padding: 0 24px;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
+      background: var(--surface);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
       border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow);
       z-index: 1000;
     }
-    body.light .top-bar { background: rgba(255,255,255,0.8); }
 
     .site-name {
       font-size: 2rem;
@@ -190,15 +192,15 @@
       left: -300px;
       width: 280px;
       height: 100%;
-      background: rgba(10,10,10,0.7);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
+      background: var(--surface);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
       padding: 100px 28px;
       border-right: 1px solid var(--border);
+      box-shadow: var(--shadow);
       transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 999;
     }
-    body.light .sidebar { background: rgba(255,255,255,0.7); }
     .sidebar.active { left: 0; }
 
     .sidebar a {
@@ -256,6 +258,8 @@
       padding: 24px;
       margin-bottom: 24px;
       box-shadow: var(--shadow);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
       transition: 0.25s;
     }
     .card:hover { border-color: var(--accent); }
@@ -270,6 +274,7 @@
       font-size: 1rem;
       outline: none;
       transition: 0.2s;
+      backdrop-filter: var(--blur);
     }
     input:focus, textarea:focus { border-color: var(--accent); background: var(--card); }
     ::placeholder { color: var(--text-sec); opacity: 0.5; }
@@ -284,7 +289,8 @@
       border: 1px solid var(--border);
       cursor: pointer;
       transition: 0.2s;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      box-shadow: var(--shadow);
+      backdrop-filter: var(--blur);
     }
     button:hover {
       background: var(--hover);
@@ -306,11 +312,17 @@
       border: 1px solid var(--border);
       font-size: 1.1rem;
       padding: 12px 20px;
+      backdrop-filter: var(--blur);
     }
     .feed-header button.active {
       background: var(--accent);
       color: black;
       border-color: var(--accent);
+    }
+
+    /* Пошук у популярному */
+    .popular-search {
+      margin-bottom: 20px;
     }
 
     .feed { display: flex; flex-direction: column; gap: 24px; }
@@ -323,6 +335,8 @@
       opacity: 0;
       transform: translateY(30px);
       transition: opacity 0.6s cubic-bezier(0.2, 0.9, 0.3, 1), transform 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
+      backdrop-filter: var(--blur);
+      box-shadow: var(--shadow);
     }
     .post.show { opacity: 1; transform: translateY(0); }
 
@@ -362,6 +376,7 @@
       border: none;
       color: var(--text-sec);
       padding: 0 8px;
+      cursor: pointer;
     }
     .menu-btn:hover { color: var(--text); transform: scale(1.2); background: none; border: none; }
 
@@ -375,6 +390,7 @@
       margin-left: 16px;
       cursor: pointer;
       transition: all 0.3s ease;
+      backdrop-filter: var(--blur);
     }
     .subscribe-post-btn:hover {
       background: var(--accent);
@@ -444,6 +460,7 @@
       border-radius: 22px;
       flex: 1;
       border: 1px solid var(--border);
+      backdrop-filter: var(--blur);
     }
     .comment-author { font-weight: 700; margin-right: 8px; cursor: pointer; }
     .comment-author:hover { text-decoration: underline; }
@@ -469,6 +486,7 @@
       border: 1px solid var(--border);
       width: fit-content;
       margin-bottom: 10px;
+      backdrop-filter: var(--blur);
     }
     .emoji-panel span {
       font-size: 1.8rem;
@@ -495,6 +513,8 @@
       margin-bottom: 12px;
       cursor: pointer;
       transition: 0.2s;
+      backdrop-filter: var(--blur);
+      box-shadow: var(--shadow);
     }
     .user-item:hover { border-color: var(--accent); transform: translateX(6px); }
     .follow-btn {
@@ -512,6 +532,7 @@
     .chat-item {
       display: flex; align-items: center; gap: 16px; padding: 16px; border-radius: 24px;
       background: var(--card); border: 1px solid var(--border); cursor: pointer; transition: 0.2s;
+      backdrop-filter: var(--blur);
     }
     .chat-item:hover { background: var(--hover); border-color: var(--accent); }
     .chat-item.unread { background: rgba(255,255,255,0.05); border-left: 4px solid var(--accent); }
@@ -526,11 +547,13 @@
     .chat-window {
       display: none; flex-direction: column; height: 70vh; border: 1px solid var(--border); border-radius: 32px;
       overflow: hidden; background: var(--card); margin-top: 20px;
+      backdrop-filter: var(--blur);
+      box-shadow: var(--shadow);
     }
     .chat-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; background: var(--surface); }
     .chat-header .avatar { width: 40px; height: 40px; }
     .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-    .message { max-width: 75%; padding: 12px 18px; border-radius: 26px; animation: messagePop 0.3s; word-break: break-word; }
+    .message { max-width: 75%; padding: 12px 18px; border-radius: 26px; animation: messagePop 0.3s; word-break: break-word; backdrop-filter: var(--blur); }
     .message.sent { background: var(--accent); color: black; align-self: flex-end; border-bottom-right-radius: 6px; }
     .message.received { background: var(--surface); border: 1px solid var(--border); align-self: flex-start; border-bottom-left-radius: 6px; }
     .chat-input { display: flex; padding: 16px; border-top: 1px solid var(--border); background: var(--surface); }
@@ -538,6 +561,7 @@
 
     /* Профіль */
     .profile-header { display: flex; flex-wrap: wrap; gap: 28px; align-items: center; }
+
     .profile-avatar { width: 120px; height: 120px; border-radius: 50%; background: #333; background-size: cover; border: 3px solid var(--border); cursor: pointer; transition: 0.2s; }
     .profile-avatar:hover { border-color: var(--accent); transform: scale(1.02); }
 
@@ -550,12 +574,60 @@
     .modal-content {
       background: var(--card); border: 1px solid var(--border); border-radius: 40px; padding: 32px;
       width: 92%; max-width: 480px; box-shadow: var(--shadow); animation: modalPop 0.3s;
+      backdrop-filter: var(--blur);
     }
     @keyframes modalPop {
       from { opacity: 0; transform: scale(0.9); }
       to { opacity: 1; transform: scale(1); }
     }
     .close-modal { float: right; font-size: 2.5rem; line-height: 1; cursor: pointer; color: var(--text-sec); }
+
+    /* Анімовані SVG іконки */
+    .icon-svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: var(--text-sec);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: stroke 0.2s, transform 0.2s;
+    }
+    .icon-svg:hover {
+      stroke: var(--text);
+      transform: scale(1.1);
+    }
+    .like-btn .icon-svg {
+      stroke: none;
+      fill: var(--text-sec);
+    }
+    .like-btn.liked .icon-svg {
+      fill: #ff4444;
+      animation: heartBeat 0.6s ease-in-out;
+    }
+    @keyframes heartBeat {
+      0% { transform: scale(1); }
+      20% { transform: scale(1.2); }
+      40% { transform: scale(0.9); }
+      60% { transform: scale(1.1); }
+      80% { transform: scale(0.95); }
+      100% { transform: scale(1); }
+    }
+    .comments-toggle .icon-svg path {
+      animation: commentBounce 1s infinite alternate;
+    }
+    @keyframes commentBounce {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-2px); }
+    }
+    .emoji-panel .icon-svg {
+      fill: var(--text-sec);
+      transition: fill 0.2s, transform 0.3s;
+    }
+    .emoji-panel .icon-svg:hover {
+      fill: var(--accent);
+      transform: rotate(15deg) scale(1.2);
+    }
 
     @media (max-width: 700px) {
       .main-content { padding: 16px; }
@@ -609,7 +681,14 @@
       <div style="display:flex; gap:12px; align-items:center; margin:15px 0;">
         <button id="emojiPostBtn">😊 Додати емодзі</button>
         <div id="emojiPostPicker" class="emoji-panel" style="display:none;">
-          <span>😊</span><span>😂</span><span>❤️</span><span>🔥</span><span>👍</span><span>🎉</span><span>😢</span><span>😎</span>
+          <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 15a4 4 0 0 0 8 0H8z"/><circle cx="8" cy="8" r="1.5"/><circle cx="16" cy="8" r="1.5"/></svg>
+          <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M6 13c0-3 6 0 6-3s6-3 6 3"/><circle cx="8" cy="8" r="1"/><circle cx="16" cy="8" r="1"/></svg>
+          <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"/></svg>
+          <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"/></svg>
+          <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"/></svg>
+          <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 15a4 4 0 0 0 8 0H8z"/><circle cx="8" cy="8" r="1.5"/><circle cx="16" cy="8" r="1.5"/></svg>
+          <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M6 13c0-3 6 0 6-3s6-3 6 3"/><circle cx="8" cy="8" r="1"/><circle cx="16" cy="8" r="1"/></svg>
         </div>
       </div>
       <input type="file" id="postMedia" accept="image/*,video/*" style="margin:12px 0;"/>
@@ -618,8 +697,17 @@
 
     <!-- Перемикач стрічок -->
     <div class="feed-header">
-      <button id="feedNewBtn" class="active">✨ Нові</button>
-      <button id="feedPopularBtn">🔥 Популярні</button>
+      <button id="feedNewBtn" class="active">
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2l-5.5 9h11z"/><circle cx="17.5" cy="17.5" r="4.5"/><path d="M3 13.5h8v8H3z"/></svg> Нові
+      </button>
+      <button id="feedPopularBtn">
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M15 5l-1.41 1.41L18.17 11H2v2h16.17l-4.59 4.59L15 19l7-7z"/></svg> Популярні
+      </button>
+    </div>
+
+    <!-- Пошук у популярному (з'являється тільки при виборі популярних) -->
+    <div id="popularSearchContainer" class="popular-search" style="display: none;">
+      <input type="text" id="popularSearchInput" placeholder="Пошук за ніком автора..." />
     </div>
 
     <div class="feed" id="feed"></div>
@@ -659,7 +747,20 @@
   </div>
 </main>
 
-<!-- МОДАЛКИ -->
+<!-- МОДАЛКА РЕДАГУВАННЯ ПОСТА (покращена) -->
+<div class="modal" id="editPostModal">
+  <div class="modal-content">
+    <span class="close-modal" id="closeEditPostModal">&times;</span>
+    <h2>Редагувати пост</h2>
+    <textarea id="editPostText" rows="5" placeholder="Текст поста..." style="margin:20px 0;"></textarea>
+    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+      <button id="cancelEditPost">Скасувати</button>
+      <button id="savePostEdit">Зберегти</button>
+    </div>
+  </div>
+</div>
+
+<!-- МОДАЛКА РЕДАГУВАННЯ ПРОФІЛЮ -->
 <div class="modal" id="editProfileModal">
   <div class="modal-content">
     <span class="close-modal" id="closeModal">&times;</span>
@@ -667,15 +768,6 @@
     <input type="text" id="editNickname" placeholder="Псевдонім"/>
     <textarea id="editBio" placeholder="Про себе" rows="4" style="margin:16px 0;"></textarea>
     <button id="saveProfileEdit">Зберегти</button>
-  </div>
-</div>
-
-<div class="modal" id="editPostModal">
-  <div class="modal-content">
-    <span class="close-modal" id="closeEditPostModal">&times;</span>
-    <h2>Редагувати пост</h2>
-    <textarea id="editPostText" rows="5" style="margin:20px 0;"></textarea>
-    <button id="savePostEdit">Оновити</button>
   </div>
 </div>
 
@@ -708,6 +800,7 @@
   let viewingProfileUid = null;
   let unreadCount = 0;
   let currentFeedType = 'new'; // 'new' або 'popular'
+  let popularSearchTerm = ''; // для фільтрації в популярному
 
   const getChatId = (uid1, uid2) => [uid1, uid2].sort().join('_');
 
@@ -741,7 +834,6 @@
         loadChatList();
       }
       if (sectionId === 'profile') {
-        // Якщо viewingProfileUid не встановлено або це поточний користувач, показуємо свій профіль
         if (!viewingProfileUid || viewingProfileUid === currentUser?.uid) {
           viewingProfileUid = currentUser?.uid;
           loadMyProfile();
@@ -835,8 +927,7 @@
       currentUser = user;
       document.getElementById('authBox').style.display = 'none';
       document.getElementById('newPostBox').style.display = 'block';
-      // Підписуємось на стрічку за замовчуванням (нові)
-      subscribeToFeed('new');
+      subscribeToFeed('new'); // за замовчуванням нові
       loadMyProfile();
       if (unsubscribeChatList) unsubscribeChatList();
       const q = query(collection(db, "chats"), where("participants", "array-contains", currentUser.uid));
@@ -867,7 +958,9 @@
     if (currentFeedType === 'new') return;
     document.getElementById('feedNewBtn').classList.add('active');
     document.getElementById('feedPopularBtn').classList.remove('active');
+    document.getElementById('popularSearchContainer').style.display = 'none';
     currentFeedType = 'new';
+    popularSearchTerm = '';
     subscribeToFeed('new');
   };
 
@@ -875,18 +968,25 @@
     if (currentFeedType === 'popular') return;
     document.getElementById('feedPopularBtn').classList.add('active');
     document.getElementById('feedNewBtn').classList.remove('active');
+    document.getElementById('popularSearchContainer').style.display = 'block';
     currentFeedType = 'popular';
     subscribeToFeed('popular');
   };
+
+  // Пошук у популярному
+  document.getElementById('popularSearchInput').addEventListener('input', (e) => {
+    popularSearchTerm = e.target.value.trim().toLowerCase();
+    subscribeToFeed('popular'); // перезавантажуємо з фільтром
+  });
 
   // Емодзі для поста
   document.getElementById('emojiPostBtn').onclick = () => {
     const p = document.getElementById('emojiPostPicker');
     p.style.display = p.style.display === 'none' ? 'flex' : 'none';
   };
-  document.querySelectorAll('#emojiPostPicker span').forEach(s => {
+  document.querySelectorAll('#emojiPostPicker .icon-svg').forEach(s => {
     s.onclick = () => {
-      document.getElementById('postText').value += s.textContent;
+      document.getElementById('postText').value += s.outerHTML; // Додаємо SVG як емодзі (якщо потрібно, адаптуйте)
       document.getElementById('emojiPostPicker').style.display = 'none';
     };
   });
@@ -917,7 +1017,7 @@
     } catch (e) { alert(e.message); }
   };
 
-  // Підписка на стрічку (з параметром типу)
+  // Підписка на стрічку з фільтрацією
   function subscribeToFeed(type) {
     if (unsubscribeFeed) unsubscribeFeed();
     let q;
@@ -929,10 +1029,23 @@
     unsubscribeFeed = onSnapshot(q, async (snapshot) => {
       const feed = document.getElementById('feed');
       feed.innerHTML = '';
+      let posts = [];
       for (const docSnap of snapshot.docs) {
-        const post = docSnap.data(); const postId = docSnap.id;
+        const post = { id: docSnap.id, ...docSnap.data() };
         const authorSnap = await getDoc(doc(db, "users", post.author));
         const author = authorSnap.exists() ? authorSnap.data() : { nickname: 'Невідомо', avatar: '' };
+        post.authorData = author;
+
+        // Фільтр за ніком, якщо в популярному і є пошуковий запит
+        if (type === 'popular' && popularSearchTerm && !author.nickname.toLowerCase().includes(popularSearchTerm)) {
+          continue;
+        }
+        posts.push(post);
+      }
+
+      for (const post of posts) {
+        const postId = post.id;
+        const author = post.authorData;
         const isOwn = post.author === currentUser?.uid;
         const liked = post.likes?.includes(currentUser?.uid) || false;
 
@@ -960,11 +1073,12 @@
           ${post.mediaUrl ? (post.mediaType==='image' ? `<img src="${post.mediaUrl}" class="post-media">` : `<video src="${post.mediaUrl}" controls class="post-media"></video>`) : ''}
           <div class="post-footer">
             <button class="like-btn ${liked ? 'liked' : ''}" data-post-id="${postId}">
-              <span style="font-size:1.4rem;">${liked ? '♥' : '♡'}</span>
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
               <span>${post.likesCount || 0}</span>
             </button>
             <button class="comments-toggle" data-post-id="${postId}">
-              <span style="font-size:1.4rem;">✉</span> <span>${post.commentsCount || 0}</span>
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg>
+              <span>${post.commentsCount || 0}</span>
             </button>
           </div>
           <div class="comments-section" id="comments-${postId}" style="display:none;">
@@ -974,7 +1088,12 @@
               <button class="send-comment" data-post-id="${postId}">➤</button>
             </div>
             <div class="emoji-panel" id="emoji-comment-${postId}" style="display:none;">
-              <span>😊</span><span>😂</span><span>❤️</span><span>🔥</span><span>👍</span><span>🎉</span>
+              <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 15a4 4 0 0 0 8 0H8z"/><circle cx="8" cy="8" r="1.5"/><circle cx="16" cy="8" r="1.5"/></svg>
+              <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M6 13c0-3 6 0 6-3s6-3 6 3"/><circle cx="8" cy="8" r="1"/><circle cx="16" cy="8" r="1"/></svg>
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"/></svg>
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"/></svg>
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"/></svg>
             </div>
             <button class="emoji-comment-btn" data-post-id="${postId}">😋 Емодзі</button>
           </div>
@@ -1021,22 +1140,12 @@
 
     if (e.target.closest('.menu-btn')) {
       const postId = e.target.closest('.menu-btn').dataset.postId;
-      const action = prompt('1 - редагувати, 2 - видалити');
-      if (action === '1') {
-        const postRef = doc(db, "posts", postId);
-        const snap = await getDoc(postRef);
-        document.getElementById('editPostText').value = snap.data().text || '';
-        currentEditPostId = postId;
-        document.getElementById('editPostModal').classList.add('active');
-      } else if (action === '2') {
-        if (confirm('Видалити пост?')) {
-          const postRef = doc(db, "posts", postId);
-          const postSnap = await getDoc(postRef);
-          const author = postSnap.data().author;
-          await deleteDoc(postRef);
-          await updateDoc(doc(db, "users", author), { posts: arrayRemove(postId) });
-        }
-      }
+      // Використовуємо модальне вікно замість prompt
+      const postRef = doc(db, "posts", postId);
+      const snap = await getDoc(postRef);
+      document.getElementById('editPostText').value = snap.data().text || '';
+      currentEditPostId = postId;
+      document.getElementById('editPostModal').classList.add('active');
     }
 
     if (e.target.closest('.comments-toggle')) {
@@ -1067,12 +1176,12 @@
       picker.style.display = picker.style.display === 'none' ? 'flex' : 'none';
     }
 
-    if (e.target.closest('.emoji-panel span')) {
-      const span = e.target.closest('.emoji-panel span');
-      const picker = span.closest('.emoji-panel');
+    if (e.target.closest('.emoji-panel .icon-svg')) {
+      const svg = e.target.closest('.emoji-panel .icon-svg');
+      const picker = svg.closest('.emoji-panel');
       const postId = picker.id.replace('emoji-comment-', '');
       const textarea = document.getElementById(`comment-text-${postId}`);
-      textarea.value += span.textContent;
+      textarea.value += svg.outerHTML; // Додаємо SVG як емодзі
       picker.style.display = 'none';
     }
 
@@ -1101,11 +1210,15 @@
     }
   });
 
-  // Редагування поста
+  // Редагування поста (через модалку)
   document.getElementById('savePostEdit').onclick = async () => {
     if (!currentEditPostId) return;
     const newText = document.getElementById('editPostText').value.trim();
     await updateDoc(doc(db, "posts", currentEditPostId), { text: newText });
+    document.getElementById('editPostModal').classList.remove('active');
+    currentEditPostId = null;
+  };
+  document.getElementById('cancelEditPost').onclick = () => {
     document.getElementById('editPostModal').classList.remove('active');
     currentEditPostId = null;
   };
@@ -1114,7 +1227,7 @@
     currentEditPostId = null;
   };
 
-  // Пошук
+  // Пошук користувачів
   async function loadSearchUsers() {
     const val = document.getElementById('searchInput').value.trim().toLowerCase();
     const userList = document.getElementById('userList');
@@ -1216,7 +1329,6 @@
     if (!isOwn && currentUser) {
       document.getElementById('profileFollowBtn').onclick = async () => {
         await toggleFollow(uid);
-        // Оновлюємо профіль після підписки
         loadUserProfile(uid);
       };
       document.getElementById('profileMessageBtn').onclick = () => {

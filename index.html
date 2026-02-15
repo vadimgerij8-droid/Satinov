@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"/>
-  <title>FANTASYAS · ТВ версія</title>
+  <title>FANTASYAS · ТВ версія (виправлено)</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
     /* ========== ГЛОБАЛЬНІ СТИЛІ ========== */
@@ -206,7 +206,7 @@
       flex: 1;
       overflow-y: auto;
       padding: 20px;
-      scroll-behavior: smooth; /* Плавний скрол для ТВ */
+      scroll-behavior: smooth;
     }
 
     .section {
@@ -1320,7 +1320,7 @@
 
   // Налаштування ТВ (логічні, не змінюють вигляд)
   const tvSettings = {
-    tvNavEnabled: localStorage.getItem('tvNav') !== 'false', // default true
+    tvNavEnabled: localStorage.getItem('tvNav') !== 'false',
     remoteNavEnabled: localStorage.getItem('remoteNav') !== 'false',
     focusOptimized: localStorage.getItem('focusOptimized') !== 'false'
   };
@@ -1365,7 +1365,6 @@
   function updateFocusableElements() {
     const activeSection = document.querySelector('.section.active');
     if (!activeSection) return;
-    // Збираємо всі потенційно фокусовані елементи в активній секції та модалках
     const modals = document.querySelectorAll('.modal.active');
     let elements = [];
     if (modals.length) {
@@ -1375,7 +1374,6 @@
     } else {
       elements = Array.from(activeSection.querySelectorAll('[tabindex="0"], button, input, textarea, .nav-item, .post, .chat-item, .group-item, .channel-item, .profile-tab'));
     }
-    // Фільтруємо приховані
     focusableElements = elements.filter(el => {
       const style = window.getComputedStyle(el);
       return style.display !== 'none' && style.visibility !== 'hidden' && el.offsetParent !== null;
@@ -1396,9 +1394,8 @@
   }
 
   function handleKeyDown(e) {
-    // Якщо навігація вимкнена – ігноруємо
     if (!tvSettings.tvNavEnabled && !tvSettings.remoteNavEnabled) return;
-    if (!currentUser) return; // Не активуємо до логіну
+    if (!currentUser) return;
 
     updateFocusableElements();
     if (focusableElements.length === 0) return;
@@ -1411,10 +1408,6 @@
       case 'ArrowUp':
         e.preventDefault();
         setFocus(currentFocusIndex - 1);
-        break;
-      case 'ArrowRight':
-      case 'ArrowLeft':
-        // Можна використати для відкриття/закриття, поки що нічого
         break;
       case 'Enter':
         e.preventDefault();
@@ -1453,7 +1446,6 @@
       document.getElementById(section).classList.add('active');
       document.getElementById('pageTitle').textContent = item.textContent.trim();
       
-      // Очищаємо попередні підписки при зміні розділу
       cleanupListeners();
       
       if (section === 'home') resetPagination();
@@ -1461,7 +1453,6 @@
       if (section === 'chats' && currentUser) {
         document.getElementById('chatWindow').style.display = 'none';
         loadChatList();
-        // Сховати результати пошуку при перемиканні на чати
         document.getElementById('chatSearchResults').style.display = 'none';
         document.getElementById('chatSearchInput').value = '';
       }
@@ -1516,7 +1507,6 @@
   // ================= Емоджі-пікер (ПОКРАЩЕНИЙ) =================
   const emojiList = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥸','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','💩','👻','💀','☠️','👽','👾','🤖','🎃','😺','😸','😹','😻','😼','😽','🙀','😿','😾'];
 
-  // Функція для закриття всіх пікерів
   function closeAllEmojiPickers() {
     document.querySelectorAll('.emoji-picker').forEach(p => p.style.display = 'none');
   }
@@ -1529,9 +1519,8 @@
     
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      closeAllEmojiPickers(); // закриваємо інші пікери
+      closeAllEmojiPickers();
       
-      // Визначаємо оптимальне положення (зверху, якщо є місце, інакше знизу)
       const rect = btn.getBoundingClientRect();
       const spaceAbove = rect.top;
       const spaceBelow = window.innerHeight - rect.bottom;
@@ -1573,7 +1562,7 @@
     });
   }
 
-  // ================= АВТОРИЗАЦІЯ (ВИПРАВЛЕНО) =================
+  // ================= АВТОРИЗАЦІЯ =================
   document.getElementById('toRegister').onclick = () => {
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('registerForm').style.display = 'block';
@@ -1597,14 +1586,12 @@
     if (!snap.empty) return alert('Цей ID вже зайнятий');
     
     try {
-      // Генеруємо унікальний email
       const safeNick = nickname.toLowerCase().replace(/[^a-z0-9]/g, '');
       const randomSuffix = Math.floor(Math.random() * 10000);
       const email = `${safeNick}_${randomSuffix}@fantasyas.local`;
       
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       
-      // Зберігаємо email у документі користувача
       await setDoc(doc(db, "users", cred.user.uid), {
         nickname,
         userId,
@@ -1618,7 +1605,7 @@
         following: [],
         createdAt: serverTimestamp(),
         lastOnline: serverTimestamp(),
-        email: email // зберігаємо email для подальшого входу
+        email: email
       });
       
       showToast('Реєстрація успішна');
@@ -1638,10 +1625,9 @@
       
       const userDoc = snap.docs[0];
       const userData = userDoc.data();
-      const email = userData.email; // отримуємо збережений email
+      const email = userData.email;
       
       if (!email) {
-        // Якщо старого користувача, який не має email – пропонуємо увійти через Google/Apple або зареєструватися заново
         return alert('Для цього акаунту не встановлено email. Увійдіть через Google або Apple, або створіть новий акаунт.');
       }
       
@@ -1760,7 +1746,6 @@
       resetPagination();
       loadMyProfile();
       
-      // Підписка на список чатів для оновлення непрочитаних та списку
       const q = query(collection(db, "chats"), where("participants", "array-contains", currentUser.uid));
       unsubscribeChatList = onSnapshot(q, (snapshot) => {
         let totalUnread = 0;
@@ -1772,16 +1757,14 @@
         });
         unreadCount = totalUnread;
         updateUnreadBadge();
-        // Якщо ми в розділі чатів, оновлюємо список
         if (document.getElementById('chats').classList.contains('active')) {
           loadChatList();
         }
       }, (error) => {
         console.error('Chat list snapshot error:', error);
-        showToast('Помилка оновлення списку чатів');
+        showToast('Помилка оновлення списку чатів. Перевірте індекси Firestore.');
       });
 
-      // Налаштовуємо всі емоджі-пікери
       setupEmojiPicker('postEmojiBtn', 'postEmojiPicker', 'postText');
       setupEmojiPicker('chatEmojiBtn', 'chatEmojiPicker', 'chatText');
       setupEmojiPicker('groupEmojiBtn', 'groupEmojiPicker', 'groupChatText');
@@ -2202,7 +2185,6 @@
       </div>
     `;
 
-    // Додаємо обробники для відкриття списків підписників/підписок
     document.getElementById('followersCount').style.cursor = 'pointer';
     document.getElementById('followersCount').onclick = () => openFollowersList(uid);
     document.getElementById('followingCount').style.cursor = 'pointer';
@@ -2245,7 +2227,6 @@
     setTimeout(() => { updateFocusableElements(); }, 100);
   }
 
-  // Функції для відкриття списків підписників/підписок
   async function openFollowersList(uid) {
     const modal = document.getElementById('followersModal');
     const list = document.getElementById('followersList');
@@ -2324,7 +2305,6 @@
     setTimeout(() => { updateFocusableElements(); setFocus(0); }, 100);
   }
 
-  // Закриття модалок підписників/підписок
   document.getElementById('closeFollowersModal').onclick = () => {
     document.getElementById('followersModal').classList.remove('active');
     setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
@@ -2366,7 +2346,6 @@
       }
     }
     
-    // Сортуємо за датою (новіші перші)
     posts.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
     
     posts.forEach(post => {
@@ -2421,7 +2400,9 @@
     }
   };
 
-  // ================= ЧАТИ (ВИПРАВЛЕНО: ТІЛЬКИ onSnapshot) =================
+  // ================= ЧАТИ (ВИПРАВЛЕНО) =================
+  const getChatId = (uid1, uid2) => [uid1, uid2].sort().join('_');
+
   async function loadChatList() {
     if (!currentUser) return;
     const list = document.getElementById('chatList');
@@ -2430,14 +2411,14 @@
     try {
       const q = query(collection(db, "chats"), where("participants", "array-contains", currentUser.uid), orderBy("updatedAt", "desc"));
       const snapshot = await getDocs(q);
-      for (const docSnap of snapshot.docs) {
+      const chatPromises = snapshot.docs.map(async (docSnap) => {
         const chat = docSnap.data();
         const otherUid = chat.participants.find(uid => uid !== currentUser.uid);
-        if (!otherUid) continue;
+        if (!otherUid) return null;
         
         const userSnap = await getDoc(doc(db, "users", otherUid));
         const user = userSnap.data();
-        if (!user) continue;
+        if (!user) return null;
         
         const unread = chat.unread?.[currentUser.uid] || 0;
         const lastMsg = chat.lastMessage || '';
@@ -2445,26 +2426,39 @@
         const lastOnline = user.lastOnline?.seconds || 0;
         const isOnline = (Date.now()/1000 - lastOnline) < 60;
         
-        const item = document.createElement('div');
-        item.className = `chat-item ${unread > 0 ? 'unread' : ''}`;
-        item.dataset.chatId = docSnap.id;
-        item.dataset.otherUid = otherUid;
-        item.tabIndex = 0;
-        item.innerHTML = `
-          <div class="avatar small" style="background-image:url(${user.avatar || ''})" tabindex="0"></div>
+        return {
+          chatId: docSnap.id,
+          otherUid,
+          user,
+          unread,
+          lastMsg,
+          time,
+          isOnline
+        };
+      });
+      
+      const chatItems = await Promise.all(chatPromises);
+      chatItems.filter(item => item !== null).forEach(item => {
+        const div = document.createElement('div');
+        div.className = `chat-item ${item.unread > 0 ? 'unread' : ''}`;
+        div.dataset.chatId = item.chatId;
+        div.dataset.otherUid = item.otherUid;
+        div.tabIndex = 0;
+        div.innerHTML = `
+          <div class="avatar small" style="background-image:url(${item.user.avatar || ''})" tabindex="0"></div>
           <div class="chat-info">
-            <div class="chat-name">${user.nickname} ${isOnline ? '<span class="online-indicator" style="display:inline-block;"></span>' : ''}</div>
-            <div class="chat-last">${lastMsg}</div>
+            <div class="chat-name">${item.user.nickname} ${item.isOnline ? '<span class="online-indicator" style="display:inline-block;"></span>' : ''}</div>
+            <div class="chat-last">${item.lastMsg}</div>
           </div>
-          <div class="chat-time">${time}</div>
-          ${unread > 0 ? `<div class="chat-badge">${unread}</div>` : ''}
+          <div class="chat-time">${item.time}</div>
+          ${item.unread > 0 ? `<div class="chat-badge">${item.unread}</div>` : ''}
         `;
-        item.onclick = () => openChatFromList(docSnap.id, otherUid, user.nickname, user.userId, user.avatar);
-        list.appendChild(item);
-      }
+        div.onclick = () => openChatFromList(item.chatId, item.otherUid, item.user.nickname, item.user.userId, item.user.avatar);
+        list.appendChild(div);
+      });
     } catch (error) {
       console.error('Error loading chat list:', error);
-      showToast('Помилка завантаження списку чатів');
+      showToast('Помилка завантаження списку чатів. Перевірте індекси Firestore.');
     }
     setTimeout(() => { updateFocusableElements(); }, 100);
   }
@@ -2474,20 +2468,23 @@
     currentChatPartner = otherUid;
     currentChatPartnerName = otherName;
     currentChatId = chatId;
+    
     document.getElementById('chatWindow').style.display = 'flex';
     document.getElementById('chatName').textContent = otherName;
     document.getElementById('chatUserId').textContent = otherUserId || '';
     document.getElementById('chatAvatar').style.backgroundImage = `url(${otherAvatar || ''})`;
     
+    // Скидаємо лічильник непрочитаних
     const chatRef = doc(db, "chats", chatId);
     await updateDoc(chatRef, { [`unread.${currentUser.uid}`]: 0 });
     
-    try {
-      await subscribeToChat(chatId);
-    } catch (error) {
-      console.error('Error subscribing to chat:', error);
-      showToast('Помилка завантаження повідомлень');
-    }
+    // Даємо час на рендеринг, потім підписуємось
+    setTimeout(() => {
+      subscribeToChat(chatId).catch(err => {
+        console.error('Error subscribing to chat:', err);
+        showToast('Помилка завантаження повідомлень');
+      });
+    }, 100);
     
     if (unsubscribeOnlineStatus) unsubscribeOnlineStatus();
     unsubscribeOnlineStatus = onSnapshot(doc(db, "users", otherUid), (snap) => {
@@ -2499,13 +2496,11 @@
     setTimeout(() => { updateFocusableElements(); setFocus(0); }, 200);
   }
 
-  // ВІДКРИТТЯ ЧАТУ З КНОПКИ "НАПИСАТИ" (ВИПРАВЛЕНО)
   function openChat(otherName, otherUid, otherUserId) {
     if (!currentUser) return;
     currentChatPartner = otherUid;
     currentChatPartnerName = otherName;
     
-    // Переходимо в розділ чатів
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.querySelector('[data-section="chats"]').classList.add('active');
     sections.forEach(s => document.getElementById(s).classList.remove('active'));
@@ -2548,8 +2543,12 @@
         } else {
           await updateDoc(chatRef, { [`unread.${currentUser.uid}`]: 0 });
         }
-        await subscribeToChat(chatId);
-        // Оновлюємо список чатів, щоб новий чат одразу з'явився
+        setTimeout(() => {
+          subscribeToChat(chatId).catch(err => {
+            console.error('Error subscribing to chat:', err);
+            showToast('Помилка завантаження повідомлень');
+          });
+        }, 100);
         loadChatList();
       } catch (error) {
         console.error('Error opening chat:', error);
@@ -2563,8 +2562,6 @@
     setTimeout(() => { updateFocusableElements(); setFocus(0); }, 200);
   }
 
-  const getChatId = (uid1, uid2) => [uid1, uid2].sort().join('_');
-
   async function subscribeToChat(chatId) {
     if (!currentUser) throw new Error('No current user');
     if (unsubscribeChat) unsubscribeChat();
@@ -2575,7 +2572,6 @@
       throw new Error('chatMessages container not found');
     }
 
-    // Підписуємося на зміни – дані прийдуть одразу
     const q = query(collection(db, `chats/${chatId}/messages`), orderBy("createdAt"));
     unsubscribeChat = onSnapshot(q, (snap) => {
       renderMessages(snap.docs);
@@ -2686,7 +2682,6 @@
         </div>
         <button class="btn" tabindex="0">Написати</button>
       `;
-      // При кліку на весь елемент або на кнопку відкриваємо чат
       div.onclick = () => {
         openChat(data.nickname, uid, data.userId);
         resultsContainer.style.display = 'none';
@@ -2703,7 +2698,7 @@
     setTimeout(() => { updateFocusableElements(); }, 100);
   }
 
-  // ================= Групи ================= (повна реалізація)
+  // ================= Групи =================
   async function loadGroups() {
     if (!currentUser) return;
     const list = document.getElementById('groupList');
@@ -2841,7 +2836,7 @@
     document.getElementById('groupMembersModal').classList.remove('active');
   };
 
-  // ================= Канали ================= (повна реалізація)
+  // ================= Канали =================
   async function loadChannels() {
     if (!currentUser) return;
     const list = document.getElementById('channelList');
@@ -2985,7 +2980,6 @@
     setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
   };
 
-  // Налаштування ТВ
   function updateTvButtons() {
     document.getElementById('tvNavToggle').textContent = `TV-навігація: ${tvSettings.tvNavEnabled ? 'увімкнено' : 'вимкнено'}`;
     document.getElementById('remoteNavToggle').textContent = `Навігація з пульта: ${tvSettings.remoteNavEnabled ? 'увімкнено' : 'вимкнено'}`;
@@ -2996,7 +2990,6 @@
     localStorage.setItem('tvNav', tvSettings.tvNavEnabled);
     updateTvButtons();
     if (!tvSettings.tvNavEnabled) {
-      // Вимикаємо фокус
       focusableElements.forEach(el => el.classList.remove('focused'));
     }
   };
@@ -3009,7 +3002,6 @@
     tvSettings.focusOptimized = !tvSettings.focusOptimized;
     localStorage.setItem('focusOptimized', tvSettings.focusOptimized);
     updateTvButtons();
-    // Логіка оптимізації (наприклад, зміна товщини outline) заборонена, тому просто зберігаємо стан
   };
   updateTvButtons();
 
@@ -3025,7 +3017,6 @@
   }, { threshold: 0.5 });
   observer.observe(sentinel);
 
-  // Лайки, збереження, шеринг
   document.addEventListener('click', async (e) => {
     if (!currentUser) return;
     const target = e.target.closest('button');

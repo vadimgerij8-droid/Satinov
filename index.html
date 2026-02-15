@@ -1042,14 +1042,25 @@
       <div id="settings" class="section card">
         <h2>Налаштування</h2>
         <button class="btn" id="toggleTheme" style="margin:18px 0;" tabindex="0">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/></svg>
           Тема
         </button>
         <button class="btn" id="privacyPolicyBtn" style="margin:18px 0;" tabindex="0">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           Політика конфіденційності
         </button>
-        <button class="btn" id="logoutBtn" tabindex="0">Вийти</button>
+
+        <!-- Пункт "Телевізор" (тільки логічні налаштування, без зміни дизайну) -->
+        <div style="margin-top:20px; border-top:1px solid var(--border); padding-top:20px;">
+          <h3>Телевізор</h3>
+          <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+            <button class="btn" id="tvNavToggle">TV-навігація: увімкнено</button>
+            <button class="btn" id="remoteNavToggle">Навігація з пульта: увімкнено</button>
+            <button class="btn" id="focusOptimizeToggle">Оптимізація фокусу: увімкнено</button>
+          </div>
+        </div>
+
+        <button class="btn" id="logoutBtn" style="margin-top:20px;" tabindex="0">Вийти</button>
       </div>
     </div>
   </main>
@@ -1183,6 +1194,7 @@
   let currentUser = null;
   let currentChatPartner = null;
   let currentChatPartnerName = '';
+  let currentChatId = null;
   let currentGroup = null;
   let currentChannel = null;
   let currentProfileUid = null;
@@ -1204,6 +1216,13 @@
   let lastVisible = null;
   let loading = false;
   let hasMore = true;
+
+  // Налаштування ТВ (логічні, не змінюють вигляд)
+  const tvSettings = {
+    tvNavEnabled: localStorage.getItem('tvNav') !== 'false', // default true
+    remoteNavEnabled: localStorage.getItem('remoteNav') !== 'false',
+    focusOptimized: localStorage.getItem('focusOptimized') !== 'false'
+  };
 
   // ================= Допоміжні функції =================
   const showToast = (msg) => {
@@ -1245,14 +1264,25 @@
   function updateFocusableElements() {
     const activeSection = document.querySelector('.section.active');
     if (!activeSection) return;
-    focusableElements = Array.from(activeSection.querySelectorAll('[tabindex="0"], button, input, textarea, .nav-item, .post, .chat-item, .group-item, .channel-item, .profile-tab, .modal.active [tabindex="0"], .modal.active button, .modal.active input'));
-    focusableElements = focusableElements.filter(el => {
+    // Збираємо всі потенційно фокусовані елементи в активній секції та модалках
+    const modals = document.querySelectorAll('.modal.active');
+    let elements = [];
+    if (modals.length) {
+      modals.forEach(modal => {
+        elements = elements.concat(Array.from(modal.querySelectorAll('[tabindex="0"], button, input, textarea, .nav-item, .post, .chat-item, .group-item, .channel-item, .profile-tab')));
+      });
+    } else {
+      elements = Array.from(activeSection.querySelectorAll('[tabindex="0"], button, input, textarea, .nav-item, .post, .chat-item, .group-item, .channel-item, .profile-tab'));
+    }
+    // Фільтруємо приховані
+    focusableElements = elements.filter(el => {
       const style = window.getComputedStyle(el);
       return style.display !== 'none' && style.visibility !== 'hidden' && el.offsetParent !== null;
     });
   }
 
   function setFocus(index) {
+    if (!tvSettings.tvNavEnabled && !tvSettings.remoteNavEnabled) return;
     if (focusableElements.length === 0) return;
     if (index < 0) index = focusableElements.length - 1;
     if (index >= focusableElements.length) index = 0;
@@ -1265,7 +1295,10 @@
   }
 
   function handleKeyDown(e) {
-    if (!currentUser) return; // Не активуємо навігацію до логіну
+    // Якщо навігація вимкнена – ігноруємо
+    if (!tvSettings.tvNavEnabled && !tvSettings.remoteNavEnabled) return;
+    if (!currentUser) return; // Не активуємо до логіну
+
     updateFocusableElements();
     if (focusableElements.length === 0) return;
 
@@ -1279,10 +1312,8 @@
         setFocus(currentFocusIndex - 1);
         break;
       case 'ArrowRight':
-        // Можна використати для відкриття підменю, поки пропускаємо
-        break;
       case 'ArrowLeft':
-        // Для закриття
+        // Можна використати для відкриття/закриття, покі що нічого
         break;
       case 'Enter':
         e.preventDefault();
@@ -1321,6 +1352,9 @@
       document.getElementById(section).classList.add('active');
       document.getElementById('pageTitle').textContent = item.textContent.trim();
       
+      // Очищаємо попередні підписки при зміні розділу
+      cleanupListeners();
+      
       if (section === 'home') resetPagination();
       if (section === 'search' && currentUser) loadSearchUsers();
       if (section === 'chats' && currentUser) {
@@ -1344,7 +1378,7 @@
       }
       
       closeSidebar();
-      setTimeout(() => { currentFocusIndex = -1; setFocus(0); }, 100);
+      setTimeout(() => { currentFocusIndex = -1; setFocus(0); }, 200);
     });
   });
 
@@ -1406,6 +1440,8 @@
         input.focus();
         input.selectionStart = input.selectionEnd = start + emoji.length;
         picker.style.display = 'none';
+        updateFocusableElements();
+        setFocus(currentFocusIndex);
       };
       picker.appendChild(span);
     });
@@ -1583,6 +1619,10 @@
         });
         unreadCount = totalUnread;
         updateUnreadBadge();
+        // Якщо ми в розділі чатів, оновлюємо список
+        if (document.getElementById('chats').classList.contains('active')) {
+          loadChatList();
+        }
       });
 
       setupEmojiPicker('postEmojiBtn', 'postEmojiPicker', 'postText');
@@ -2125,56 +2165,54 @@
     }
   };
 
-  // ================= ЧАТИ (ВИПРАВЛЕНО КНОПКУ "НАПИСАТИ") =================
+  // ================= ЧАТИ (ВИПРАВЛЕНО) =================
   async function loadChatList() {
     if (!currentUser) return;
     const list = document.getElementById('chatList');
     list.innerHTML = '';
     
-    if (unsubscribeChatList) unsubscribeChatList();
     const q = query(collection(db, "chats"), where("participants", "array-contains", currentUser.uid), orderBy("updatedAt", "desc"));
-    unsubscribeChatList = onSnapshot(q, async (snapshot) => {
-      list.innerHTML = '';
-      for (const docSnap of snapshot.docs) {
-        const chat = docSnap.data();
-        const otherUid = chat.participants.find(uid => uid !== currentUser.uid);
-        if (!otherUid) continue;
-        
-        const userSnap = await getDoc(doc(db, "users", otherUid));
-        const user = userSnap.data();
-        if (!user) continue;
-        
-        const unread = chat.unread?.[currentUser.uid] || 0;
-        const lastMsg = chat.lastMessage || '';
-        const time = chat.updatedAt ? new Date(chat.updatedAt.seconds * 1000).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '';
-        const lastOnline = user.lastOnline?.seconds || 0;
-        const isOnline = (Date.now()/1000 - lastOnline) < 60;
-        
-        const item = document.createElement('div');
-        item.className = `chat-item ${unread > 0 ? 'unread' : ''}`;
-        item.dataset.chatId = docSnap.id;
-        item.dataset.otherUid = otherUid;
-        item.tabIndex = 0;
-        item.innerHTML = `
-          <div class="avatar small" style="background-image:url(${user.avatar || ''})" tabindex="0"></div>
-          <div class="chat-info">
-            <div class="chat-name">${user.nickname} ${isOnline ? '<span class="online-indicator" style="display:inline-block;"></span>' : ''}</div>
-            <div class="chat-last">${lastMsg}</div>
-          </div>
-          <div class="chat-time">${time}</div>
-          ${unread > 0 ? `<div class="chat-badge">${unread}</div>` : ''}
-        `;
-        item.onclick = () => openChatFromList(docSnap.id, otherUid, user.nickname, user.userId, user.avatar);
-        list.appendChild(item);
-      }
-      setTimeout(() => { updateFocusableElements(); }, 100);
-    });
+    const snapshot = await getDocs(q);
+    for (const docSnap of snapshot.docs) {
+      const chat = docSnap.data();
+      const otherUid = chat.participants.find(uid => uid !== currentUser.uid);
+      if (!otherUid) continue;
+      
+      const userSnap = await getDoc(doc(db, "users", otherUid));
+      const user = userSnap.data();
+      if (!user) continue;
+      
+      const unread = chat.unread?.[currentUser.uid] || 0;
+      const lastMsg = chat.lastMessage || '';
+      const time = chat.updatedAt ? new Date(chat.updatedAt.seconds * 1000).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '';
+      const lastOnline = user.lastOnline?.seconds || 0;
+      const isOnline = (Date.now()/1000 - lastOnline) < 60;
+      
+      const item = document.createElement('div');
+      item.className = `chat-item ${unread > 0 ? 'unread' : ''}`;
+      item.dataset.chatId = docSnap.id;
+      item.dataset.otherUid = otherUid;
+      item.tabIndex = 0;
+      item.innerHTML = `
+        <div class="avatar small" style="background-image:url(${user.avatar || ''})" tabindex="0"></div>
+        <div class="chat-info">
+          <div class="chat-name">${user.nickname} ${isOnline ? '<span class="online-indicator" style="display:inline-block;"></span>' : ''}</div>
+          <div class="chat-last">${lastMsg}</div>
+        </div>
+        <div class="chat-time">${time}</div>
+        ${unread > 0 ? `<div class="chat-badge">${unread}</div>` : ''}
+      `;
+      item.onclick = () => openChatFromList(docSnap.id, otherUid, user.nickname, user.userId, user.avatar);
+      list.appendChild(item);
+    }
+    setTimeout(() => { updateFocusableElements(); }, 100);
   }
 
   async function openChatFromList(chatId, otherUid, otherName, otherUserId, otherAvatar) {
     if (!currentUser) return;
     currentChatPartner = otherUid;
     currentChatPartnerName = otherName;
+    currentChatId = chatId;
     document.getElementById('chatWindow').style.display = 'flex';
     document.getElementById('chatName').textContent = otherName;
     document.getElementById('chatUserId').textContent = otherUserId || '';
@@ -2195,7 +2233,7 @@
     setTimeout(() => { updateFocusableElements(); setFocus(0); }, 200);
   }
 
-  // ВІДКРИТТЯ ЧАТУ З КНОПКИ "НАПИСАТИ" (ВИПРАВЛЕНО)
+  // ВІДКРИТТЯ ЧАТУ З КНОПКИ "НАПИСАТИ"
   function openChat(otherName, otherUid, otherUserId) {
     if (!currentUser) return;
     currentChatPartner = otherUid;
@@ -2229,6 +2267,7 @@
     });
     
     const chatId = getChatId(currentUser.uid, otherUid);
+    currentChatId = chatId;
     const chatRef = doc(db, "chats", chatId);
     getDoc(chatRef).then(async (docSnap) => {
       if (!docSnap.exists()) {
@@ -2282,9 +2321,8 @@
   }
 
   document.getElementById('chatText').addEventListener('input', () => {
-    if (!currentUser || !currentChatPartner) return;
-    const chatId = getChatId(currentUser.uid, currentChatPartner);
-    const typingRef = doc(db, `chats/${chatId}/typing/${currentUser.uid}`);
+    if (!currentUser || !currentChatPartner || !currentChatId) return;
+    const typingRef = doc(db, `chats/${currentChatId}/typing/${currentUser.uid}`);
     setDoc(typingRef, { isTyping: true }, { merge: true });
     clearTimeout(window.typingTimeout);
     window.typingTimeout = setTimeout(() => setDoc(typingRef, { isTyping: false }, { merge: true }), 2000);
@@ -2292,10 +2330,9 @@
 
   document.getElementById('sendMessage').onclick = async () => {
     const text = document.getElementById('chatText').value.trim();
-    if (!text || !currentUser || !currentChatPartner) return;
-    const chatId = getChatId(currentUser.uid, currentChatPartner);
-    const chatRef = doc(db, "chats", chatId);
-    const messageRef = collection(db, `chats/${chatId}/messages`);
+    if (!text || !currentUser || !currentChatPartner || !currentChatId) return;
+    const chatRef = doc(db, "chats", currentChatId);
+    const messageRef = collection(db, `chats/${currentChatId}/messages`);
     await addDoc(messageRef, { from: currentUser.uid, text, createdAt: serverTimestamp() });
     await updateDoc(chatRef, {
       lastMessage: text,
@@ -2304,7 +2341,7 @@
     });
     document.getElementById('chatText').value = '';
     
-    const typingRef = doc(db, `chats/${chatId}/typing/${currentUser.uid}`);
+    const typingRef = doc(db, `chats/${currentChatId}/typing/${currentUser.uid}`);
     setDoc(typingRef, { isTyping: false }, { merge: true });
   };
 
@@ -2315,7 +2352,63 @@
     }
   });
 
-  // ================= Групи ================= (скорочено для економії місця, але логіка та ж)
+  // ================= Групи ================= (повна реалізація)
+  async function loadGroups() {
+    if (!currentUser) return;
+    const list = document.getElementById('groupList');
+    list.innerHTML = '';
+    const q = query(collection(db, "groups"), where("members", "array-contains", currentUser.uid));
+    const snapshot = await getDocs(q);
+    snapshot.forEach(docSnap => {
+      const group = docSnap.data();
+      const item = document.createElement('div');
+      item.className = 'group-item';
+      item.dataset.groupId = docSnap.id;
+      item.tabIndex = 0;
+      item.innerHTML = `
+        <div class="group-avatar" style="background-image:url(${group.avatar || ''})"></div>
+        <div class="group-info">
+          <div class="group-name">${group.name}</div>
+          <div class="group-meta">${group.members?.length || 0} учасників</div>
+        </div>
+      `;
+      item.onclick = () => openGroup(docSnap.id, group);
+      list.appendChild(item);
+    });
+    setTimeout(() => { updateFocusableElements(); }, 100);
+  }
+
+  async function openGroup(groupId, groupData) {
+    currentGroup = { id: groupId, ...groupData };
+    document.getElementById('groupChatWindow').style.display = 'flex';
+    document.getElementById('groupChatName').textContent = groupData.name;
+    document.getElementById('groupChatAvatar').style.backgroundImage = `url(${groupData.avatar || ''})`;
+    document.getElementById('groupChatMeta').textContent = `${groupData.members?.length || 0} учасників`;
+    
+    if (groupData.createdBy === currentUser.uid) {
+      document.getElementById('editGroupBtn').style.display = 'inline-block';
+    } else {
+      document.getElementById('editGroupBtn').style.display = 'none';
+    }
+    
+    if (unsubscribeGroup) unsubscribeGroup();
+    const q = query(collection(db, `groups/${groupId}/messages`), orderBy("createdAt"));
+    unsubscribeGroup = onSnapshot(q, (snap) => {
+      const messages = document.getElementById('groupChatMessages');
+      messages.innerHTML = '';
+      snap.forEach(m => {
+        const msg = m.data();
+        const div = document.createElement('div');
+        div.className = `message ${msg.from === currentUser.uid ? 'sent' : 'received'}`;
+        div.innerHTML = `<div class="group-message-sender">${msg.senderName || 'Невідомо'}</div>${msg.text}`;
+        messages.appendChild(div);
+      });
+      messages.scrollTop = messages.scrollHeight;
+    });
+    
+    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 200);
+  }
+
   document.getElementById('createGroupBtn').onclick = () => {
     document.getElementById('createGroupModal').classList.add('active');
     setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
@@ -2324,10 +2417,206 @@
     document.getElementById('createGroupModal').classList.remove('active');
     setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
   };
-  // ... решта коду груп аналогічна, але для економії місця не дублюю повністю
-  // (в реальному проекті вставте повний код груп з попередньої версії)
+  document.getElementById('saveGroup').onclick = async () => {
+    const name = document.getElementById('groupName').value.trim();
+    const desc = document.getElementById('groupDesc').value.trim();
+    const file = document.getElementById('groupAvatar').files[0];
+    if (!name) return alert('Введіть назву групи');
+    try {
+      let avatarUrl = '';
+      if (file) {
+        const storageRef = ref(storage, `groups/${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        avatarUrl = await getDownloadURL(storageRef);
+      }
+      const groupRef = await addDoc(collection(db, "groups"), {
+        name,
+        description: desc,
+        avatar: avatarUrl,
+        createdBy: currentUser.uid,
+        members: [currentUser.uid],
+        createdAt: serverTimestamp()
+      });
+      showToast('Групу створено');
+      document.getElementById('createGroupModal').classList.remove('active');
+      loadGroups();
+    } catch (e) { showToast(e.message); }
+  };
 
-  // ================= Канали ================= (аналогічно)
+  document.getElementById('sendGroupMessage').onclick = async () => {
+    const text = document.getElementById('groupChatText').value.trim();
+    if (!text || !currentGroup || !currentUser) return;
+    const userSnap = await getDoc(doc(db, "users", currentUser.uid));
+    const user = userSnap.data();
+    const msgRef = collection(db, `groups/${currentGroup.id}/messages`);
+    await addDoc(msgRef, {
+      from: currentUser.uid,
+      senderName: user.nickname,
+      text,
+      createdAt: serverTimestamp()
+    });
+    document.getElementById('groupChatText').value = '';
+  };
+
+  document.getElementById('groupMembersBtn').onclick = async () => {
+    if (!currentGroup) return;
+    const membersDiv = document.getElementById('membersList');
+    membersDiv.innerHTML = '';
+    for (const uid of currentGroup.members) {
+      const userSnap = await getDoc(doc(db, "users", uid));
+      const user = userSnap.data();
+      const div = document.createElement('div');
+      div.className = 'chat-item';
+      div.innerHTML = `<div class="avatar small" style="background-image:url(${user.avatar || ''})"></div><div>${user.nickname}</div>`;
+      membersDiv.appendChild(div);
+    }
+    document.getElementById('groupMembersModal').classList.add('active');
+    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
+  };
+  document.getElementById('closeGroupMembers').onclick = () => {
+    document.getElementById('groupMembersModal').classList.remove('active');
+    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
+  };
+  document.getElementById('addMemberBtn').onclick = async () => {
+    const input = document.getElementById('addMemberInput').value.trim();
+    if (!input || !currentGroup) return;
+    const q = query(collection(db, "users"), where("userId", "==", input));
+    const snap = await getDocs(q);
+    if (snap.empty) return alert('Користувача не знайдено');
+    const targetUid = snap.docs[0].id;
+    await updateDoc(doc(db, "groups", currentGroup.id), { members: arrayUnion(targetUid) });
+    showToast('Учасника додано');
+    document.getElementById('addMemberInput').value = '';
+    document.getElementById('groupMembersModal').classList.remove('active');
+  };
+
+  // ================= Канали ================= (повна реалізація)
+  async function loadChannels() {
+    if (!currentUser) return;
+    const list = document.getElementById('channelList');
+    list.innerHTML = '';
+    const q = query(collection(db, "channels"), where("subscribers", "array-contains", currentUser.uid));
+    const snapshot = await getDocs(q);
+    snapshot.forEach(docSnap => {
+      const channel = docSnap.data();
+      const item = document.createElement('div');
+      item.className = 'channel-item';
+      item.dataset.channelId = docSnap.id;
+      item.tabIndex = 0;
+      item.innerHTML = `
+        <div class="channel-avatar" style="background-image:url(${channel.avatar || ''})"></div>
+        <div class="channel-info">
+          <div class="channel-name">${channel.name}</div>
+          <div class="channel-meta">${channel.subscribers?.length || 0} підписників</div>
+        </div>
+      `;
+      item.onclick = () => openChannel(docSnap.id, channel);
+      list.appendChild(item);
+    });
+    setTimeout(() => { updateFocusableElements(); }, 100);
+  }
+
+  async function openChannel(channelId, channelData) {
+    currentChannel = { id: channelId, ...channelData };
+    document.getElementById('channelView').style.display = 'block';
+    document.getElementById('channelHeader').innerHTML = `
+      <div style="display:flex; gap:20px;">
+        <div class="avatar large" style="background-image:url(${channelData.avatar || ''})"></div>
+        <div>
+          <h2>${channelData.name}</h2>
+          <p>${channelData.description || ''}</p>
+          <div>${channelData.subscribers?.length || 0} підписників</div>
+        </div>
+      </div>
+    `;
+    if (channelData.createdBy === currentUser.uid) {
+      document.getElementById('newChannelPostBox').style.display = 'block';
+    } else {
+      document.getElementById('newChannelPostBox').style.display = 'none';
+    }
+    loadChannelPosts(channelId);
+    setTimeout(() => { updateFocusableElements(); }, 100);
+  }
+
+  async function loadChannelPosts(channelId) {
+    const feed = document.getElementById('channelFeed');
+    feed.innerHTML = '';
+    const q = query(collection(db, `channels/${channelId}/posts`), orderBy("createdAt", "desc"));
+    const snapshot = await getDocs(q);
+    snapshot.forEach(docSnap => {
+      const post = docSnap.data();
+      const div = document.createElement('div');
+      div.className = 'post';
+      div.tabIndex = 0;
+      div.innerHTML = `<div class="post-content">${post.text || ''}</div>`;
+      feed.appendChild(div);
+    });
+    setTimeout(() => { updateFocusableElements(); }, 100);
+  }
+
+  document.getElementById('createChannelBtn').onclick = () => {
+    document.getElementById('createChannelModal').classList.add('active');
+    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
+  };
+  document.getElementById('closeChannelModal').onclick = () => {
+    document.getElementById('createChannelModal').classList.remove('active');
+    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
+  };
+  document.getElementById('saveChannel').onclick = async () => {
+    const name = document.getElementById('channelName').value.trim();
+    const desc = document.getElementById('channelDesc').value.trim();
+    const file = document.getElementById('channelAvatar').files[0];
+    if (!name) return alert('Введіть назву каналу');
+    try {
+      let avatarUrl = '';
+      if (file) {
+        const storageRef = ref(storage, `channels/${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        avatarUrl = await getDownloadURL(storageRef);
+      }
+      const channelRef = await addDoc(collection(db, "channels"), {
+        name,
+        description: desc,
+        avatar: avatarUrl,
+        createdBy: currentUser.uid,
+        subscribers: [currentUser.uid],
+        createdAt: serverTimestamp()
+      });
+      showToast('Канал створено');
+      document.getElementById('createChannelModal').classList.remove('active');
+      loadChannels();
+    } catch (e) { showToast(e.message); }
+  };
+
+  document.getElementById('addChannelPost').onclick = async () => {
+    if (!currentChannel || !currentUser) return;
+    const text = document.getElementById('channelPostText').value.trim();
+    const file = document.getElementById('channelPostMedia').files[0];
+    if (!text && !file) return alert('Додайте текст або медіа');
+    try {
+      let mediaUrl = '', mediaType = '';
+      if (file) {
+        const storageRef = ref(storage, `channel_posts/${currentChannel.id}/${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        mediaUrl = await getDownloadURL(storageRef);
+        mediaType = file.type.split('/')[0];
+      }
+      const userSnap = await getDoc(doc(db, "users", currentUser.uid));
+      const user = userSnap.data();
+      await addDoc(collection(db, `channels/${currentChannel.id}/posts`), {
+        author: currentUser.uid,
+        authorName: user.nickname,
+        text,
+        mediaUrl,
+        mediaType,
+        createdAt: serverTimestamp()
+      });
+      document.getElementById('channelPostText').value = '';
+      document.getElementById('channelPostMedia').value = '';
+      showToast('Пост опубліковано');
+      loadChannelPosts(currentChannel.id);
+    } catch (e) { showToast(e.message); }
+  };
 
   // ================= Налаштування =================
   document.getElementById('toggleTheme').onclick = () => {
@@ -2344,6 +2633,34 @@
     document.getElementById('privacyPolicyModal').classList.remove('active');
     setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
   };
+
+  // Налаштування ТВ
+  function updateTvButtons() {
+    document.getElementById('tvNavToggle').textContent = `TV-навігація: ${tvSettings.tvNavEnabled ? 'увімкнено' : 'вимкнено'}`;
+    document.getElementById('remoteNavToggle').textContent = `Навігація з пульта: ${tvSettings.remoteNavEnabled ? 'увімкнено' : 'вимкнено'}`;
+    document.getElementById('focusOptimizeToggle').textContent = `Оптимізація фокусу: ${tvSettings.focusOptimized ? 'увімкнено' : 'вимкнено'}`;
+  }
+  document.getElementById('tvNavToggle').onclick = () => {
+    tvSettings.tvNavEnabled = !tvSettings.tvNavEnabled;
+    localStorage.setItem('tvNav', tvSettings.tvNavEnabled);
+    updateTvButtons();
+    if (!tvSettings.tvNavEnabled) {
+      // Вимикаємо фокус
+      focusableElements.forEach(el => el.classList.remove('focused'));
+    }
+  };
+  document.getElementById('remoteNavToggle').onclick = () => {
+    tvSettings.remoteNavEnabled = !tvSettings.remoteNavEnabled;
+    localStorage.setItem('remoteNav', tvSettings.remoteNavEnabled);
+    updateTvButtons();
+  };
+  document.getElementById('focusOptimizeToggle').onclick = () => {
+    tvSettings.focusOptimized = !tvSettings.focusOptimized;
+    localStorage.setItem('focusOptimized', tvSettings.focusOptimized);
+    updateTvButtons();
+    // Логіка оптимізації (наприклад, зміна товщини outline) заборонена, тому просто зберігаємо стан
+  };
+  updateTvButtons();
 
   document.getElementById('logoutBtn').onclick = () => {
     cleanupListeners();

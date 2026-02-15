@@ -60,6 +60,53 @@
       line-height: 1.5;
     }
 
+    /* TV mode */
+    body.tv-mode {
+      cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>') 12 12, auto;
+    }
+
+    /* Віртуальна клавіатура */
+    .virtual-keyboard {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 10px;
+      margin-top: 10px;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 5px;
+      position: sticky;
+      bottom: 0;
+      z-index: 100;
+    }
+    body.tv-mode .virtual-keyboard.active {
+      display: grid;
+    }
+    .key {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 5px;
+      text-align: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .key:active {
+      background: var(--accent);
+      color: var(--bg);
+    }
+    .key.special {
+      background: var(--accent);
+      color: var(--bg);
+    }
+    .keyboard-row {
+      grid-column: span 10;
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+    }
+
     /* ========== LAYOUT ========== */
     .app {
       display: flex;
@@ -293,7 +340,7 @@
       padding: 10px;
     }
 
-    .input, select.input {
+    .input {
       width: 100%;
       padding: 14px 18px;
       border-radius: var(--radius-md);
@@ -353,10 +400,6 @@
       border-radius: var(--radius-md);
       margin: 10px 0;
       cursor: pointer;
-    }
-
-    audio.post-media {
-      width: 100%;
     }
 
     .post-footer {
@@ -612,15 +655,6 @@
       border-bottom-left-radius: 4px;
     }
 
-    .message.media {
-      padding: 5px;
-    }
-    .message img, .message video, .message audio {
-      max-width: 100%;
-      border-radius: var(--radius-md);
-      margin-top: 5px;
-    }
-
     .typing-indicator {
       color: var(--text-tertiary);
       font-size: 0.9rem;
@@ -634,25 +668,10 @@
       border-top: 1px solid var(--border);
       gap: 8px;
       align-items: center;
-      flex-wrap: wrap;
     }
 
-    .chat-input-area input[type="text"] {
+    .chat-input-area input {
       flex: 1;
-      min-width: 150px;
-    }
-
-    .chat-input-area input[type="file"] {
-      display: none;
-    }
-
-    .chat-input-area .file-label {
-      cursor: pointer;
-      padding: 8px 12px;
-      background: var(--surface);
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border);
-      font-size: 1.2rem;
     }
 
     /* Групи та канали */
@@ -727,7 +746,6 @@
       cursor: pointer;
       font-weight: 600;
       color: var(--text-secondary);
-      transition: all var(--transition);
     }
 
     .profile-tab.active {
@@ -806,11 +824,6 @@
       0% { background-position: 200% 0; }
       100% { background-position: -200% 0; }
     }
-
-    /* Language selector */
-    .language-select {
-      margin: 18px 0;
-    }
   </style>
 </head>
 <body>
@@ -823,32 +836,32 @@
     <nav class="nav">
       <div class="nav-item active" data-section="home">
         <svg class="icon" viewBox="0 0 24 24"><path d="M3 10l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        <span data-i18n="nav.home">Головна</span>
+        Головна
       </div>
       <div class="nav-item" data-section="search">
         <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <span data-i18n="nav.search">Пошук</span>
+        Пошук
       </div>
       <div class="nav-item" data-section="profile">
         <svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span data-i18n="nav.profile">Профіль</span>
+        Профіль
       </div>
       <div class="nav-item" data-section="chats">
         <svg class="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        <span data-i18n="nav.chats">Повідомлення</span>
+        Чати
         <span class="badge" id="unreadBadge" style="display:none;">0</span>
       </div>
       <div class="nav-item" data-section="groups">
         <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span data-i18n="nav.groups">Групи</span>
+        Групи
       </div>
       <div class="nav-item" data-section="channels">
         <svg class="icon" viewBox="0 0 24 24"><path d="M4 4l16 8-16 8V4z"/></svg>
-        <span data-i18n="nav.channels">Канали</span>
+        Канали
       </div>
       <div class="nav-item" data-section="settings">
         <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H5.78a1.65 1.65 0 0 0-1.51 1 1.65 1.65 0 0 0 .33 1.82l.07.07A10 10 0 0 0 12 17.66a10 10 0 0 0 6.26-2.26z"/></svg>
-        <span data-i18n="nav.settings">Налаштування</span>
+        Налаштування
       </div>
     </nav>
   </aside>
@@ -859,7 +872,7 @@
       <div class="menu-toggle" id="menuToggle">
         <span></span><span></span><span></span>
       </div>
-      <div class="top-bar-title" id="pageTitle" data-i18n="pages.home">Головна</div>
+      <div class="top-bar-title" id="pageTitle">Головна</div>
     </div>
 
     <div class="content" id="content">
@@ -867,39 +880,39 @@
       <div id="home" class="section active">
         <div class="card" id="authBox">
           <div id="loginForm">
-            <input type="text" id="loginNickname" class="input" placeholder="Псевдонім (без @)" data-i18n-placeholder="login.nickname" autocomplete="off"/>
-            <input type="password" id="loginPassword" class="input" placeholder="Пароль" data-i18n-placeholder="login.password"/>
-            <button class="btn btn-primary" id="loginBtn" style="width:100%; margin-top:12px;" data-i18n="login.loginBtn">Увійти</button>
+            <input type="text" id="loginNickname" class="input" placeholder="Псевдонім (без @)" autocomplete="off"/>
+            <input type="password" id="loginPassword" class="input" placeholder="Пароль"/>
+            <button class="btn btn-primary" id="loginBtn" style="width:100%; margin-top:12px;">Увійти</button>
             <div style="display:flex; gap:10px; margin-top:15px;">
               <button class="btn" id="googleLoginBtn" style="flex:1;">Google</button>
               <button class="btn" id="appleLoginBtn" style="flex:1;">Apple</button>
             </div>
-            <p style="margin-top:18px;"><span data-i18n="login.noAccount">Немає акаунта?</span> <span id="toRegister" style="color:var(--accent);cursor:pointer;" data-i18n="login.registerLink">Зареєструватися</span></p>
-            <p><a href="#" id="forgotPassword" style="color:var(--accent);" data-i18n="login.forgotPassword">Забули пароль?</a></p>
+            <p style="margin-top:18px;">Немає акаунта? <span id="toRegister" style="color:var(--accent);cursor:pointer;">Зареєструватися</span></p>
+            <p><a href="#" id="forgotPassword" style="color:var(--accent);">Забули пароль?</a></p>
           </div>
           <div id="registerForm" style="display:none;">
-            <input type="text" id="registerNickname" class="input" placeholder="Псевдонім (без @)" data-i18n-placeholder="register.nickname"/>
-            <input type="password" id="registerPassword" class="input" placeholder="Пароль" data-i18n-placeholder="register.password"/>
-            <button class="btn btn-primary" id="registerBtn" style="width:100%; margin-top:12px;" data-i18n="register.registerBtn">Зареєструватися</button>
-            <p style="margin-top:18px;"><span data-i18n="register.haveAccount">Вже є акаунт?</span> <span id="toLogin" style="color:var(--accent);cursor:pointer;" data-i18n="register.loginLink">Увійти</span></p>
+            <input type="text" id="registerNickname" class="input" placeholder="Псевдонім (без @)"/>
+            <input type="password" id="registerPassword" class="input" placeholder="Пароль"/>
+            <button class="btn btn-primary" id="registerBtn" style="width:100%; margin-top:12px;">Зареєструватися</button>
+            <p style="margin-top:18px;">Вже є акаунт? <span id="toLogin" style="color:var(--accent);cursor:pointer;">Увійти</span></p>
           </div>
         </div>
 
         <div class="card" id="newPostBox" style="display:none;">
           <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px;">
-            <textarea id="postText" class="input" placeholder="Що нового?" rows="3" style="flex:1;" data-i18n-placeholder="post.placeholder"></textarea>
+            <textarea id="postText" class="input" placeholder="Що нового?" rows="3" style="flex:1;"></textarea>
             <div class="emoji-picker-container">
               <button class="emoji-button" id="postEmojiBtn">😊</button>
               <div class="emoji-picker" id="postEmojiPicker" style="display: none;"></div>
             </div>
           </div>
-          <input type="file" id="postMedia" accept="image/*,video/*,audio/*" style="margin:10px 0;"/>
-          <button class="btn btn-primary" id="addPost" data-i18n="post.publish">Опублікувати</button>
+          <input type="file" id="postMedia" accept="image/*,video/*" style="margin:10px 0;"/>
+          <button class="btn btn-primary" id="addPost">Опублікувати</button>
         </div>
 
         <div class="feed-header" style="display:flex; gap:10px; margin-bottom:20px;">
-          <button class="btn" id="feedNewBtn" data-i18n="feed.new">Нові</button>
-          <button class="btn" id="feedPopularBtn" data-i18n="feed.popular">Популярні</button>
+          <button class="btn" id="feedNewBtn">Нові</button>
+          <button class="btn" id="feedPopularBtn">Популярні</button>
         </div>
 
         <div class="feed" id="feed"></div>
@@ -911,7 +924,7 @@
       </div>
 
       <div id="search" class="section">
-        <input type="text" id="searchInput" class="input" placeholder="Пошук за @id або ім'ям..." data-i18n-placeholder="search.placeholder"/>
+        <input type="text" id="searchInput" class="input" placeholder="Пошук за @id або ім'ям..."/>
         <div class="user-list" id="userList" style="margin-top:20px;"></div>
       </div>
 
@@ -933,15 +946,13 @@
             <span id="onlineIndicator" class="online-indicator" style="display:none;"></span>
           </div>
           <div class="chat-messages" id="chatMessages"></div>
-          <div class="typing-indicator" id="typingIndicator" style="display:none;" data-i18n="chat.typing">друкує...</div>
+          <div class="typing-indicator" id="typingIndicator" style="display:none;">друкує...</div>
           <div class="chat-input-area">
-            <input type="text" id="chatText" class="input" placeholder="Напишіть повідомлення..." data-i18n-placeholder="chat.placeholder"/>
+            <input type="text" id="chatText" class="input" placeholder="Напишіть повідомлення..."/>
             <div class="emoji-picker-container">
               <button class="emoji-button" id="chatEmojiBtn">😊</button>
               <div class="emoji-picker" id="chatEmojiPicker" style="display: none;"></div>
             </div>
-            <label for="chatMedia" class="file-label">📎</label>
-            <input type="file" id="chatMedia" accept="image/*,video/*,audio/*"/>
             <button class="btn btn-primary btn-icon" id="sendMessage">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
             </button>
@@ -950,9 +961,9 @@
       </div>
 
       <div id="groups" class="section">
-        <button class="btn btn-primary" id="createGroupBtn" style="margin-bottom:20px;" data-i18n="groups.create">
+        <button class="btn btn-primary" id="createGroupBtn" style="margin-bottom:20px;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          <span data-i18n="groups.createText">Створити групу</span>
+          Створити групу
         </button>
         <div class="group-list" id="groupList"></div>
         <div class="chat-window" id="groupChatWindow" style="display:none;">
@@ -962,17 +973,15 @@
               <div id="groupChatName"></div>
               <div class="chat-meta" id="groupChatMeta"></div>
             </div>
-            <button class="btn" id="groupMembersBtn" data-i18n="groups.members">Учасники</button>
+            <button class="btn" id="groupMembersBtn">Учасники</button>
           </div>
           <div class="chat-messages" id="groupChatMessages"></div>
           <div class="chat-input-area">
-            <input type="text" id="groupChatText" class="input" placeholder="Напишіть повідомлення..." data-i18n-placeholder="chat.placeholder"/>
+            <input type="text" id="groupChatText" class="input" placeholder="Напишіть повідомлення..."/>
             <div class="emoji-picker-container">
               <button class="emoji-button" id="groupEmojiBtn">😊</button>
               <div class="emoji-picker" id="groupEmojiPicker" style="display: none;"></div>
             </div>
-            <label for="groupChatMedia" class="file-label">📎</label>
-            <input type="file" id="groupChatMedia" accept="image/*,video/*,audio/*"/>
             <button class="btn btn-primary btn-icon" id="sendGroupMessage">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
             </button>
@@ -981,9 +990,9 @@
       </div>
 
       <div id="channels" class="section">
-        <button class="btn btn-primary" id="createChannelBtn" style="margin-bottom:20px;" data-i18n="channels.create">
+        <button class="btn btn-primary" id="createChannelBtn" style="margin-bottom:20px;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          <span data-i18n="channels.createText">Створити канал</span>
+          Створити канал
         </button>
         <div class="channel-list" id="channelList"></div>
         <div id="channelView" style="display:none;">
@@ -991,45 +1000,34 @@
           <div class="feed" id="channelFeed"></div>
           <div id="newChannelPostBox" style="display:none; margin-top:20px;">
             <div style="display: flex; gap: 8px; align-items: center;">
-              <textarea id="channelPostText" class="input" placeholder="Новий пост..." rows="3" style="flex:1;" data-i18n-placeholder="channel.postPlaceholder"></textarea>
+              <textarea id="channelPostText" class="input" placeholder="Новий пост..." rows="3" style="flex:1;"></textarea>
               <div class="emoji-picker-container">
                 <button class="emoji-button" id="channelEmojiBtn">😊</button>
                 <div class="emoji-picker" id="channelEmojiPicker" style="display: none;"></div>
               </div>
             </div>
-            <input type="file" id="channelPostMedia" accept="image/*,video/*,audio/*" style="margin:10px 0;"/>
-            <button class="btn btn-primary" id="addChannelPost" data-i18n="channel.publish">Опублікувати</button>
+            <input type="file" id="channelPostMedia" accept="image/*,video/*" style="margin:10px 0;"/>
+            <button class="btn btn-primary" id="addChannelPost">Опублікувати</button>
           </div>
         </div>
       </div>
 
       <div id="settings" class="section card">
-        <h2 data-i18n="settings.title">Налаштування</h2>
+        <h2>Налаштування</h2>
         <button class="btn" id="toggleTheme" style="margin:18px 0;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-          <span data-i18n="settings.theme">Тема</span>
+          Тема
         </button>
-        
-        <div class="language-select">
-          <label for="languageSelect" data-i18n="settings.language">Мова:</label>
-          <select id="languageSelect" class="input">
-            <option value="uk">Українська</option>
-            <option value="en">English</option>
-            <option value="es">Español</option>
-            <option value="pl">Polski</option>
-            <option value="de">Deutsch</option>
-            <option value="ru">Русский</option>
-            <option value="be">Беларуская</option>
-            <option value="cs">Čeština</option>
-            <option value="kk">Қазақша</option>
-          </select>
-        </div>
-
+        <!-- Новий пункт: TV режим -->
+        <button class="btn" id="toggleTVMode" style="margin:18px 0;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="16 21 12 17 8 21"/></svg>
+          TV режим
+        </button>
         <button class="btn" id="privacyPolicyBtn" style="margin:18px 0;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <span data-i18n="settings.privacy">Політика конфіденційності</span>
+          Політика конфіденційності
         </button>
-        <button class="btn" id="logoutBtn" data-i18n="settings.logout">Вийти</button>
+        <button class="btn" id="logoutBtn">Вийти</button>
       </div>
     </div>
   </main>
@@ -1039,51 +1037,52 @@
 <div class="modal" id="editProfileModal">
   <div class="modal-content">
     <div class="modal-header">
-      <h3 data-i18n="profile.editTitle">Редагувати профіль</h3>
+      <h3>Редагувати профіль</h3>
       <span class="modal-close" id="closeModal">&times;</span>
     </div>
-    <input type="text" id="editNickname" class="input" placeholder="Псевдонім" data-i18n-placeholder="profile.nickname"/>
-    <textarea id="editBio" class="input" placeholder="Про себе" rows="4" style="margin:14px 0;" data-i18n-placeholder="profile.bio"></textarea>
-    <button class="btn btn-primary" id="saveProfileEdit" data-i18n="profile.save">Зберегти</button>
+    <input type="text" id="editNickname" class="input" placeholder="Псевдонім"/>
+    <textarea id="editBio" class="input" placeholder="Про себе" rows="4" style="margin:14px 0;"></textarea>
+    <input type="file" id="editAvatar" accept="image/*" style="margin:14px 0;" />
+    <button class="btn btn-primary" id="saveProfileEdit">Зберегти</button>
   </div>
 </div>
 
 <div class="modal" id="createGroupModal">
   <div class="modal-content">
     <div class="modal-header">
-      <h3 data-i18n="groups.createTitle">Створити групу</h3>
+      <h3>Створити групу</h3>
       <span class="modal-close" id="closeGroupModal">&times;</span>
     </div>
-    <input type="text" id="groupName" class="input" placeholder="Назва групи" data-i18n-placeholder="groups.name"/>
-    <textarea id="groupDesc" class="input" placeholder="Опис" rows="3" style="margin:14px 0;" data-i18n-placeholder="groups.desc"></textarea>
+    <input type="text" id="groupName" class="input" placeholder="Назва групи"/>
+    <textarea id="groupDesc" class="input" placeholder="Опис" rows="3" style="margin:14px 0;"></textarea>
     <input type="file" id="groupAvatar" accept="image/*"/>
-    <button class="btn btn-primary" id="saveGroup" data-i18n="groups.createBtn">Створити</button>
+    <button class="btn btn-primary" id="saveGroup">Створити</button>
   </div>
 </div>
 
 <div class="modal" id="createChannelModal">
   <div class="modal-content">
     <div class="modal-header">
-      <h3 data-i18n="channels.createTitle">Створити канал</h3>
+      <h3>Створити канал</h3>
       <span class="modal-close" id="closeChannelModal">&times;</span>
     </div>
-    <input type="text" id="channelName" class="input" placeholder="Назва каналу" data-i18n-placeholder="channels.name"/>
-    <textarea id="channelDesc" class="input" placeholder="Опис" rows="3" style="margin:14px 0;" data-i18n-placeholder="channels.desc"></textarea>
+    <input type="text" id="channelName" class="input" placeholder="Назва каналу"/>
+    <textarea id="channelDesc" class="input" placeholder="Опис" rows="3" style="margin:14px 0;"></textarea>
     <input type="file" id="channelAvatar" accept="image/*"/>
-    <button class="btn btn-primary" id="saveChannel" data-i18n="channels.createBtn">Створити</button>
+    <button class="btn btn-primary" id="saveChannel">Створити</button>
   </div>
 </div>
 
 <div class="modal" id="groupMembersModal">
   <div class="modal-content">
     <div class="modal-header">
-      <h3 data-i18n="groups.membersTitle">Учасники групи</h3>
+      <h3>Учасники групи</h3>
       <span class="modal-close" id="closeGroupMembers">&times;</span>
     </div>
     <div id="membersList"></div>
     <div style="margin-top:20px;">
-      <input type="text" id="addMemberInput" class="input" placeholder="ID користувача (наприклад, @username)" data-i18n-placeholder="groups.addMember"/>
-      <button class="btn btn-primary" id="addMemberBtn" data-i18n="groups.addBtn">Додати</button>
+      <input type="text" id="addMemberInput" class="input" placeholder="ID користувача (наприклад, @username)"/>
+      <button class="btn btn-primary" id="addMemberBtn">Додати</button>
     </div>
   </div>
 </div>
@@ -1092,10 +1091,10 @@
 <div class="modal" id="privacyPolicyModal">
   <div class="modal-content">
     <div class="modal-header">
-      <h3 data-i18n="privacy.title">Політика конфіденційності</h3>
+      <h3>Політика конфіденційності</h3>
       <span class="modal-close" id="closePrivacyModal">&times;</span>
     </div>
-    <div style="max-height: 60vh; overflow-y: auto;" data-i18n="privacy.content">
+    <div style="max-height: 60vh; overflow-y: auto;">
       <p>Ваша конфіденційність важлива для нас. Ця політика пояснює, які дані ми збираємо, як їх використовуємо та захищаємо.</p>
       <h4>1. Які дані ми збираємо</h4>
       <p>Ми збираємо інформацію, яку ви надаєте під час реєстрації (псевдонім, email), а також дані про ваші дії на платформі (пости, лайки, повідомлення).</p>
@@ -1108,6 +1107,11 @@
       <p>Останнє оновлення: лютий 2026</p>
     </div>
   </div>
+</div>
+
+<!-- Віртуальна клавіатура для TV режиму -->
+<div class="virtual-keyboard" id="virtualKeyboard">
+  <!-- буде заповнено скриптом -->
 </div>
 
 <div id="toast"></div>
@@ -1156,552 +1160,6 @@
   let loading = false;
   let hasMore = true;
 
-  // ================= i18n =================
-  const translations = {
-    uk: {
-      'nav.home': 'Головна',
-      'nav.search': 'Пошук',
-      'nav.profile': 'Профіль',
-      'nav.chats': 'Повідомлення',
-      'nav.groups': 'Групи',
-      'nav.channels': 'Канали',
-      'nav.settings': 'Налаштування',
-      'pages.home': 'Головна',
-      'login.nickname': 'Псевдонім (без @)',
-      'login.password': 'Пароль',
-      'login.loginBtn': 'Увійти',
-      'login.noAccount': 'Немає акаунта?',
-      'login.registerLink': 'Зареєструватися',
-      'login.forgotPassword': 'Забули пароль?',
-      'register.nickname': 'Псевдонім (без @)',
-      'register.password': 'Пароль',
-      'register.registerBtn': 'Зареєструватися',
-      'register.haveAccount': 'Вже є акаунт?',
-      'register.loginLink': 'Увійти',
-      'post.placeholder': 'Що нового?',
-      'post.publish': 'Опублікувати',
-      'feed.new': 'Нові',
-      'feed.popular': 'Популярні',
-      'search.placeholder': 'Пошук за @id або ім\'ям...',
-      'chat.typing': 'друкує...',
-      'chat.placeholder': 'Напишіть повідомлення...',
-      'groups.create': 'Створити групу',
-      'groups.createText': 'Створити групу',
-      'groups.members': 'Учасники',
-      'channels.create': 'Створити канал',
-      'channels.createText': 'Створити канал',
-      'channel.postPlaceholder': 'Новий пост...',
-      'channel.publish': 'Опублікувати',
-      'settings.title': 'Налаштування',
-      'settings.theme': 'Тема',
-      'settings.language': 'Мова:',
-      'settings.privacy': 'Політика конфіденційності',
-      'settings.logout': 'Вийти',
-      'profile.editTitle': 'Редагувати профіль',
-      'profile.nickname': 'Псевдонім',
-      'profile.bio': 'Про себе',
-      'profile.save': 'Зберегти',
-      'groups.createTitle': 'Створити групу',
-      'groups.name': 'Назва групи',
-      'groups.desc': 'Опис',
-      'groups.createBtn': 'Створити',
-      'channels.createTitle': 'Створити канал',
-      'channels.name': 'Назва каналу',
-      'channels.desc': 'Опис',
-      'channels.createBtn': 'Створити',
-      'groups.membersTitle': 'Учасники групи',
-      'groups.addMember': 'ID користувача (наприклад, @username)',
-      'groups.addBtn': 'Додати',
-      'privacy.title': 'Політика конфіденційності',
-      'privacy.content': '<p>Ваша конфіденційність важлива для нас. Ця політика пояснює, які дані ми збираємо, як їх використовуємо та захищаємо.</p><h4>1. Які дані ми збираємо</h4><p>Ми збираємо інформацію, яку ви надаєте під час реєстрації (псевдонім, email), а також дані про ваші дії на платформі (пости, лайки, повідомлення).</p><h4>2. Як ми використовуємо дані</h4><p>Ваші дані використовуються для забезпечення роботи сервісу, персоналізації контенту та покращення функціоналу. Ми не передаємо ваші дані третім особам без вашої згоди.</p><h4>3. Захист даних</h4><p>Ми використовуємо сучасні методи шифрування та безпеки для захисту вашої інформації.</p><h4>4. Ваші права</h4><p>Ви можете в будь-який час видалити свій акаунт або звернутися до нас із запитом про надання інформації.</p><p>Останнє оновлення: лютий 2026</p>'
-    },
-    en: {
-      'nav.home': 'Home',
-      'nav.search': 'Search',
-      'nav.profile': 'Profile',
-      'nav.chats': 'Messages',
-      'nav.groups': 'Groups',
-      'nav.channels': 'Channels',
-      'nav.settings': 'Settings',
-      'pages.home': 'Home',
-      'login.nickname': 'Nickname (without @)',
-      'login.password': 'Password',
-      'login.loginBtn': 'Login',
-      'login.noAccount': 'No account?',
-      'login.registerLink': 'Register',
-      'login.forgotPassword': 'Forgot password?',
-      'register.nickname': 'Nickname (without @)',
-      'register.password': 'Password',
-      'register.registerBtn': 'Register',
-      'register.haveAccount': 'Already have an account?',
-      'register.loginLink': 'Login',
-      'post.placeholder': 'What\'s new?',
-      'post.publish': 'Publish',
-      'feed.new': 'New',
-      'feed.popular': 'Popular',
-      'search.placeholder': 'Search by @id or name...',
-      'chat.typing': 'typing...',
-      'chat.placeholder': 'Write a message...',
-      'groups.create': 'Create group',
-      'groups.createText': 'Create group',
-      'groups.members': 'Members',
-      'channels.create': 'Create channel',
-      'channels.createText': 'Create channel',
-      'channel.postPlaceholder': 'New post...',
-      'channel.publish': 'Publish',
-      'settings.title': 'Settings',
-      'settings.theme': 'Theme',
-      'settings.language': 'Language:',
-      'settings.privacy': 'Privacy Policy',
-      'settings.logout': 'Logout',
-      'profile.editTitle': 'Edit Profile',
-      'profile.nickname': 'Nickname',
-      'profile.bio': 'Bio',
-      'profile.save': 'Save',
-      'groups.createTitle': 'Create Group',
-      'groups.name': 'Group name',
-      'groups.desc': 'Description',
-      'groups.createBtn': 'Create',
-      'channels.createTitle': 'Create Channel',
-      'channels.name': 'Channel name',
-      'channels.desc': 'Description',
-      'channels.createBtn': 'Create',
-      'groups.membersTitle': 'Group Members',
-      'groups.addMember': 'User ID (e.g., @username)',
-      'groups.addBtn': 'Add',
-      'privacy.title': 'Privacy Policy',
-      'privacy.content': '<p>Your privacy is important to us. This policy explains what data we collect, how we use it, and how we protect it.</p><h4>1. What data we collect</h4><p>We collect information you provide during registration (nickname, email), as well as data about your actions on the platform (posts, likes, messages).</p><h4>2. How we use data</h4><p>Your data is used to provide the service, personalize content, and improve functionality. We do not share your data with third parties without your consent.</p><h4>3. Data protection</h4><p>We use modern encryption and security methods to protect your information.</p><h4>4. Your rights</h4><p>You can delete your account at any time or contact us with a request for information.</p><p>Last updated: February 2026</p>'
-    },
-    es: {
-      'nav.home': 'Inicio',
-      'nav.search': 'Buscar',
-      'nav.profile': 'Perfil',
-      'nav.chats': 'Mensajes',
-      'nav.groups': 'Grupos',
-      'nav.channels': 'Canales',
-      'nav.settings': 'Ajustes',
-      'pages.home': 'Inicio',
-      'login.nickname': 'Apodo (sin @)',
-      'login.password': 'Contraseña',
-      'login.loginBtn': 'Iniciar sesión',
-      'login.noAccount': '¿No tienes cuenta?',
-      'login.registerLink': 'Registrarse',
-      'login.forgotPassword': '¿Olvidaste tu contraseña?',
-      'register.nickname': 'Apodo (sin @)',
-      'register.password': 'Contraseña',
-      'register.registerBtn': 'Registrarse',
-      'register.haveAccount': '¿Ya tienes cuenta?',
-      'register.loginLink': 'Iniciar sesión',
-      'post.placeholder': '¿Qué hay de nuevo?',
-      'post.publish': 'Publicar',
-      'feed.new': 'Nuevos',
-      'feed.popular': 'Populares',
-      'search.placeholder': 'Buscar por @id o nombre...',
-      'chat.typing': 'escribiendo...',
-      'chat.placeholder': 'Escribe un mensaje...',
-      'groups.create': 'Crear grupo',
-      'groups.createText': 'Crear grupo',
-      'groups.members': 'Miembros',
-      'channels.create': 'Crear canal',
-      'channels.createText': 'Crear canal',
-      'channel.postPlaceholder': 'Nueva publicación...',
-      'channel.publish': 'Publicar',
-      'settings.title': 'Ajustes',
-      'settings.theme': 'Tema',
-      'settings.language': 'Idioma:',
-      'settings.privacy': 'Política de privacidad',
-      'settings.logout': 'Cerrar sesión',
-      'profile.editTitle': 'Editar perfil',
-      'profile.nickname': 'Apodo',
-      'profile.bio': 'Biografía',
-      'profile.save': 'Guardar',
-      'groups.createTitle': 'Crear grupo',
-      'groups.name': 'Nombre del grupo',
-      'groups.desc': 'Descripción',
-      'groups.createBtn': 'Crear',
-      'channels.createTitle': 'Crear canal',
-      'channels.name': 'Nombre del canal',
-      'channels.desc': 'Descripción',
-      'channels.createBtn': 'Crear',
-      'groups.membersTitle': 'Miembros del grupo',
-      'groups.addMember': 'ID de usuario (ej., @usuario)',
-      'groups.addBtn': 'Agregar',
-      'privacy.title': 'Política de privacidad',
-      'privacy.content': '<p>Tu privacidad es importante para nosotros. Esta política explica qué datos recopilamos, cómo los usamos y cómo los protegemos.</p><h4>1. Qué datos recopilamos</h4><p>Recopilamos información que proporcionas durante el registro (apodo, correo electrónico), así como datos sobre tus acciones en la plataforma (publicaciones, me gusta, mensajes).</p><h4>2. Cómo usamos los datos</h4><p>Tus datos se utilizan para proporcionar el servicio, personalizar el contenido y mejorar la funcionalidad. No compartimos tus datos con terceros sin tu consentimiento.</p><h4>3. Protección de datos</h4><p>Usamos métodos modernos de cifrado y seguridad para proteger tu información.</p><h4>4. Tus derechos</h4><p>Puedes eliminar tu cuenta en cualquier momento o contactarnos para solicitar información.</p><p>Última actualización: febrero de 2026</p>'
-    },
-    pl: {
-      'nav.home': 'Strona główna',
-      'nav.search': 'Szukaj',
-      'nav.profile': 'Profil',
-      'nav.chats': 'Wiadomości',
-      'nav.groups': 'Grupy',
-      'nav.channels': 'Kanały',
-      'nav.settings': 'Ustawienia',
-      'pages.home': 'Strona główna',
-      'login.nickname': 'Pseudonim (bez @)',
-      'login.password': 'Hasło',
-      'login.loginBtn': 'Zaloguj się',
-      'login.noAccount': 'Nie masz konta?',
-      'login.registerLink': 'Zarejestruj się',
-      'login.forgotPassword': 'Zapomniałeś hasła?',
-      'register.nickname': 'Pseudonim (bez @)',
-      'register.password': 'Hasło',
-      'register.registerBtn': 'Zarejestruj się',
-      'register.haveAccount': 'Masz już konto?',
-      'register.loginLink': 'Zaloguj się',
-      'post.placeholder': 'Co nowego?',
-      'post.publish': 'Opublikuj',
-      'feed.new': 'Nowe',
-      'feed.popular': 'Popularne',
-      'search.placeholder': 'Szukaj po @id lub nazwie...',
-      'chat.typing': 'pisze...',
-      'chat.placeholder': 'Napisz wiadomość...',
-      'groups.create': 'Utwórz grupę',
-      'groups.createText': 'Utwórz grupę',
-      'groups.members': 'Członkowie',
-      'channels.create': 'Utwórz kanał',
-      'channels.createText': 'Utwórz kanał',
-      'channel.postPlaceholder': 'Nowy post...',
-      'channel.publish': 'Opublikuj',
-      'settings.title': 'Ustawienia',
-      'settings.theme': 'Motyw',
-      'settings.language': 'Język:',
-      'settings.privacy': 'Polityka prywatności',
-      'settings.logout': 'Wyloguj się',
-      'profile.editTitle': 'Edytuj profil',
-      'profile.nickname': 'Pseudonim',
-      'profile.bio': 'Bio',
-      'profile.save': 'Zapisz',
-      'groups.createTitle': 'Utwórz grupę',
-      'groups.name': 'Nazwa grupy',
-      'groups.desc': 'Opis',
-      'groups.createBtn': 'Utwórz',
-      'channels.createTitle': 'Utwórz kanał',
-      'channels.name': 'Nazwa kanału',
-      'channels.desc': 'Opis',
-      'channels.createBtn': 'Utwórz',
-      'groups.membersTitle': 'Członkowie grupy',
-      'groups.addMember': 'ID użytkownika (np. @nazwa)',
-      'groups.addBtn': 'Dodaj',
-      'privacy.title': 'Polityka prywatności',
-      'privacy.content': '<p>Twoja prywatność jest dla nas ważna. Niniejsza polityka wyjaśnia, jakie dane zbieramy, jak je wykorzystujemy i jak je chronimy.</p><h4>1. Jakie dane zbieramy</h4><p>Zbieramy informacje podawane podczas rejestracji (pseudonim, e-mail) oraz dane dotyczące Twoich działań na platformie (posty, polubienia, wiadomości).</p><h4>2. Jak wykorzystujemy dane</h4><p>Twoje dane są wykorzystywane do świadczenia usługi, personalizacji treści i ulepszania funkcjonalności. Nie udostępniamy Twoich danych osobom trzecim bez Twojej zgody.</p><h4>3. Ochrona danych</h4><p>Stosujemy nowoczesne metody szyfrowania i zabezpieczeń, aby chronić Twoje informacje.</p><h4>4. Twoje prawa</h4><p>Możesz w każdej chwili usunąć swoje konto lub skontaktować się z nami z prośbą o udostępnienie informacji.</p><p>Ostatnia aktualizacja: luty 2026</p>'
-    },
-    de: {
-      'nav.home': 'Startseite',
-      'nav.search': 'Suche',
-      'nav.profile': 'Profil',
-      'nav.chats': 'Nachrichten',
-      'nav.groups': 'Gruppen',
-      'nav.channels': 'Kanäle',
-      'nav.settings': 'Einstellungen',
-      'pages.home': 'Startseite',
-      'login.nickname': 'Spitzname (ohne @)',
-      'login.password': 'Passwort',
-      'login.loginBtn': 'Anmelden',
-      'login.noAccount': 'Kein Konto?',
-      'login.registerLink': 'Registrieren',
-      'login.forgotPassword': 'Passwort vergessen?',
-      'register.nickname': 'Spitzname (ohne @)',
-      'register.password': 'Passwort',
-      'register.registerBtn': 'Registrieren',
-      'register.haveAccount': 'Bereits ein Konto?',
-      'register.loginLink': 'Anmelden',
-      'post.placeholder': 'Was gibt\'s Neues?',
-      'post.publish': 'Veröffentlichen',
-      'feed.new': 'Neu',
-      'feed.popular': 'Beliebt',
-      'search.placeholder': 'Suche nach @id oder Name...',
-      'chat.typing': 'tippt...',
-      'chat.placeholder': 'Nachricht schreiben...',
-      'groups.create': 'Gruppe erstellen',
-      'groups.createText': 'Gruppe erstellen',
-      'groups.members': 'Mitglieder',
-      'channels.create': 'Kanal erstellen',
-      'channels.createText': 'Kanal erstellen',
-      'channel.postPlaceholder': 'Neuer Beitrag...',
-      'channel.publish': 'Veröffentlichen',
-      'settings.title': 'Einstellungen',
-      'settings.theme': 'Design',
-      'settings.language': 'Sprache:',
-      'settings.privacy': 'Datenschutzrichtlinie',
-      'settings.logout': 'Abmelden',
-      'profile.editTitle': 'Profil bearbeiten',
-      'profile.nickname': 'Spitzname',
-      'profile.bio': 'Bio',
-      'profile.save': 'Speichern',
-      'groups.createTitle': 'Gruppe erstellen',
-      'groups.name': 'Gruppenname',
-      'groups.desc': 'Beschreibung',
-      'groups.createBtn': 'Erstellen',
-      'channels.createTitle': 'Kanal erstellen',
-      'channels.name': 'Kanalname',
-      'channels.desc': 'Beschreibung',
-      'channels.createBtn': 'Erstellen',
-      'groups.membersTitle': 'Gruppenmitglieder',
-      'groups.addMember': 'Benutzer-ID (z.B. @benutzername)',
-      'groups.addBtn': 'Hinzufügen',
-      'privacy.title': 'Datenschutzrichtlinie',
-      'privacy.content': '<p>Ihre Privatsphäre ist uns wichtig. Diese Richtlinie erklärt, welche Daten wir sammeln, wie wir sie verwenden und schützen.</p><h4>1. Welche Daten wir sammeln</h4><p>Wir sammeln Informationen, die Sie bei der Registrierung angeben (Spitzname, E-Mail), sowie Daten über Ihre Aktivitäten auf der Plattform (Beiträge, Likes, Nachrichten).</p><h4>2. Wie wir Daten verwenden</h4><p>Ihre Daten werden verwendet, um den Dienst bereitzustellen, Inhalte zu personalisieren und die Funktionalität zu verbessern. Wir geben Ihre Daten nicht ohne Ihre Zustimmung an Dritte weiter.</p><h4>3. Datenschutz</h4><p>Wir verwenden moderne Verschlüsselungs- und Sicherheitsmethoden, um Ihre Informationen zu schützen.</p><h4>4. Ihre Rechte</h4><p>Sie können Ihr Konto jederzeit löschen oder uns mit einer Anfrage nach Informationen kontaktieren.</p><p>Letzte Aktualisierung: Februar 2026</p>'
-    },
-    ru: {
-      'nav.home': 'Главная',
-      'nav.search': 'Поиск',
-      'nav.profile': 'Профиль',
-      'nav.chats': 'Сообщения',
-      'nav.groups': 'Группы',
-      'nav.channels': 'Каналы',
-      'nav.settings': 'Настройки',
-      'pages.home': 'Главная',
-      'login.nickname': 'Псевдоним (без @)',
-      'login.password': 'Пароль',
-      'login.loginBtn': 'Войти',
-      'login.noAccount': 'Нет аккаунта?',
-      'login.registerLink': 'Зарегистрироваться',
-      'login.forgotPassword': 'Забыли пароль?',
-      'register.nickname': 'Псевдоним (без @)',
-      'register.password': 'Пароль',
-      'register.registerBtn': 'Зарегистрироваться',
-      'register.haveAccount': 'Уже есть аккаунт?',
-      'register.loginLink': 'Войти',
-      'post.placeholder': 'Что нового?',
-      'post.publish': 'Опубликовать',
-      'feed.new': 'Новые',
-      'feed.popular': 'Популярные',
-      'search.placeholder': 'Поиск по @id или имени...',
-      'chat.typing': 'печатает...',
-      'chat.placeholder': 'Напишите сообщение...',
-      'groups.create': 'Создать группу',
-      'groups.createText': 'Создать группу',
-      'groups.members': 'Участники',
-      'channels.create': 'Создать канал',
-      'channels.createText': 'Создать канал',
-      'channel.postPlaceholder': 'Новый пост...',
-      'channel.publish': 'Опубликовать',
-      'settings.title': 'Настройки',
-      'settings.theme': 'Тема',
-      'settings.language': 'Язык:',
-      'settings.privacy': 'Политика конфиденциальности',
-      'settings.logout': 'Выйти',
-      'profile.editTitle': 'Редактировать профиль',
-      'profile.nickname': 'Псевдоним',
-      'profile.bio': 'О себе',
-      'profile.save': 'Сохранить',
-      'groups.createTitle': 'Создать группу',
-      'groups.name': 'Название группы',
-      'groups.desc': 'Описание',
-      'groups.createBtn': 'Создать',
-      'channels.createTitle': 'Создать канал',
-      'channels.name': 'Название канала',
-      'channels.desc': 'Описание',
-      'channels.createBtn': 'Создать',
-      'groups.membersTitle': 'Участники группы',
-      'groups.addMember': 'ID пользователя (например, @username)',
-      'groups.addBtn': 'Добавить',
-      'privacy.title': 'Политика конфиденциальности',
-      'privacy.content': '<p>Ваша конфиденциальность важна для нас. Эта политика объясняет, какие данные мы собираем, как их используем и защищаем.</p><h4>1. Какие данные мы собираем</h4><p>Мы собираем информацию, которую вы предоставляете при регистрации (псевдоним, email), а также данные о ваших действиях на платформе (посты, лайки, сообщения).</p><h4>2. Как мы используем данные</h4><p>Ваши данные используются для обеспечения работы сервиса, персонализации контента и улучшения функционала. Мы не передаем ваши данные третьим лицам без вашего согласия.</p><h4>3. Защита данных</h4><p>Мы используем современные методы шифрования и безопасности для защиты вашей информации.</p><h4>4. Ваши права</h4><p>Вы можете в любое время удалить свой аккаунт или обратиться к нам с запросом о предоставлении информации.</p><p>Последнее обновление: февраль 2026</p>'
-    },
-    be: {
-      'nav.home': 'Галоўная',
-      'nav.search': 'Пошук',
-      'nav.profile': 'Профіль',
-      'nav.chats': 'Паведамленні',
-      'nav.groups': 'Групы',
-      'nav.channels': 'Каналы',
-      'nav.settings': 'Налады',
-      'pages.home': 'Галоўная',
-      'login.nickname': 'Псеўданім (без @)',
-      'login.password': 'Пароль',
-      'login.loginBtn': 'Увайсці',
-      'login.noAccount': 'Няма акаўнта?',
-      'login.registerLink': 'Зарэгістравацца',
-      'login.forgotPassword': 'Забылі пароль?',
-      'register.nickname': 'Псеўданім (без @)',
-      'register.password': 'Пароль',
-      'register.registerBtn': 'Зарэгістравацца',
-      'register.haveAccount': 'Ужо ёсць акаўнт?',
-      'register.loginLink': 'Увайсці',
-      'post.placeholder': 'Што новага?',
-      'post.publish': 'Апублікаваць',
-      'feed.new': 'Новыя',
-      'feed.popular': 'Папулярныя',
-      'search.placeholder': 'Пошук па @id або імені...',
-      'chat.typing': 'друкуе...',
-      'chat.placeholder': 'Напішыце паведамленне...',
-      'groups.create': 'Стварыць групу',
-      'groups.createText': 'Стварыць групу',
-      'groups.members': 'Удзельнікі',
-      'channels.create': 'Стварыць канал',
-      'channels.createText': 'Стварыць канал',
-      'channel.postPlaceholder': 'Новы пост...',
-      'channel.publish': 'Апублікаваць',
-      'settings.title': 'Налады',
-      'settings.theme': 'Тэма',
-      'settings.language': 'Мова:',
-      'settings.privacy': 'Палітыка прыватнасці',
-      'settings.logout': 'Выйсці',
-      'profile.editTitle': 'Рэдагаваць профіль',
-      'profile.nickname': 'Псеўданім',
-      'profile.bio': 'Пра сябе',
-      'profile.save': 'Захаваць',
-      'groups.createTitle': 'Стварыць групу',
-      'groups.name': 'Назва групы',
-      'groups.desc': 'Апісанне',
-      'groups.createBtn': 'Стварыць',
-      'channels.createTitle': 'Стварыць канал',
-      'channels.name': 'Назва канала',
-      'channels.desc': 'Апісанне',
-      'channels.createBtn': 'Стварыць',
-      'groups.membersTitle': 'Удзельнікі групы',
-      'groups.addMember': 'ID карыстальніка (напрыклад, @username)',
-      'groups.addBtn': 'Дадаць',
-      'privacy.title': 'Палітыка прыватнасці',
-      'privacy.content': '<p>Ваша канфідэнцыяльнасць важная для нас. Гэтая палітыка тлумачыць, якія даныя мы збіраем, як іх выкарыстоўваем і абараняем.</p><h4>1. Якія даныя мы збіраем</h4><p>Мы збіраем інфармацыю, якую вы прадастаўляеце падчас рэгістрацыі (псеўданім, email), а таксама даныя аб вашых дзеяннях на платформе (пасты, лайкі, паведамленні).</p><h4>2. Як мы выкарыстоўваем даныя</h4><p>Вашы даныя выкарыстоўваюцца для забеспячэння працы сэрвісу, персаналізацыі кантэнту і паляпшэння функцыяналу. Мы не перадаем вашы даныя трэцім асобам без вашай згоды.</p><h4>3. Абарона даных</h4><p>Мы выкарыстоўваем сучасныя метады шыфравання і бяспекі для абароны вашай інфармацыі.</p><h4>4. Вашы правы</h4><p>Вы можаце ў любы час выдаліць свой акаўнт або звярнуцца да нас з запытам аб прадастаўленні інфармацыі.</p><p>Апошняе абнаўленне: люты 2026</p>'
-    },
-    cs: {
-      'nav.home': 'Domů',
-      'nav.search': 'Hledat',
-      'nav.profile': 'Profil',
-      'nav.chats': 'Zprávy',
-      'nav.groups': 'Skupiny',
-      'nav.channels': 'Kanály',
-      'nav.settings': 'Nastavení',
-      'pages.home': 'Domů',
-      'login.nickname': 'Přezdívka (bez @)',
-      'login.password': 'Heslo',
-      'login.loginBtn': 'Přihlásit se',
-      'login.noAccount': 'Nemáte účet?',
-      'login.registerLink': 'Registrovat se',
-      'login.forgotPassword': 'Zapomněli jste heslo?',
-      'register.nickname': 'Přezdívka (bez @)',
-      'register.password': 'Heslo',
-      'register.registerBtn': 'Registrovat se',
-      'register.haveAccount': 'Již máte účet?',
-      'register.loginLink': 'Přihlásit se',
-      'post.placeholder': 'Co je nového?',
-      'post.publish': 'Zveřejnit',
-      'feed.new': 'Nové',
-      'feed.popular': 'Populární',
-      'search.placeholder': 'Hledat podle @id nebo jména...',
-      'chat.typing': 'píše...',
-      'chat.placeholder': 'Napište zprávu...',
-      'groups.create': 'Vytvořit skupinu',
-      'groups.createText': 'Vytvořit skupinu',
-      'groups.members': 'Členové',
-      'channels.create': 'Vytvořit kanál',
-      'channels.createText': 'Vytvořit kanál',
-      'channel.postPlaceholder': 'Nový příspěvek...',
-      'channel.publish': 'Zveřejnit',
-      'settings.title': 'Nastavení',
-      'settings.theme': 'Motiv',
-      'settings.language': 'Jazyk:',
-      'settings.privacy': 'Zásady ochrany osobních údajů',
-      'settings.logout': 'Odhlásit se',
-      'profile.editTitle': 'Upravit profil',
-      'profile.nickname': 'Přezdívka',
-      'profile.bio': 'O mně',
-      'profile.save': 'Uložit',
-      'groups.createTitle': 'Vytvořit skupinu',
-      'groups.name': 'Název skupiny',
-      'groups.desc': 'Popis',
-      'groups.createBtn': 'Vytvořit',
-      'channels.createTitle': 'Vytvořit kanál',
-      'channels.name': 'Název kanálu',
-      'channels.desc': 'Popis',
-      'channels.createBtn': 'Vytvořit',
-      'groups.membersTitle': 'Členové skupiny',
-      'groups.addMember': 'ID uživatele (např. @uživatel)',
-      'groups.addBtn': 'Přidat',
-      'privacy.title': 'Zásady ochrany osobních údajů',
-      'privacy.content': '<p>Vaše soukromí je pro nás důležité. Tyto zásady vysvětlují, jaké údaje shromažďujeme, jak je používáme a chráníme.</p><h4>1. Jaké údaje shromažďujeme</h4><p>Shromažďujeme informace, které poskytujete při registraci (přezdívka, e-mail), a také údaje o vašich aktivitách na platformě (příspěvky, lajky, zprávy).</p><h4>2. Jak používáme údaje</h4><p>Vaše údaje jsou používány k poskytování služby, personalizaci obsahu a zlepšování funkcí. Vaše údaje nesdílíme s třetími stranami bez vašeho souhlasu.</p><h4>3. Ochrana údajů</h4><p>Používáme moderní metody šifrování a zabezpečení k ochraně vašich informací.</p><h4>4. Vaše práva</h4><p>Svůj účet můžete kdykoli smazat nebo nás kontaktovat s žádostí o poskytnutí informací.</p><p>Poslední aktualizace: únor 2026</p>'
-    },
-    kk: {
-      'nav.home': 'Басты бет',
-      'nav.search': 'Іздеу',
-      'nav.profile': 'Профиль',
-      'nav.chats': 'Хабарламалар',
-      'nav.groups': 'Топтар',
-      'nav.channels': 'Арналар',
-      'nav.settings': 'Баптаулар',
-      'pages.home': 'Басты бет',
-      'login.nickname': 'Лақап ат (@-сіз)',
-      'login.password': 'Құпия сөз',
-      'login.loginBtn': 'Кіру',
-      'login.noAccount': 'Аккаунт жоқ па?',
-      'login.registerLink': 'Тіркелу',
-      'login.forgotPassword': 'Құпия сөзді ұмыттыңыз ба?',
-      'register.nickname': 'Лақап ат (@-сіз)',
-      'register.password': 'Құпия сөз',
-      'register.registerBtn': 'Тіркелу',
-      'register.haveAccount': 'Аккаунтыңыз бар ма?',
-      'register.loginLink': 'Кіру',
-      'post.placeholder': 'Не жаңалық?',
-      'post.publish': 'Жариялау',
-      'feed.new': 'Жаңа',
-      'feed.popular': 'Танымал',
-      'search.placeholder': '@id немесе аты бойынша іздеу...',
-      'chat.typing': 'теруде...',
-      'chat.placeholder': 'Хабарлама жазыңыз...',
-      'groups.create': 'Топ құру',
-      'groups.createText': 'Топ құру',
-      'groups.members': 'Қатысушылар',
-      'channels.create': 'Арна құру',
-      'channels.createText': 'Арна құру',
-      'channel.postPlaceholder': 'Жаңа пост...',
-      'channel.publish': 'Жариялау',
-      'settings.title': 'Баптаулар',
-      'settings.theme': 'Тақырып',
-      'settings.language': 'Тіл:',
-      'settings.privacy': 'Құпиялылық саясаты',
-      'settings.logout': 'Шығу',
-      'profile.editTitle': 'Профильді өңдеу',
-      'profile.nickname': 'Лақап ат',
-      'profile.bio': 'Өзім туралы',
-      'profile.save': 'Сақтау',
-      'groups.createTitle': 'Топ құру',
-      'groups.name': 'Топ атауы',
-      'groups.desc': 'Сипаттама',
-      'groups.createBtn': 'Құру',
-      'channels.createTitle': 'Арна құру',
-      'channels.name': 'Арна атауы',
-      'channels.desc': 'Сипаттама',
-      'channels.createBtn': 'Құру',
-      'groups.membersTitle': 'Топ мүшелері',
-      'groups.addMember': 'Пайдаланушы ID (мысалы, @username)',
-      'groups.addBtn': 'Қосу',
-      'privacy.title': 'Құпиялылық саясаты',
-      'privacy.content': '<p>Сіздің құпиялылығыңыз біз үшін маңызды. Бұл саясат қандай деректерді жинайтынымызды, оларды қалай пайдаланатынымызды және қорғайтынымызды түсіндіреді.</p><h4>1. Біз қандай деректерді жинаймыз</h4><p>Біз тіркеу кезінде сіз ұсынатын ақпаратты (лақап ат, email), сондай-ақ платформадағы әрекеттеріңіз туралы деректерді (посттар, лайктар, хабарламалар) жинаймыз.</p><h4>2. Деректерді қалай пайдаланамыз</h4><p>Сіздің деректеріңіз қызметті қамтамасыз ету, мазмұнды теңшеу және функционалдылықты жақсарту үшін пайдаланылады. Біз сіздің келісіміңізсіз деректеріңізді үшінші тұлғаларға бермейміз.</p><h4>3. Деректерді қорғау</h4><p>Біз ақпаратыңызды қорғау үшін заманауи шифрлау және қауіпсіздік әдістерін қолданамыз.</p><h4>4. Сіздің құқықтарыңыз</h4><p>Сіз кез келген уақытта аккаунтыңызды жоя аласыз немесе ақпарат беру туралы сұраумен бізге хабарласа аласыз.</p><p>Соңғы жаңарту: ақпан 2026</p>'
-    }
-  };
-
-  let currentLanguage = localStorage.getItem('language') || 'uk';
-
-  function applyLanguage(lang) {
-    const elements = document.querySelectorAll('[data-i18n]');
-    elements.forEach(el => {
-      const key = el.getAttribute('data-i18n');
-      if (translations[lang] && translations[lang][key]) {
-        el.textContent = translations[lang][key];
-      }
-    });
-    const placeholders = document.querySelectorAll('[data-i18n-placeholder]');
-    placeholders.forEach(el => {
-      const key = el.getAttribute('data-i18n-placeholder');
-      if (translations[lang] && translations[lang][key]) {
-        el.placeholder = translations[lang][key];
-      }
-    });
-    // Оновлюємо сторінку title
-    const pageTitle = document.getElementById('pageTitle');
-    if (pageTitle && translations[lang]['pages.home']) {
-      pageTitle.textContent = translations[lang]['pages.home'];
-    }
-    // privacy modal content
-    const privacyContent = document.querySelector('#privacyPolicyModal [data-i18n="privacy.content"]');
-    if (privacyContent && translations[lang]['privacy.content']) {
-      privacyContent.innerHTML = translations[lang]['privacy.content'];
-    }
-  }
-
   // ================= Допоміжні функції =================
   const showToast = (msg) => {
     const toast = document.getElementById('toast');
@@ -1745,11 +1203,7 @@
       item.classList.add('active');
       sections.forEach(s => document.getElementById(s).classList.remove('active'));
       document.getElementById(section).classList.add('active');
-      const pageTitle = document.getElementById('pageTitle');
-      if (pageTitle) {
-        const key = 'pages.' + section;
-        pageTitle.textContent = translations[currentLanguage][key] || section;
-      }
+      document.getElementById('pageTitle').textContent = item.textContent.trim();
       
       // Завантаження відповідних даних
       if (section === 'home') resetPagination();
@@ -1806,6 +1260,122 @@
         picker.style.display = 'none';
       }
     });
+  }
+
+  // ================= Віртуальна клавіатура для TV режиму =================
+  const keyboardElement = document.getElementById('virtualKeyboard');
+  let activeInput = null;
+  let tvModeEnabled = localStorage.getItem('tvMode') === 'true';
+
+  // Створюємо клавіатуру
+  function buildKeyboard() {
+    const keys = [
+      ['q','w','e','r','t','y','u','i','o','p'],
+      ['a','s','d','f','g','h','j','k','l'],
+      ['z','x','c','v','b','n','m'],
+      ['1','2','3','4','5','6','7','8','9','0'],
+      [' ']
+    ];
+    keyboardElement.innerHTML = '';
+    keys.forEach(row => {
+      const rowDiv = document.createElement('div');
+      rowDiv.className = 'keyboard-row';
+      row.forEach(key => {
+        const keyDiv = document.createElement('div');
+        keyDiv.className = 'key';
+        if (key === ' ') keyDiv.classList.add('special');
+        keyDiv.textContent = key === ' ' ? '␣' : key;
+        keyDiv.dataset.key = key;
+        keyDiv.addEventListener('click', () => {
+          if (activeInput) {
+            if (key === ' ') {
+              activeInput.value += ' ';
+            } else {
+              activeInput.value += key;
+            }
+            activeInput.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        });
+        rowDiv.appendChild(keyDiv);
+      });
+      keyboardElement.appendChild(rowDiv);
+    });
+    // Додаємо спеціальні клавіші
+    const specialRow = document.createElement('div');
+    specialRow.className = 'keyboard-row';
+    const backspace = document.createElement('div');
+    backspace.className = 'key special';
+    backspace.textContent = '⌫';
+    backspace.addEventListener('click', () => {
+      if (activeInput) {
+        activeInput.value = activeInput.value.slice(0, -1);
+        activeInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    });
+    const enter = document.createElement('div');
+    enter.className = 'key special';
+    enter.textContent = '⏎';
+    enter.addEventListener('click', () => {
+      if (activeInput) {
+        // Для textarea додаємо новий рядок, для input – імітуємо Enter
+        if (activeInput.tagName === 'TEXTAREA') {
+          activeInput.value += '\n';
+        } else {
+          // Для простих полів можна відправити форму, але тут просто знімемо фокус
+          activeInput.blur();
+        }
+        activeInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    });
+    const done = document.createElement('div');
+    done.className = 'key special';
+    done.textContent = 'Готово';
+    done.addEventListener('click', () => {
+      if (activeInput) activeInput.blur();
+    });
+    specialRow.appendChild(backspace);
+    specialRow.appendChild(enter);
+    specialRow.appendChild(done);
+    keyboardElement.appendChild(specialRow);
+  }
+  buildKeyboard();
+
+  // Відстежуємо фокус на всіх input/textarea
+  document.addEventListener('focusin', (e) => {
+    if (tvModeEnabled && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+      activeInput = e.target;
+      keyboardElement.classList.add('active');
+    }
+  });
+  document.addEventListener('focusout', (e) => {
+    if (tvModeEnabled && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+      // Даємо час на клік по клавіатурі
+      setTimeout(() => {
+        if (!keyboardElement.contains(document.activeElement)) {
+          activeInput = null;
+          keyboardElement.classList.remove('active');
+        }
+      }, 200);
+    }
+  });
+
+  // Кнопка TV режиму в налаштуваннях
+  document.getElementById('toggleTVMode').addEventListener('click', () => {
+    tvModeEnabled = !tvModeEnabled;
+    localStorage.setItem('tvMode', tvModeEnabled);
+    if (tvModeEnabled) {
+      document.body.classList.add('tv-mode');
+    } else {
+      document.body.classList.remove('tv-mode');
+      keyboardElement.classList.remove('active');
+      activeInput = null;
+    }
+    showToast(tvModeEnabled ? 'TV режим увімкнено' : 'TV режим вимкнено');
+  });
+
+  // Ініціалізація TV режиму при завантаженні
+  if (tvModeEnabled) {
+    document.body.classList.add('tv-mode');
   }
 
   // ================= Авторизація =================
@@ -2008,15 +1578,6 @@
     loadMorePosts();
   }
 
-  // Функція завантаження медіа
-  async function uploadMedia(file, pathPrefix) {
-    const storageRef = ref(storage, `${pathPrefix}/${Date.now()}_${file.name}`);
-    await uploadBytes(storageRef, file);
-    const url = await getDownloadURL(storageRef);
-    const type = file.type.split('/')[0]; // 'image', 'video', 'audio'
-    return { url, type };
-  }
-
   document.getElementById('addPost').onclick = async () => {
     if (!currentUser) return alert('Увійдіть');
     const text = document.getElementById('postText').value.trim();
@@ -2025,9 +1586,10 @@
     try {
       let mediaUrl = '', mediaType = '';
       if (file) {
-        const uploaded = await uploadMedia(file, `posts/${currentUser.uid}`);
-        mediaUrl = uploaded.url;
-        mediaType = uploaded.type;
+        const storageRef = ref(storage, `posts/${currentUser.uid}/${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        mediaUrl = await getDownloadURL(storageRef);
+        mediaType = file.type.split('/')[0];
       }
       const userSnap = await getDoc(doc(db, "users", currentUser.uid));
       const userData = userSnap.data();
@@ -2128,18 +1690,6 @@
       const postEl = document.createElement('div');
       postEl.className = 'post';
       postEl.dataset.postId = post.id;
-      
-      let mediaHtml = '';
-      if (post.mediaUrl) {
-        if (post.mediaType === 'image') {
-          mediaHtml = `<img src="${post.mediaUrl}" class="post-media" loading="lazy">`;
-        } else if (post.mediaType === 'video') {
-          mediaHtml = `<video src="${post.mediaUrl}" controls class="post-media"></video>`;
-        } else if (post.mediaType === 'audio') {
-          mediaHtml = `<audio src="${post.mediaUrl}" controls class="post-media"></audio>`;
-        }
-      }
-
       postEl.innerHTML = `
         <div class="post-header">
           <div class="avatar" style="background-image:url(${post.authorAvatar || ''})" data-uid="${post.author}"></div>
@@ -2149,7 +1699,7 @@
           </div>
         </div>
         <div class="post-content">${post.text || ''}</div>
-        ${mediaHtml}
+        ${post.mediaUrl ? (post.mediaType==='image' ? `<img src="${post.mediaUrl}" class="post-media" loading="lazy">` : `<video src="${post.mediaUrl}" controls class="post-media"></video>`) : ''}
         <div class="post-footer">
           <button class="like-btn ${liked ? 'liked' : ''}" data-post-id="${post.id}">
             <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
@@ -2217,7 +1767,7 @@
     });
   }
 
-  // ================= Пошук =================
+  // ================= Пошук (додано кнопку "Написати") =================
   async function loadSearchUsers() {
     if (!currentUser) return;
     const val = document.getElementById('searchInput').value.trim().toLowerCase();
@@ -2248,11 +1798,16 @@
           <div class="chat-last">${data.userId}</div>
         </div>
         <button class="btn follow-btn">${isFollowing ? 'Відписатися' : 'Підписатися'}</button>
+        <button class="btn message-btn">Написати</button>
       `;
       div.querySelector('.follow-btn').onclick = async (e) => {
         e.stopPropagation();
         await toggleFollow(uid);
         loadSearchUsers();
+      };
+      div.querySelector('.message-btn').onclick = (e) => {
+        e.stopPropagation();
+        openChat(data.nickname, uid, data.userId);
       };
       div.onclick = () => viewProfile(uid);
       userList.appendChild(div);
@@ -2311,10 +1866,10 @@
         ${!isOwn && currentUser ? `
           <div style="display:flex; gap:10px; margin-top:10px;">
             <button class="btn" id="profileFollowBtn">${isFollowing ? 'Відписатися' : 'Підписатися'}</button>
-            <button class="btn" id="profileMessageBtn">${translations[currentLanguage]['nav.chats'] || 'Написати'}</button>
+            <button class="btn" id="profileMessageBtn">Написати</button>
           </div>
         ` : ''}
-        ${isOwn ? '<button class="btn" id="editProfileBtn">' + (translations[currentLanguage]['profile.editTitle'] || 'Редагувати') + '</button>' : ''}
+        ${isOwn ? '<button class="btn" id="editProfileBtn">Редагувати</button>' : ''}
       </div>
     `;
     if (!isOwn && currentUser) {
@@ -2330,14 +1885,15 @@
       document.getElementById('editProfileBtn').onclick = () => {
         document.getElementById('editNickname').value = data.nickname;
         document.getElementById('editBio').value = data.bio || '';
+        document.getElementById('editAvatar').value = '';
         document.getElementById('editProfileModal').classList.add('active');
       };
     }
     
     const tabs = document.getElementById('profileTabs');
     tabs.innerHTML = `
-      <div class="profile-tab active" data-tab="posts">${translations[currentLanguage]['feed.new'] || 'Пости'}</div>
-      <div class="profile-tab" data-tab="likes">${translations[currentLanguage]['feed.popular'] || 'Лайки'}</div>
+      <div class="profile-tab active" data-tab="posts">Пости</div>
+      <div class="profile-tab" data-tab="likes">Лайки</div>
       <div class="profile-tab" data-tab="media">Медіа</div>
       <div class="profile-tab" data-tab="saved">Збережене</div>
     `;
@@ -2396,15 +1952,37 @@
     if (!currentUser) return;
     const nickname = document.getElementById('editNickname').value.trim();
     const bio = document.getElementById('editBio').value.trim();
+    const avatarFile = document.getElementById('editAvatar').files[0];
     if (!nickname) return alert('Псевдонім обов’язковий');
+    
     const newUserId = `@${nickname.toLowerCase()}`;
     const q = query(collection(db, "users"), where("userId", "==", newUserId));
     const snap = await getDocs(q);
     if (!snap.empty && snap.docs[0].id !== currentUser.uid) return alert('Цей ID вже зайнятий');
-    await updateDoc(doc(db, "users", currentUser.uid), { nickname, userId: newUserId, nickname_lower: nickname.toLowerCase(), bio });
-    loadMyProfile();
-    document.getElementById('editProfileModal').classList.remove('active');
-    showToast('Профіль оновлено');
+    
+    try {
+      let avatarUrl;
+      if (avatarFile) {
+        const storageRef = ref(storage, `avatars/${currentUser.uid}/${Date.now()}_${avatarFile.name}`);
+        await uploadBytes(storageRef, avatarFile);
+        avatarUrl = await getDownloadURL(storageRef);
+      }
+      
+      const updateData = { 
+        nickname, 
+        userId: newUserId, 
+        nickname_lower: nickname.toLowerCase(), 
+        bio 
+      };
+      if (avatarUrl) updateData.avatar = avatarUrl;
+      
+      await updateDoc(doc(db, "users", currentUser.uid), updateData);
+      loadMyProfile();
+      document.getElementById('editProfileModal').classList.remove('active');
+      showToast('Профіль оновлено');
+    } catch (e) {
+      showToast('Помилка: ' + e.message);
+    }
   };
 
   // ================= Чати =================
@@ -2518,17 +2096,8 @@
       snap.forEach(m => {
         const msg = m.data();
         const div = document.createElement('div');
-        div.className = `message ${msg.from === currentUser.uid ? 'sent' : 'received'} ${msg.mediaUrl ? 'media' : ''}`;
-        if (msg.text) div.textContent = msg.text;
-        if (msg.mediaUrl) {
-          if (msg.mediaType === 'image') {
-            div.innerHTML += `<img src="${msg.mediaUrl}" class="message-media">`;
-          } else if (msg.mediaType === 'video') {
-            div.innerHTML += `<video src="${msg.mediaUrl}" controls class="message-media"></video>`;
-          } else if (msg.mediaType === 'audio') {
-            div.innerHTML += `<audio src="${msg.mediaUrl}" controls class="message-media"></audio>`;
-          }
-        }
+        div.className = `message ${msg.from === currentUser.uid ? 'sent' : 'received'}`;
+        div.textContent = msg.text;
         messages.appendChild(div);
       });
       messages.scrollTop = messages.scrollHeight;
@@ -2554,39 +2123,20 @@
 
   document.getElementById('sendMessage').onclick = async () => {
     const text = document.getElementById('chatText').value.trim();
-    const file = document.getElementById('chatMedia').files[0];
-    if (!text && !file) return;
-    if (!currentUser || !currentChatPartner) return;
-
-    try {
-      let mediaUrl = '', mediaType = '';
-      if (file) {
-        const uploaded = await uploadMedia(file, `chat/${currentUser.uid}`);
-        mediaUrl = uploaded.url;
-        mediaType = uploaded.type;
-      }
-
-      const chatId = getChatId(currentUser.uid, currentChatPartner);
-      const chatRef = doc(db, "chats", chatId);
-      const messageRef = collection(db, `chats/${chatId}/messages`);
-      await addDoc(messageRef, { 
-        from: currentUser.uid, 
-        text, 
-        mediaUrl, 
-        mediaType,
-        createdAt: serverTimestamp() 
-      });
-      await updateDoc(chatRef, {
-        lastMessage: text || 'Медіа',
-        updatedAt: serverTimestamp(),
-        [`unread.${currentChatPartner}`]: increment(1)
-      });
-      document.getElementById('chatText').value = '';
-      document.getElementById('chatMedia').value = '';
-      
-      const typingRef = doc(db, `chats/${chatId}/typing/${currentUser.uid}`);
-      setDoc(typingRef, { isTyping: false }, { merge: true });
-    } catch (e) { showToast(e.message); }
+    if (!text || !currentUser || !currentChatPartner) return;
+    const chatId = getChatId(currentUser.uid, currentChatPartner);
+    const chatRef = doc(db, "chats", chatId);
+    const messageRef = collection(db, `chats/${chatId}/messages`);
+    await addDoc(messageRef, { from: currentUser.uid, text, createdAt: serverTimestamp() });
+    await updateDoc(chatRef, {
+      lastMessage: text,
+      updatedAt: serverTimestamp(),
+      [`unread.${currentChatPartner}`]: increment(1)
+    });
+    document.getElementById('chatText').value = '';
+    
+    const typingRef = doc(db, `chats/${chatId}/typing/${currentUser.uid}`);
+    setDoc(typingRef, { isTyping: false }, { merge: true });
   };
 
   // ================= Групи =================
@@ -2667,17 +2217,8 @@
       snap.forEach(m => {
         const msg = m.data();
         const div = document.createElement('div');
-        div.className = `message ${msg.from === currentUser.uid ? 'sent' : 'received'} ${msg.mediaUrl ? 'media' : ''}`;
-        if (msg.text) div.textContent = `${msg.senderName}: ${msg.text}`;
-        if (msg.mediaUrl) {
-          if (msg.mediaType === 'image') {
-            div.innerHTML += `<img src="${msg.mediaUrl}" class="message-media">`;
-          } else if (msg.mediaType === 'video') {
-            div.innerHTML += `<video src="${msg.mediaUrl}" controls class="message-media"></video>`;
-          } else if (msg.mediaType === 'audio') {
-            div.innerHTML += `<audio src="${msg.mediaUrl}" controls class="message-media"></audio>`;
-          }
-        }
+        div.className = `message ${msg.from === currentUser.uid ? 'sent' : 'received'}`;
+        div.textContent = `${msg.senderName}: ${msg.text}`;
         messages.appendChild(div);
       });
       messages.scrollTop = messages.scrollHeight;
@@ -2743,35 +2284,20 @@
 
   document.getElementById('sendGroupMessage').onclick = async () => {
     const text = document.getElementById('groupChatText').value.trim();
-    const file = document.getElementById('groupChatMedia').files[0];
-    if (!text && !file) return;
-    if (!currentGroup || !currentUser) return;
-
-    try {
-      let mediaUrl = '', mediaType = '';
-      if (file) {
-        const uploaded = await uploadMedia(file, `group/${currentGroup.id}`);
-        mediaUrl = uploaded.url;
-        mediaType = uploaded.type;
-      }
-
-      const userSnap = await getDoc(doc(db, "users", currentUser.uid));
-      const user = userSnap.data();
-      await addDoc(collection(db, `groups/${currentGroup.id}/messages`), {
-        from: currentUser.uid,
-        senderName: user.nickname,
-        text,
-        mediaUrl,
-        mediaType,
-        createdAt: serverTimestamp()
-      });
-      await updateDoc(doc(db, "groups", currentGroup.id), {
-        lastMessage: text || 'Медіа',
-        updatedAt: serverTimestamp()
-      });
-      document.getElementById('groupChatText').value = '';
-      document.getElementById('groupChatMedia').value = '';
-    } catch (e) { showToast(e.message); }
+    if (!text || !currentGroup || !currentUser) return;
+    const userSnap = await getDoc(doc(db, "users", currentUser.uid));
+    const user = userSnap.data();
+    await addDoc(collection(db, `groups/${currentGroup.id}/messages`), {
+      from: currentUser.uid,
+      senderName: user.nickname,
+      text,
+      createdAt: serverTimestamp()
+    });
+    await updateDoc(doc(db, "groups", currentGroup.id), {
+      lastMessage: text,
+      updatedAt: serverTimestamp()
+    });
+    document.getElementById('groupChatText').value = '';
   };
 
   // ================= Канали =================
@@ -2864,17 +2390,11 @@
       feed.innerHTML = '';
       snap.forEach(doc => {
         const post = doc.data();
-        let mediaHtml = '';
-        if (post.mediaUrl) {
-          if (post.mediaType === 'image') mediaHtml = `<img src="${post.mediaUrl}" class="post-media">`;
-          else if (post.mediaType === 'video') mediaHtml = `<video src="${post.mediaUrl}" controls class="post-media"></video>`;
-          else if (post.mediaType === 'audio') mediaHtml = `<audio src="${post.mediaUrl}" controls class="post-media"></audio>`;
-        }
         const postEl = document.createElement('div');
         postEl.className = 'post';
         postEl.innerHTML = `
           <div class="post-content">${post.text || ''}</div>
-          ${mediaHtml}
+          ${post.mediaUrl ? `<img src="${post.mediaUrl}" class="post-media">` : ''}
         `;
         feed.appendChild(postEl);
       });
@@ -2889,9 +2409,10 @@
     
     let mediaUrl = '', mediaType = '';
     if (file) {
-      const uploaded = await uploadMedia(file, `channelPosts/${currentChannel.id}`);
-      mediaUrl = uploaded.url;
-      mediaType = uploaded.type;
+      const storageRef = ref(storage, `channelPosts/${currentChannel.id}/${Date.now()}_${file.name}`);
+      await uploadBytes(storageRef, file);
+      mediaUrl = await getDownloadURL(storageRef);
+      mediaType = file.type.split('/')[0];
     }
     
     await addDoc(collection(db, `channels/${currentChannel.id}/posts`), {
@@ -2923,22 +2444,6 @@
     cleanupListeners();
     signOut(auth);
   };
-
-  // Language selector
-  const langSelect = document.getElementById('languageSelect');
-  langSelect.value = currentLanguage;
-  langSelect.addEventListener('change', (e) => {
-    currentLanguage = e.target.value;
-    localStorage.setItem('language', currentLanguage);
-    applyLanguage(currentLanguage);
-    // Оновити заголовок поточної сторінки
-    const activeSection = document.querySelector('.section.active').id;
-    const pageTitle = document.getElementById('pageTitle');
-    if (pageTitle) {
-      pageTitle.textContent = translations[currentLanguage]['pages.' + activeSection] || activeSection;
-    }
-  });
-  applyLanguage(currentLanguage);
 
   // ================= Інші обробники =================
   const sentinel = document.getElementById('feedSentinel');

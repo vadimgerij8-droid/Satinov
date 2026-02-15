@@ -66,6 +66,8 @@
       outline-offset: 2px;
       transform: scale(1.02);
       transition: all 0.1s ease;
+      box-shadow: var(--shadow-md);
+      z-index: 10;
     }
 
     .sidebar-backdrop {
@@ -535,6 +537,10 @@
       cursor: pointer;
       padding: 4px 8px;
       color: var(--text-secondary);
+      transition: transform 0.1s;
+    }
+    .emoji-button:hover {
+      transform: scale(1.2);
     }
 
     .emoji-picker {
@@ -546,26 +552,29 @@
       border-radius: var(--radius-md);
       padding: 8px;
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 4px;
-      z-index: 10;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 6px;
+      z-index: 100;
       box-shadow: var(--shadow-lg);
-      max-width: 200px;
-      max-height: 150px;
+      width: 280px;
+      max-height: 220px;
       overflow-y: auto;
+      margin-bottom: 8px;
     }
 
     .emoji-picker span {
-      font-size: 1.5rem;
+      font-size: 1.8rem;
       cursor: pointer;
       text-align: center;
       padding: 4px;
       border-radius: var(--radius-sm);
       transition: background 0.1s;
+      line-height: 1;
     }
 
     .emoji-picker span:hover, .emoji-picker span.focused {
       background: var(--surface);
+      transform: scale(1.1);
     }
 
     .chat-list {
@@ -1504,9 +1513,14 @@
 
   backdrop.addEventListener('click', closeSidebar);
 
-  // ================= Емоджі-пікер =================
+  // ================= Емоджі-пікер (ПОКРАЩЕНИЙ) =================
   const emojiList = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥸','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','💩','👻','💀','☠️','👽','👾','🤖','🎃','😺','😸','😹','😻','😼','😽','🙀','😿','😾'];
-  
+
+  // Функція для закриття всіх пікерів
+  function closeAllEmojiPickers() {
+    document.querySelectorAll('.emoji-picker').forEach(p => p.style.display = 'none');
+  }
+
   function setupEmojiPicker(buttonId, pickerId, inputId) {
     const btn = document.getElementById(buttonId);
     const picker = document.getElementById(pickerId);
@@ -1515,6 +1529,17 @@
     
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
+      closeAllEmojiPickers(); // закриваємо інші пікери
+      
+      // Визначаємо оптимальне положення (зверху, якщо є місце, інакше знизу)
+      const rect = btn.getBoundingClientRect();
+      const spaceAbove = rect.top;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      picker.style.bottom = spaceAbove > 280 ? '100%' : 'auto';
+      picker.style.top = spaceBelow > 280 ? 'auto' : '100%';
+      picker.style.left = 'auto';
+      picker.style.right = '0';
+      
       picker.style.display = picker.style.display === 'none' ? 'grid' : 'none';
       if (picker.style.display === 'grid') {
         setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
@@ -1548,7 +1573,7 @@
     });
   }
 
-  // ================= АВТОРИЗАЦІЯ =================
+  // ================= АВТОРИЗАЦІЯ (ВИПРАВЛЕНО) =================
   document.getElementById('toRegister').onclick = () => {
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('registerForm').style.display = 'block';
@@ -1572,11 +1597,14 @@
     if (!snap.empty) return alert('Цей ID вже зайнятий');
     
     try {
-      // Генеруємо унікальний email на основі userId та випадкового числа, щоб уникнути колізій
+      // Генеруємо унікальний email
       const safeNick = nickname.toLowerCase().replace(/[^a-z0-9]/g, '');
       const randomSuffix = Math.floor(Math.random() * 10000);
       const email = `${safeNick}_${randomSuffix}@fantasyas.local`;
+      
       const cred = await createUserWithEmailAndPassword(auth, email, password);
+      
+      // Зберігаємо email у документі користувача
       await setDoc(doc(db, "users", cred.user.uid), {
         nickname,
         userId,
@@ -1589,8 +1617,10 @@
         followers: [],
         following: [],
         createdAt: serverTimestamp(),
-        lastOnline: serverTimestamp()
+        lastOnline: serverTimestamp(),
+        email: email // зберігаємо email для подальшого входу
       });
+      
       showToast('Реєстрація успішна');
       document.getElementById('toLogin').click();
     } catch (e) { showToast(e.message); }
@@ -1601,25 +1631,25 @@
     const password = document.getElementById('loginPassword').value.trim();
     if (!nickname || !password) return alert('Заповніть поля');
     try {
-      // Шукаємо користувача за userId, щоб знайти його email
       const userId = `@${nickname.toLowerCase()}`;
       const q = query(collection(db, "users"), where("userId", "==", userId));
       const snap = await getDocs(q);
       if (snap.empty) return alert('Користувача не знайдено');
-      const userData = snap.docs[0].data();
-      // Оскільки ми не зберігаємо email, потрібно його відновити. У нашій системі email формувався як `${safeNick}_${random}@fantasyas.local`
-      // Але ми не знаємо random. Тому для спрощення використаємо підхід: при реєстрації зберігатимемо email у полі authEmail.
-      // Для сумісності з попередніми користувачами використаємо спробу входу з різними варіантами? Це складно.
-      // Краще: при реєстрації зберігати email у документі. Виправляємо:
-      // Ми вже змінили реєстрацію, але старі користувачі не мають поля email. Для них логін не працюватиме.
-      // Тому додамо перевірку: якщо у документі є поле email, використовуємо його, інакше формуємо приблизний email (але це може не спрацювати).
-      // Для простоти пропонуємо користувачам увійти через Google/Apple, а для email/password створити нового.
-      // Але це не ідеально. Тому тимчасово залишимо як є, з попередженням.
-      const safeNick = nickname.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const email = `${safeNick}@fantasyas.local`; // старий формат без random
+      
+      const userDoc = snap.docs[0];
+      const userData = userDoc.data();
+      const email = userData.email; // отримуємо збережений email
+      
+      if (!email) {
+        // Якщо старого користувача, який не має email – пропонуємо увійти через Google/Apple або зареєструватися заново
+        return alert('Для цього акаунту не встановлено email. Увійдіть через Google або Apple, або створіть новий акаунт.');
+      }
+      
       await signInWithEmailAndPassword(auth, email, password);
       showToast('Ласкаво просимо!');
-    } catch { alert('Невірний псевдонім або пароль'); }
+    } catch (err) {
+      alert('Невірний псевдонім або пароль');
+    }
   };
 
   document.getElementById('googleLoginBtn').onclick = async () => {
@@ -1647,7 +1677,7 @@
           following: [],
           createdAt: serverTimestamp(),
           lastOnline: serverTimestamp(),
-          email: user.email // зберігаємо email для відновлення
+          email: user.email
         });
       }
       showToast('Вхід через Google успішний');
@@ -1694,14 +1724,23 @@
 
   document.getElementById('forgotPassword').onclick = async (e) => {
     e.preventDefault();
-    const email = prompt('Введіть ваш email, який ви використовували при реєстрації (якщо реєструвалися через Google/Apple)');
-    if (email) {
-      try {
-        await sendPasswordResetEmail(auth, email);
-        showToast('Лист для скидання пароля відправлено');
-      } catch (err) {
-        showToast('Помилка: ' + err.message);
-      }
+    const nickname = prompt('Введіть ваш псевдонім (без @)');
+    if (!nickname) return;
+    
+    const userId = `@${nickname.toLowerCase()}`;
+    const q = query(collection(db, "users"), where("userId", "==", userId));
+    const snap = await getDocs(q);
+    if (snap.empty) return alert('Користувача не знайдено');
+    
+    const userData = snap.docs[0].data();
+    const email = userData.email;
+    if (!email) return alert('Для цього акаунту не вказано email. Увійдіть через Google/Apple або створіть новий акаунт.');
+    
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showToast('Лист для скидання пароля відправлено');
+    } catch (err) {
+      showToast('Помилка: ' + err.message);
     }
   };
 
@@ -1742,6 +1781,7 @@
         showToast('Помилка оновлення списку чатів');
       });
 
+      // Налаштовуємо всі емоджі-пікери
       setupEmojiPicker('postEmojiBtn', 'postEmojiPicker', 'postText');
       setupEmojiPicker('chatEmojiBtn', 'chatEmojiPicker', 'chatText');
       setupEmojiPicker('groupEmojiBtn', 'groupEmojiPicker', 'groupChatText');
@@ -2381,7 +2421,7 @@
     }
   };
 
-  // ================= ЧАТИ (ВИПРАВЛЕНО: ПОВНА ОБРОБКА ПОМИЛОК) =================
+  // ================= ЧАТИ (ВИПРАВЛЕНО: ТІЛЬКИ onSnapshot) =================
   async function loadChatList() {
     if (!currentUser) return;
     const list = document.getElementById('chatList');
@@ -2535,18 +2575,7 @@
       throw new Error('chatMessages container not found');
     }
 
-    // Спочатку завантажимо існуючі повідомлення один раз, щоб одразу показати їх
-    try {
-      const q = query(collection(db, `chats/${chatId}/messages`), orderBy("createdAt"));
-      const snapshot = await getDocs(q);
-      renderMessages(snapshot.docs);
-    } catch (error) {
-      console.error('Error loading initial messages:', error);
-      showToast('Помилка завантаження повідомлень');
-      throw error; // передаємо далі, щоб вищий рівень знав про помилку
-    }
-
-    // Підписуємося на зміни
+    // Підписуємося на зміни – дані прийдуть одразу
     const q = query(collection(db, `chats/${chatId}/messages`), orderBy("createdAt"));
     unsubscribeChat = onSnapshot(q, (snap) => {
       renderMessages(snap.docs);

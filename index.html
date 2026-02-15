@@ -437,6 +437,7 @@
       word-break: break-word;
     }
 
+    /* Фікс співвідношення сторін для медіа на мобільних */
     .post-media {
       width: 100%;
       border-radius: var(--radius-md);
@@ -445,6 +446,8 @@
       aspect-ratio: 16/9;
       object-fit: cover;
       background: #ccc;
+      max-width: 100%;
+      height: auto;
     }
 
     .post-footer {
@@ -1655,18 +1658,29 @@
     } catch { showToast('Невірний псевдонім або пароль', 'error'); }
   };
 
+  // Google Login з покращеною обробкою
   document.getElementById('googleLoginBtn').onclick = async () => {
     const provider = new GoogleAuthProvider();
+    // Додаємо вибір акаунта
+    provider.setCustomParameters({ prompt: 'select_account' });
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (!userDoc.exists()) {
-        const nickname = user.displayName || user.email?.split('@')[0] || 'user';
+        // Генеруємо nickname з імені або email
+        let nickname = user.displayName || user.email?.split('@')[0] || 'user';
+        // Видаляємо пробіли та спецсимволи
+        nickname = nickname.replace(/[^a-zA-Z0-9]/g, '');
+        if (!nickname) nickname = 'user';
         let userId = `@${nickname.toLowerCase()}`;
+        // Перевіряємо унікальність
         const q = query(collection(db, "users"), where("userId", "==", userId));
         const snap = await getDocs(q);
-        if (!snap.empty) userId = `@${nickname.toLowerCase()}${Math.floor(Math.random()*1000)}`;
+        if (!snap.empty) {
+          // Додаємо випадкове число
+          userId = `@${nickname.toLowerCase()}${Math.floor(Math.random()*1000)}`;
+        }
         await setDoc(doc(db, "users", user.uid), {
           nickname,
           userId,
@@ -1684,7 +1698,12 @@
       }
       showToast('Вхід через Google успішний', 'success');
     } catch (error) {
-      showToast('Помилка: ' + error.message, 'error');
+      // Якщо popup заблоковано
+      if (error.code === 'auth/popup-blocked') {
+        showToast('Блокування спливаючих вікон. Дозвольте їх для цього сайту.', 'error');
+      } else {
+        showToast('Помилка: ' + error.message, 'error');
+      }
     }
   };
 
@@ -1719,7 +1738,11 @@
       }
       showToast('Вхід через Apple успішний', 'success');
     } catch (error) {
-      showToast('Помилка: ' + error.message, 'error');
+      if (error.code === 'auth/popup-blocked') {
+        showToast('Блокування спливаючих вікон. Дозвольте їх для цього сайту.', 'error');
+      } else {
+        showToast('Помилка: ' + error.message, 'error');
+      }
     }
   };
 
@@ -1809,18 +1832,18 @@
       const uploadTask = uploadBytesResumable(storageRef, file);
       const progressBar = document.getElementById(progressBarId);
       const progressFill = document.getElementById(progressFillId);
-      progressBar.style.display = 'block';
+      if (progressBar) progressBar.style.display = 'block';
       uploadTask.on('state_changed', 
         (snapshot) => {
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          progressFill.style.width = progress + '%';
+          if (progressFill) progressFill.style.width = progress + '%';
         },
         (error) => {
-          progressBar.style.display = 'none';
+          if (progressBar) progressBar.style.display = 'none';
           reject(error);
         },
         async () => {
-          progressBar.style.display = 'none';
+          if (progressBar) progressBar.style.display = 'none';
           const url = await getDownloadURL(uploadTask.snapshot.ref);
           resolve(url);
         }

@@ -2165,7 +2165,7 @@
     }
   };
 
-  // ================= ЧАТИ (ВИПРАВЛЕНО) =================
+  // ================= ЧАТИ (ВИПРАВЛЕНО: ДОДАНО НЕГАЙНЕ ЗАВАНТАЖЕННЯ ПОВІДОМЛЕНЬ) =================
   async function loadChatList() {
     if (!currentUser) return;
     const list = document.getElementById('chatList');
@@ -2221,7 +2221,7 @@
     const chatRef = doc(db, "chats", chatId);
     await updateDoc(chatRef, { [`unread.${currentUser.uid}`]: 0 });
     
-    subscribeToChat(chatId);
+    await subscribeToChat(chatId);
     
     if (unsubscribeOnlineStatus) unsubscribeOnlineStatus();
     unsubscribeOnlineStatus = onSnapshot(doc(db, "users", otherUid), (snap) => {
@@ -2233,7 +2233,7 @@
     setTimeout(() => { updateFocusableElements(); setFocus(0); }, 200);
   }
 
-  // ВІДКРИТТЯ ЧАТУ З КНОПКИ "НАПИСАТИ" (ВИПРАВЛЕНО: ДОДАНО ОНОВЛЕННЯ СПИСКУ ЧАТІВ)
+  // ВІДКРИТТЯ ЧАТУ З КНОПКИ "НАПИСАТИ" (ВИПРАВЛЕНО: ДОДАНО ОНОВЛЕННЯ СПИСКУ ЧАТІВ ТА НЕГАЙНЕ ЗАВАНТАЖЕННЯ)
   function openChat(otherName, otherUid, otherUserId) {
     if (!currentUser) return;
     currentChatPartner = otherUid;
@@ -2281,7 +2281,7 @@
       } else {
         await updateDoc(chatRef, { [`unread.${currentUser.uid}`]: 0 });
       }
-      subscribeToChat(chatId);
+      await subscribeToChat(chatId);
       // Оновлюємо список чатів, щоб новий чат одразу з'явився
       loadChatList();
     });
@@ -2291,28 +2291,51 @@
 
   const getChatId = (uid1, uid2) => [uid1, uid2].sort().join('_');
 
-  function subscribeToChat(chatId) {
+  async function subscribeToChat(chatId) {
     if (!currentUser) return;
     if (unsubscribeChat) unsubscribeChat();
     if (unsubscribeTyping) unsubscribeTyping();
-    
+
+    const messagesContainer = document.getElementById('chatMessages');
+    if (!messagesContainer) {
+      console.error('chatMessages not found');
+      return;
+    }
+
+    // Спочатку завантажимо існуючі повідомлення один раз, щоб одразу показати їх
     const q = query(collection(db, `chats/${chatId}/messages`), orderBy("createdAt"));
+    try {
+      const snapshot = await getDocs(q);
+      renderMessages(snapshot.docs);
+    } catch (error) {
+      console.error('Error loading initial messages:', error);
+      showToast('Помилка завантаження повідомлень');
+    }
+
+    // Підписуємося на зміни
     unsubscribeChat = onSnapshot(q, (snap) => {
-      const messages = document.getElementById('chatMessages');
-      messages.innerHTML = '';
-      snap.forEach(m => {
-        const msg = m.data();
+      renderMessages(snap.docs);
+    }, (error) => {
+      console.error('Error in messages snapshot:', error);
+      showToast('Помилка отримання повідомлень');
+    });
+
+    function renderMessages(docs) {
+      messagesContainer.innerHTML = '';
+      docs.forEach(doc => {
+        const msg = doc.data();
         const div = document.createElement('div');
         div.className = `message ${msg.from === currentUser.uid ? 'sent' : 'received'}`;
         if (msg.from === currentUser.uid) {
           div.innerHTML = `<div class="group-message-sender">Ви</div>${msg.text}`;
         } else {
-          div.innerHTML = `<div class="group-message-sender">${currentChatPartnerName}</div>${msg.text}`;
+          const senderName = currentChatPartnerName || 'Співрозмовник';
+          div.innerHTML = `<div class="group-message-sender">${senderName}</div>${msg.text}`;
         }
-        messages.appendChild(div);
+        messagesContainer.appendChild(div);
       });
-      messages.scrollTop = messages.scrollHeight;
-    });
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
     
     if (currentChatPartner) {
       const typingRef = doc(db, `chats/${chatId}/typing/${currentChatPartner}`);

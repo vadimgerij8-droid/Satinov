@@ -1313,7 +1313,7 @@
         break;
       case 'ArrowRight':
       case 'ArrowLeft':
-        // Можна використати для відкриття/закриття, покі що нічого
+        // Можна використати для відкриття/закриття, поки що нічого
         break;
       case 'Enter':
         e.preventDefault();
@@ -1608,6 +1608,7 @@
       resetPagination();
       loadMyProfile();
       
+      // Підписка на список чатів для оновлення непрочитаних та списку
       const q = query(collection(db, "chats"), where("participants", "array-contains", currentUser.uid));
       unsubscribeChatList = onSnapshot(q, (snapshot) => {
         let totalUnread = 0;
@@ -1623,6 +1624,9 @@
         if (document.getElementById('chats').classList.contains('active')) {
           loadChatList();
         }
+      }, (error) => {
+        console.error('Chat list snapshot error:', error);
+        showToast('Помилка оновлення списку чатів');
       });
 
       setupEmojiPicker('postEmojiBtn', 'postEmojiPicker', 'postText');
@@ -2165,45 +2169,50 @@
     }
   };
 
-  // ================= ЧАТИ (ВИПРАВЛЕНО: ДОДАНО НЕГАЙНЕ ЗАВАНТАЖЕННЯ ПОВІДОМЛЕНЬ) =================
+  // ================= ЧАТИ (ВИПРАВЛЕНО) =================
   async function loadChatList() {
     if (!currentUser) return;
     const list = document.getElementById('chatList');
     list.innerHTML = '';
     
-    const q = query(collection(db, "chats"), where("participants", "array-contains", currentUser.uid), orderBy("updatedAt", "desc"));
-    const snapshot = await getDocs(q);
-    for (const docSnap of snapshot.docs) {
-      const chat = docSnap.data();
-      const otherUid = chat.participants.find(uid => uid !== currentUser.uid);
-      if (!otherUid) continue;
-      
-      const userSnap = await getDoc(doc(db, "users", otherUid));
-      const user = userSnap.data();
-      if (!user) continue;
-      
-      const unread = chat.unread?.[currentUser.uid] || 0;
-      const lastMsg = chat.lastMessage || '';
-      const time = chat.updatedAt ? new Date(chat.updatedAt.seconds * 1000).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '';
-      const lastOnline = user.lastOnline?.seconds || 0;
-      const isOnline = (Date.now()/1000 - lastOnline) < 60;
-      
-      const item = document.createElement('div');
-      item.className = `chat-item ${unread > 0 ? 'unread' : ''}`;
-      item.dataset.chatId = docSnap.id;
-      item.dataset.otherUid = otherUid;
-      item.tabIndex = 0;
-      item.innerHTML = `
-        <div class="avatar small" style="background-image:url(${user.avatar || ''})" tabindex="0"></div>
-        <div class="chat-info">
-          <div class="chat-name">${user.nickname} ${isOnline ? '<span class="online-indicator" style="display:inline-block;"></span>' : ''}</div>
-          <div class="chat-last">${lastMsg}</div>
-        </div>
-        <div class="chat-time">${time}</div>
-        ${unread > 0 ? `<div class="chat-badge">${unread}</div>` : ''}
-      `;
-      item.onclick = () => openChatFromList(docSnap.id, otherUid, user.nickname, user.userId, user.avatar);
-      list.appendChild(item);
+    try {
+      const q = query(collection(db, "chats"), where("participants", "array-contains", currentUser.uid), orderBy("updatedAt", "desc"));
+      const snapshot = await getDocs(q);
+      for (const docSnap of snapshot.docs) {
+        const chat = docSnap.data();
+        const otherUid = chat.participants.find(uid => uid !== currentUser.uid);
+        if (!otherUid) continue;
+        
+        const userSnap = await getDoc(doc(db, "users", otherUid));
+        const user = userSnap.data();
+        if (!user) continue;
+        
+        const unread = chat.unread?.[currentUser.uid] || 0;
+        const lastMsg = chat.lastMessage || '';
+        const time = chat.updatedAt ? new Date(chat.updatedAt.seconds * 1000).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '';
+        const lastOnline = user.lastOnline?.seconds || 0;
+        const isOnline = (Date.now()/1000 - lastOnline) < 60;
+        
+        const item = document.createElement('div');
+        item.className = `chat-item ${unread > 0 ? 'unread' : ''}`;
+        item.dataset.chatId = docSnap.id;
+        item.dataset.otherUid = otherUid;
+        item.tabIndex = 0;
+        item.innerHTML = `
+          <div class="avatar small" style="background-image:url(${user.avatar || ''})" tabindex="0"></div>
+          <div class="chat-info">
+            <div class="chat-name">${user.nickname} ${isOnline ? '<span class="online-indicator" style="display:inline-block;"></span>' : ''}</div>
+            <div class="chat-last">${lastMsg}</div>
+          </div>
+          <div class="chat-time">${time}</div>
+          ${unread > 0 ? `<div class="chat-badge">${unread}</div>` : ''}
+        `;
+        item.onclick = () => openChatFromList(docSnap.id, otherUid, user.nickname, user.userId, user.avatar);
+        list.appendChild(item);
+      }
+    } catch (error) {
+      console.error('Error loading chat list:', error);
+      showToast('Помилка завантаження списку чатів');
     }
     setTimeout(() => { updateFocusableElements(); }, 100);
   }
@@ -2233,7 +2242,7 @@
     setTimeout(() => { updateFocusableElements(); setFocus(0); }, 200);
   }
 
-  // ВІДКРИТТЯ ЧАТУ З КНОПКИ "НАПИСАТИ" (ВИПРАВЛЕНО: ДОДАНО ОНОВЛЕННЯ СПИСКУ ЧАТІВ ТА НЕГАЙНЕ ЗАВАНТАЖЕННЯ)
+  // ВІДКРИТТЯ ЧАТУ З КНОПКИ "НАПИСАТИ" (ВИПРАВЛЕНО)
   function openChat(otherName, otherUid, otherUserId) {
     if (!currentUser) return;
     currentChatPartner = otherUid;
@@ -2270,20 +2279,28 @@
     currentChatId = chatId;
     const chatRef = doc(db, "chats", chatId);
     getDoc(chatRef).then(async (docSnap) => {
-      if (!docSnap.exists()) {
-        await setDoc(chatRef, {
-          participants: [currentUser.uid, otherUid],
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-          lastMessage: '',
-          unread: { [currentUser.uid]: 0, [otherUid]: 0 }
-        });
-      } else {
-        await updateDoc(chatRef, { [`unread.${currentUser.uid}`]: 0 });
+      try {
+        if (!docSnap.exists()) {
+          await setDoc(chatRef, {
+            participants: [currentUser.uid, otherUid],
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            lastMessage: '',
+            unread: { [currentUser.uid]: 0, [otherUid]: 0 }
+          });
+        } else {
+          await updateDoc(chatRef, { [`unread.${currentUser.uid}`]: 0 });
+        }
+        await subscribeToChat(chatId);
+        // Оновлюємо список чатів, щоб новий чат одразу з'явився
+        loadChatList();
+      } catch (error) {
+        console.error('Error opening chat:', error);
+        showToast('Помилка відкриття чату');
       }
-      await subscribeToChat(chatId);
-      // Оновлюємо список чатів, щоб новий чат одразу з'явився
-      loadChatList();
+    }).catch(error => {
+      console.error('Error getting chat doc:', error);
+      showToast('Помилка доступу до чату');
     });
     
     setTimeout(() => { updateFocusableElements(); setFocus(0); }, 200);
@@ -2303,8 +2320,8 @@
     }
 
     // Спочатку завантажимо існуючі повідомлення один раз, щоб одразу показати їх
-    const q = query(collection(db, `chats/${chatId}/messages`), orderBy("createdAt"));
     try {
+      const q = query(collection(db, `chats/${chatId}/messages`), orderBy("createdAt"));
       const snapshot = await getDocs(q);
       renderMessages(snapshot.docs);
     } catch (error) {
@@ -2313,6 +2330,7 @@
     }
 
     // Підписуємося на зміни
+    const q = query(collection(db, `chats/${chatId}/messages`), orderBy("createdAt"));
     unsubscribeChat = onSnapshot(q, (snap) => {
       renderMessages(snap.docs);
     }, (error) => {

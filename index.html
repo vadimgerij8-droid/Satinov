@@ -2440,54 +2440,63 @@
   // ================= ЧАТИ (ВИПРАВЛЕНО) =================
   const getChatId = (uid1, uid2) => [uid1, uid2].sort().join('_');
 
+  // Виправлена функція loadChatList – без orderBy у запиті
   async function loadChatList() {
     if (!currentUser) return;
     const list = document.getElementById('chatList');
     if (!list) return;
     list.innerHTML = '';
-    
+
     try {
-      const q = query(collection(db, "chats"), where("participants", "array-contains", currentUser.uid), orderBy("updatedAt", "desc"));
+      // Запит БЕЗ orderBy – індекс не потрібен
+      const q = query(collection(db, "chats"), where("participants", "array-contains", currentUser.uid));
       const snapshot = await getDocs(q);
-      
+
       if (snapshot.empty) {
         list.innerHTML = '<p style="text-align:center; padding:20px;">Немає чатів</p>';
         return;
       }
-      
-      const chatPromises = snapshot.docs.map(async (docSnap) => {
+
+      // Збираємо дані разом із часом останнього оновлення
+      const chatItems = [];
+      for (const docSnap of snapshot.docs) {
         const chat = docSnap.data();
         const otherUid = chat.participants.find(uid => uid !== currentUser.uid);
-        if (!otherUid) return null;
-        
+        if (!otherUid) continue;
+
         const userSnap = await getDoc(doc(db, "users", otherUid));
         const user = userSnap.data();
-        if (!user) return null;
-        
+        if (!user) continue;
+
         const unread = chat.unread?.[currentUser.uid] || 0;
         const lastMsg = chat.lastMessage || '';
-        const time = chat.updatedAt ? new Date(chat.updatedAt.seconds * 1000).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '';
+        // Отримуємо час оновлення (якщо поле відсутнє – використовуємо 0)
+        const updatedAt = chat.updatedAt?.seconds || 0;
+        const time = updatedAt ? new Date(updatedAt * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
         const lastOnline = user.lastOnline?.seconds || 0;
-        const isOnline = (Date.now()/1000 - lastOnline) < 60;
-        
-        return {
+        const isOnline = (Date.now() / 1000 - lastOnline) < 60;
+
+        chatItems.push({
           chatId: docSnap.id,
           otherUid,
           user,
           unread,
           lastMsg,
           time,
-          isOnline
-        };
-      });
-      
-      const chatItems = (await Promise.all(chatPromises)).filter(item => item !== null);
-      
+          isOnline,
+          updatedAt // зберігаємо для сортування
+        });
+      }
+
+      // Сортуємо на клієнті за updatedAt (від новіших до старіших)
+      chatItems.sort((a, b) => b.updatedAt - a.updatedAt);
+
       if (chatItems.length === 0) {
         list.innerHTML = '<p style="text-align:center; padding:20px;">Немає чатів</p>';
         return;
       }
-      
+
+      // Відображаємо відсортований список
       chatItems.forEach(item => {
         const div = document.createElement('div');
         div.className = `chat-item ${item.unread > 0 ? 'unread' : ''}`;
@@ -2509,22 +2518,7 @@
     } catch (error) {
       console.error('Error loading chat list:', error);
       alert('Помилка завантаження списку чатів:\n' + (error.message || 'Невідома помилка') + '\nКод: ' + (error.code || 'N/A'));
-      showToast('Помилка завантаження списку чатів. Перевірте індекси Firestore.');
-      
-      // Діагностичний запит без orderBy
-      try {
-        const testQuery = query(collection(db, "chats"), where("participants", "array-contains", currentUser.uid));
-        const testSnap = await getDocs(testQuery);
-        console.log('Test query без orderBy успішний, знайдено документів:', testSnap.size);
-        if (testSnap.size > 0) {
-          alert('Діагностика: простий запит без orderBy працює. Проблема саме в індексі для сортування за updatedAt.');
-        } else {
-          alert('Діагностика: у колекції chats немає документів з вашим учасником.');
-        }
-      } catch (testError) {
-        console.error('Test query також помилка:', testError);
-        alert('Діагностика: навіть простий запит без orderBy не працює. Це може бути проблема з правами доступу або мережею.\n' + testError.message);
-      }
+      showToast('Помилка завантаження списку чатів.');
     }
     setTimeout(() => { updateFocusableElements(); }, 100);
   }

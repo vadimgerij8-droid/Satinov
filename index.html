@@ -60,7 +60,7 @@
       line-height: 1.5;
     }
 
-    /* Затемнення фону при відкритому меню на мобільних */
+    /* Затемнення фону для мобільного меню */
     .sidebar-backdrop {
       display: none;
       position: fixed;
@@ -1283,7 +1283,6 @@
         }
       }
       
-      // Закриваємо sidebar на мобільному
       closeSidebar();
     });
   });
@@ -1776,7 +1775,6 @@
       const postRef = doc(db, "posts", currentEditingPost.id);
       let updateData = { text: newText };
       if (file) {
-        // Видаляємо старе медіа, якщо було
         if (currentEditingPost.mediaUrl) {
           try {
             const oldMediaRef = ref(storage, currentEditingPost.mediaUrl);
@@ -2204,6 +2202,14 @@
     setDoc(typingRef, { isTyping: false }, { merge: true });
   };
 
+  // Відправка повідомлення по Enter
+  document.getElementById('chatText').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      document.getElementById('sendMessage').click();
+    }
+  });
+
   // ================= Групи =================
   document.getElementById('createGroupBtn').onclick = () => document.getElementById('createGroupModal').classList.add('active');
   document.getElementById('closeGroupModal').onclick = () => document.getElementById('createGroupModal').classList.remove('active');
@@ -2274,7 +2280,6 @@
     document.getElementById('groupChatAvatar').style.backgroundImage = `url(${group.avatar || ''})`;
     document.getElementById('groupChatMeta').textContent = `${group.members.length} учасників`;
     
-    // Показуємо кнопку редагування, якщо поточний користувач адмін
     const isAdmin = group.members.find(m => m.uid === currentUser.uid)?.role === 'admin';
     document.getElementById('editGroupBtn').style.display = isAdmin ? 'inline-block' : 'none';
     
@@ -2287,7 +2292,11 @@
         const msg = m.data();
         const div = document.createElement('div');
         div.className = `message ${msg.from === currentUser.uid ? 'sent' : 'received'}`;
-        div.innerHTML = msg.from !== currentUser.uid ? `<div class="group-message-sender">${msg.senderName}</div>${msg.text}` : msg.text;
+        if (msg.from !== currentUser.uid) {
+          div.innerHTML = `<div class="group-message-sender">${msg.senderName}</div>${msg.text}`;
+        } else {
+          div.textContent = msg.text;
+        }
         messages.appendChild(div);
       });
       messages.scrollTop = messages.scrollHeight;
@@ -2401,6 +2410,13 @@
     });
     document.getElementById('groupChatText').value = '';
   };
+
+  document.getElementById('groupChatText').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      document.getElementById('sendGroupMessage').click();
+    }
+  });
 
   // ================= Канали =================
   document.getElementById('createChannelBtn').onclick = () => document.getElementById('createChannelModal').classList.add('active');

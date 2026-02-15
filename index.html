@@ -1193,6 +1193,7 @@
   // ================= Глобальні змінні =================
   let currentUser = null;
   let currentChatPartner = null;
+  let currentChatPartnerName = '';   // ім'я співрозмовника для відображення в чаті
   let currentGroup = null;
   let currentChannel = null;
   let currentProfileUid = null; // хто зараз відображається в профілі
@@ -2087,6 +2088,7 @@
   async function openChatFromList(chatId, otherUid, otherName, otherUserId, otherAvatar) {
     if (!currentUser) return;
     currentChatPartner = otherUid;
+    currentChatPartnerName = otherName; // зберігаємо ім'я співрозмовника
     document.getElementById('chatWindow').style.display = 'flex';
     document.getElementById('chatName').textContent = otherName;
     document.getElementById('chatUserId').textContent = otherUserId || '';
@@ -2108,6 +2110,7 @@
   function openChat(otherName, otherUid, otherUserId) {
     if (!currentUser) return;
     currentChatPartner = otherUid;
+    currentChatPartnerName = otherName;
     document.getElementById('chatWindow').style.display = 'flex';
     document.getElementById('chatName').textContent = otherName;
     document.getElementById('chatUserId').textContent = otherUserId || '';
@@ -2161,7 +2164,12 @@
         const msg = m.data();
         const div = document.createElement('div');
         div.className = `message ${msg.from === currentUser.uid ? 'sent' : 'received'}`;
-        div.textContent = msg.text;
+        // Відображаємо, хто написав (для особистих чатів)
+        if (msg.from === currentUser.uid) {
+          div.innerHTML = `<div class="group-message-sender">Ви</div>${msg.text}`;
+        } else {
+          div.innerHTML = `<div class="group-message-sender">${currentChatPartnerName}</div>${msg.text}`;
+        }
         messages.appendChild(div);
       });
       messages.scrollTop = messages.scrollHeight;

@@ -245,17 +245,14 @@
       height: 80px;
     }
 
-    .avatar.online::after {
-      content: '';
-      display: block;
-      width: 10px;
-      height: 10px;
+    .online-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
       background: #4caf50;
       border-radius: 50%;
       border: 2px solid var(--card);
-      position: relative;
-      bottom: 12px;
-      left: 36px;
+      margin-left: 8px;
     }
 
     .btn {
@@ -309,43 +306,67 @@
       border-color: var(--accent);
     }
 
-    /* Стрічка постів */
+    /* Стрічка постів (сучасний дизайн) */
     .feed {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 24px;
     }
 
     .post {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 20px;
+      padding: 16px 16px 12px;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      animation: fadeIn 0.3s ease;
+    }
+    .post:hover {
+      box-shadow: var(--shadow-md);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .post-header {
       display: flex;
       gap: 12px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
+      align-items: center;
     }
-
+    .post-header .avatar {
+      width: 42px;
+      height: 42px;
+    }
+    .post-author-info {
+      flex: 1;
+    }
     .post-author {
       font-weight: 700;
       cursor: pointer;
+      display: inline-block;
+      margin-right: 6px;
     }
-
     .post-author:hover {
       text-decoration: underline;
     }
-
     .post-meta {
       color: var(--text-tertiary);
-      font-size: 0.9rem;
+      font-size: 0.85rem;
+    }
+    .post-time {
+      color: var(--text-tertiary);
+      font-size: 0.75rem;
+      margin-left: auto;
     }
 
     .post-content {
       margin-bottom: 14px;
       white-space: pre-wrap;
+      font-size: 1rem;
+      line-height: 1.5;
     }
 
     .post-media {
@@ -353,12 +374,16 @@
       border-radius: var(--radius-md);
       margin: 10px 0;
       cursor: pointer;
+      max-height: 500px;
+      object-fit: cover;
     }
 
     .post-footer {
       display: flex;
-      gap: 16px;
+      gap: 20px;
       flex-wrap: wrap;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
     }
 
     .post-footer button {
@@ -368,9 +393,10 @@
       align-items: center;
       gap: 6px;
       color: var(--text-secondary);
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer;
       transition: color var(--transition);
+      font-size: 0.9rem;
     }
 
     .post-footer button:hover {
@@ -380,9 +406,15 @@
     .post-footer button.liked {
       color: #ff3040;
     }
+    .post-footer button.liked svg {
+      fill: #ff3040;
+    }
 
     .post-footer button.saved {
       color: #f5a623;
+    }
+    .post-footer button.saved svg {
+      fill: #f5a623;
     }
 
     /* Коментарі */
@@ -1086,6 +1118,7 @@
   let currentChatPartner = null;
   let currentGroup = null;
   let currentChannel = null;
+  let currentProfileUid = null; // хто зараз відображається в профілі
   
   // unsubscribe functions
   let unsubscribeFeed = null;
@@ -1097,6 +1130,7 @@
   let unsubscribeChannels = null;
   let unsubscribeTyping = null;
   let lastOnlineInterval = null;
+  let unsubscribeOnlineStatus = null; // для оновлення статусу онлайн в чаті
 
   let unreadCount = 0;
   let currentFeedType = 'new';
@@ -1134,6 +1168,7 @@
     if (unsubscribeGroups) { unsubscribeGroups(); unsubscribeGroups = null; }
     if (unsubscribeChannels) { unsubscribeChannels(); unsubscribeChannels = null; }
     if (unsubscribeTyping) { unsubscribeTyping(); unsubscribeTyping = null; }
+    if (unsubscribeOnlineStatus) { unsubscribeOnlineStatus(); unsubscribeOnlineStatus = null; }
     if (lastOnlineInterval) { clearInterval(lastOnlineInterval); lastOnlineInterval = null; }
   };
 
@@ -1155,7 +1190,14 @@
       if (section === 'chats' && currentUser) loadChatList();
       if (section === 'groups' && currentUser) loadGroups();
       if (section === 'channels' && currentUser) loadChannels();
-      if (section === 'profile' && currentUser) loadMyProfile();
+      if (section === 'profile' && currentUser) {
+        // Якщо профіль, то показуємо того, хто збережений у currentProfileUid (за замовчуванням поточний)
+        if (currentProfileUid === currentUser?.uid) {
+          loadMyProfile();
+        } else {
+          loadUserProfile(currentProfileUid);
+        }
+      }
       
       // Закриваємо sidebar на мобільному
       document.getElementById('sidebar').classList.remove('open');
@@ -1348,6 +1390,7 @@
     
     if (user) {
       currentUser = user;
+      currentProfileUid = user.uid; // за замовчуванням показуємо свій профіль
       document.getElementById('authBox').style.display = 'none';
       document.getElementById('newPostBox').style.display = 'block';
       
@@ -1515,15 +1558,19 @@
       const post = { id: docSnap.id, ...docSnap.data() };
       const liked = post.likes?.includes(currentUser?.uid) || false;
       const saved = post.saves?.includes(currentUser?.uid) || false;
+      const postTime = post.createdAt ? new Date(post.createdAt.seconds * 1000).toLocaleString() : '';
       const postEl = document.createElement('div');
       postEl.className = 'post';
       postEl.dataset.postId = post.id;
       postEl.innerHTML = `
         <div class="post-header">
           <div class="avatar" style="background-image:url(${post.authorAvatar || ''})" data-uid="${post.author}"></div>
-          <div>
-            <div class="post-author" data-uid="${post.author}">${post.authorName || 'Невідомо'}</div>
-            <div class="post-meta">${post.authorUserId || ''}</div>
+          <div class="post-author-info">
+            <div>
+              <span class="post-author" data-uid="${post.author}">${post.authorName || 'Невідомо'}</span>
+              <span class="post-meta">${post.authorUserId || ''}</span>
+            </div>
+            <div class="post-time">${postTime}</div>
           </div>
         </div>
         <div class="post-content">${post.text || ''}</div>
@@ -1661,9 +1708,23 @@
   }
 
   function viewProfile(uid) {
-    if (uid === currentUser?.uid) loadMyProfile();
-    else loadUserProfile(uid);
-    document.querySelector('[data-section="profile"]').click();
+    currentProfileUid = uid;
+    // Активуємо секцію профілю без виклику навігаційного кліку (щоб не перезавантажити зайвий раз)
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelector('[data-section="profile"]').classList.add('active');
+    sections.forEach(s => document.getElementById(s).classList.remove('active'));
+    document.getElementById('profile').classList.add('active');
+    document.getElementById('pageTitle').textContent = 'Профіль';
+    
+    if (uid === currentUser?.uid) {
+      loadMyProfile();
+    } else {
+      loadUserProfile(uid);
+    }
+    
+    // Закриваємо sidebar на мобільному
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('menuToggle').classList.remove('active');
   }
 
   async function loadUserProfile(uid) {
@@ -1708,7 +1769,6 @@
       document.getElementById('editProfileBtn').onclick = () => {
         document.getElementById('editNickname').value = data.nickname;
         document.getElementById('editBio').value = data.bio || '';
-        // Очищаємо попередній вибраний файл
         document.getElementById('editAvatar').value = '';
         document.getElementById('editProfileModal').classList.add('active');
       };
@@ -1773,7 +1833,6 @@
 
   document.getElementById('closeModal').onclick = () => document.getElementById('editProfileModal').classList.remove('active');
   
-  // Оновлена функція збереження профілю з можливістю завантаження аватарки
   document.getElementById('saveProfileEdit').onclick = async () => {
     if (!currentUser) return;
     const nickname = document.getElementById('editNickname').value.trim();
@@ -1841,9 +1900,9 @@
         item.dataset.chatId = docSnap.id;
         item.dataset.otherUid = otherUid;
         item.innerHTML = `
-          <div class="avatar small ${isOnline ? 'online' : ''}" style="background-image:url(${user.avatar || ''})"></div>
+          <div class="avatar small" style="background-image:url(${user.avatar || ''})"></div>
           <div class="chat-info">
-            <div class="chat-name">${user.nickname}</div>
+            <div class="chat-name">${user.nickname} ${isOnline ? '<span class="online-indicator" style="display:inline-block;"></span>' : ''}</div>
             <div class="chat-last">${lastMsg}</div>
           </div>
           <div class="chat-time">${time}</div>
@@ -1868,10 +1927,13 @@
     
     subscribeToChat(chatId);
     
-    const userSnap = await getDoc(doc(db, "users", otherUid));
-    const lastOnline = userSnap.data().lastOnline?.seconds || 0;
-    const isOnline = (Date.now()/1000 - lastOnline) < 60;
-    document.getElementById('onlineIndicator').style.display = isOnline ? 'inline-block' : 'none';
+    // Підписка на статус онлайн співрозмовника
+    if (unsubscribeOnlineStatus) unsubscribeOnlineStatus();
+    unsubscribeOnlineStatus = onSnapshot(doc(db, "users", otherUid), (snap) => {
+      const lastOnline = snap.data()?.lastOnline?.seconds || 0;
+      const isOnline = (Date.now()/1000 - lastOnline) < 60;
+      document.getElementById('onlineIndicator').style.display = isOnline ? 'inline-block' : 'none';
+    });
   }
 
   function openChat(otherName, otherUid, otherUserId) {
@@ -1888,6 +1950,14 @@
         const isOnline = (Date.now()/1000 - lastOnline) < 60;
         document.getElementById('onlineIndicator').style.display = isOnline ? 'inline-block' : 'none';
       }
+    });
+    
+    // Підписка на статус онлайн
+    if (unsubscribeOnlineStatus) unsubscribeOnlineStatus();
+    unsubscribeOnlineStatus = onSnapshot(doc(db, "users", otherUid), (snap) => {
+      const lastOnline = snap.data()?.lastOnline?.seconds || 0;
+      const isOnline = (Date.now()/1000 - lastOnline) < 60;
+      document.getElementById('onlineIndicator').style.display = isOnline ? 'inline-block' : 'none';
     });
     
     const chatId = getChatId(currentUser.uid, otherUid);

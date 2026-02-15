@@ -2169,7 +2169,7 @@
     }
   };
 
-  // ================= ЧАТИ (ВИПРАВЛЕНО) =================
+  // ================= ЧАТИ (ВИПРАВЛЕНО: ПОВНА ОБРОБКА ПОМИЛОК) =================
   async function loadChatList() {
     if (!currentUser) return;
     const list = document.getElementById('chatList');
@@ -2230,7 +2230,12 @@
     const chatRef = doc(db, "chats", chatId);
     await updateDoc(chatRef, { [`unread.${currentUser.uid}`]: 0 });
     
-    await subscribeToChat(chatId);
+    try {
+      await subscribeToChat(chatId);
+    } catch (error) {
+      console.error('Error subscribing to chat:', error);
+      showToast('Помилка завантаження повідомлень');
+    }
     
     if (unsubscribeOnlineStatus) unsubscribeOnlineStatus();
     unsubscribeOnlineStatus = onSnapshot(doc(db, "users", otherUid), (snap) => {
@@ -2309,14 +2314,13 @@
   const getChatId = (uid1, uid2) => [uid1, uid2].sort().join('_');
 
   async function subscribeToChat(chatId) {
-    if (!currentUser) return;
+    if (!currentUser) throw new Error('No current user');
     if (unsubscribeChat) unsubscribeChat();
     if (unsubscribeTyping) unsubscribeTyping();
 
     const messagesContainer = document.getElementById('chatMessages');
     if (!messagesContainer) {
-      console.error('chatMessages not found');
-      return;
+      throw new Error('chatMessages container not found');
     }
 
     // Спочатку завантажимо існуючі повідомлення один раз, щоб одразу показати їх
@@ -2327,6 +2331,7 @@
     } catch (error) {
       console.error('Error loading initial messages:', error);
       showToast('Помилка завантаження повідомлень');
+      throw error; // передаємо далі, щоб вищий рівень знав про помилку
     }
 
     // Підписуємося на зміни

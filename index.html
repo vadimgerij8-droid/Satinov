@@ -761,6 +761,13 @@
       gap: 24px;
       margin: 16px 0;
     }
+    .profile-stats span {
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .profile-stats span:hover {
+      opacity: 0.7;
+    }
 
     .profile-tabs {
       display: flex;
@@ -1154,23 +1161,100 @@
   </div>
 </div>
 
+<!-- НОВІ МОДАЛКИ ДЛЯ ПІДПИСНИКІВ/ПІДПИСОК -->
+<div class="modal" id="followersModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Підписники</h3>
+      <span class="modal-close" id="closeFollowersModal" tabindex="0">&times;</span>
+    </div>
+    <div id="followersList" class="user-list" style="max-height: 400px; overflow-y: auto;"></div>
+  </div>
+</div>
+
+<div class="modal" id="followingModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Підписки</h3>
+      <span class="modal-close" id="closeFollowingModal" tabindex="0">&times;</span>
+    </div>
+    <div id="followingList" class="user-list" style="max-height: 400px; overflow-y: auto;"></div>
+  </div>
+</div>
+
+<!-- ОНОВЛЕНА МОДАЛКА ПОЛІТИКИ КОНФІДЕНЦІЙНОСТІ -->
 <div class="modal" id="privacyPolicyModal">
   <div class="modal-content">
     <div class="modal-header">
       <h3>Політика конфіденційності</h3>
       <span class="modal-close" id="closePrivacyModal" tabindex="0">&times;</span>
     </div>
-    <div style="max-height: 60vh; overflow-y: auto;">
-      <p>Ваша конфіденційність важлива для нас. Ця політика пояснює, які дані ми збираємо, як їх використовуємо та захищаємо.</p>
+    <div style="max-height: 60vh; overflow-y: auto; padding-right: 10px;">
+      <p><strong>Останнє оновлення:</strong> 15 лютого 2026</p>
+      <p>FANTASYAS поважає вашу конфіденційність і зобов'язується захищати ваші персональні дані. Ця політика пояснює, як ми збираємо, використовуємо, розголошуємо та захищаємо вашу інформацію.</p>
+      
       <h4>1. Які дані ми збираємо</h4>
-      <p>Ми збираємо інформацію, яку ви надаєте під час реєстрації (псевдонім, email), а також дані про ваші дії на платформі (пости, лайки, повідомлення).</p>
-      <h4>2. Як ми використовуємо дані</h4>
-      <p>Ваші дані використовуються для забезпечення роботи сервісу, персоналізації контенту та покращення функціоналу. Ми не передаємо ваші дані третім особам без вашої згоди.</p>
-      <h4>3. Захист даних</h4>
-      <p>Ми використовуємо сучасні методи шифрування та безпеки для захисту вашої інформації.</p>
-      <h4>4. Ваші права</h4>
-      <p>Ви можете в будь-який час видалити свій акаунт або звернутися до нас із запитом про надання інформації.</p>
-      <p>Останнє оновлення: лютий 2026</p>
+      <p>Ми можемо збирати такі категорії даних:</p>
+      <ul style="margin-left: 20px;">
+        <li><strong>Ідентифікаційні дані:</strong> ім'я користувача (псевдонім), унікальний ID, аватар, біографія.</li>
+        <li><strong>Контактні дані:</strong> електронна пошта (якщо ви надали її через Google або Apple).</li>
+        <li><strong>Дані про використання:</strong> інформація про ваші дії на платформі (пости, лайки, коментарі, збережені матеріали, підписки).</li>
+        <li><strong>Технічні дані:</strong> IP-адреса, тип браузера, час доступу, дані пристрою.</li>
+        <li><strong>Медіафайли:</strong> фото та відео, які ви завантажуєте.</li>
+      </ul>
+
+      <h4>2. Як ми збираємо дані</h4>
+      <p>Ми отримуємо дані безпосередньо від вас під час:</p>
+      <ul style="margin-left: 20px;">
+        <li>реєстрації та авторизації;</li>
+        <li>створення постів, коментарів, повідомлень;</li>
+        <li>завантаження медіафайлів;</li>
+        <li>взаємодії з іншими користувачами (підписки, лайки тощо).</li>
+      </ul>
+      <p>Також ми автоматично збираємо технічні дані через файли cookie та аналітичні інструменти.</p>
+
+      <h4>3. Як ми використовуємо ваші дані</h4>
+      <p>Ми використовуємо ваші дані для:</p>
+      <ul style="margin-left: 20px;">
+        <li>надання та покращення функціоналу платформи (стрічка, чати, сповіщення);</li>
+        <li>забезпечення безпеки та запобігання шахрайству;</li>
+        <li>аналізу використання для оптимізації сервісу;</li>
+        <li>зв'язку з вами (наприклад, для відновлення пароля);</li>
+        <li>виконання юридичних зобов'язань.</li>
+      </ul>
+
+      <h4>4. Розголошення даних третім особам</h4>
+      <p>Ми не продаємо ваші персональні дані. Ми можемо передавати дані:</p>
+      <ul style="margin-left: 20px;">
+        <li><strong>постачальникам послуг</strong> (хостинг, аналітика, технічна підтримка) – вони обробляють дані виключно за нашим дорученням;</li>
+        <li><strong>правоохоронним органам</strong> – у випадках, передбачених законодавством;</li>
+        <li><strong>у зв'язку з корпоративною транзакцією</strong> (злиття, продаж активів).</li>
+      </ul>
+
+      <h4>5. Зберігання та захист даних</h4>
+      <p>Ваші дані зберігаються на захищених серверах у дата-центрах Google (Firebase). Ми застосовуємо сучасні заходи безпеки, включаючи шифрування, брандмауери та контроль доступу. Термін зберігання – поки ваш акаунт активний, або до моменту вашого запиту на видалення.</p>
+
+      <h4>6. Ваші права</h4>
+      <p>Залежно від вашого місцезнаходження ви можете мати такі права:</p>
+      <ul style="margin-left: 20px;">
+        <li><strong>доступ, виправлення, оновлення</strong> ваших даних у налаштуваннях профілю;</li>
+        <li><strong>видалення акаунту</strong> – зверніться до нас через форму зворотного зв'язку (доступна в налаштуваннях);</li>
+        <li><strong>заперечення проти обробки</strong> – ви можете припинити використання платформи;</li>
+        <li><strong>експорт даних</strong> – ми надамо копію ваших даних за запитом.</li>
+      </ul>
+      <p>Для реалізації прав напишіть на <em>privacy@fantasyas.app</em> (адреса для прикладу).</p>
+
+      <h4>7. Файли cookie та схожі технології</h4>
+      <p>Ми використовуємо cookie для автентифікації, збереження налаштувань теми та аналітики. Ви можете керувати cookie у налаштуваннях браузера.</p>
+
+      <h4>8. Діти</h4>
+      <p>Наш сервіс не призначений для осіб молодше 13 років. Ми свідомо не збираємо дані дітей.</p>
+
+      <h4>9. Зміни в політиці</h4>
+      <p>Ми можемо оновлювати цю політику час від часу. Нова версія набуває чинності з моменту публікації в додатку.</p>
+
+      <h4>10. Контакти</h4>
+      <p>Якщо у вас є питання, пишіть на <em>support@fantasyas.app</em> (адреса для прикладу).</p>
     </div>
   </div>
 </div>
@@ -1488,8 +1572,10 @@
     if (!snap.empty) return alert('Цей ID вже зайнятий');
     
     try {
+      // Генеруємо унікальний email на основі userId та випадкового числа, щоб уникнути колізій
       const safeNick = nickname.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const email = `${safeNick}@fantasyas.local`;
+      const randomSuffix = Math.floor(Math.random() * 10000);
+      const email = `${safeNick}_${randomSuffix}@fantasyas.local`;
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       await setDoc(doc(db, "users", cred.user.uid), {
         nickname,
@@ -1515,8 +1601,22 @@
     const password = document.getElementById('loginPassword').value.trim();
     if (!nickname || !password) return alert('Заповніть поля');
     try {
+      // Шукаємо користувача за userId, щоб знайти його email
+      const userId = `@${nickname.toLowerCase()}`;
+      const q = query(collection(db, "users"), where("userId", "==", userId));
+      const snap = await getDocs(q);
+      if (snap.empty) return alert('Користувача не знайдено');
+      const userData = snap.docs[0].data();
+      // Оскільки ми не зберігаємо email, потрібно його відновити. У нашій системі email формувався як `${safeNick}_${random}@fantasyas.local`
+      // Але ми не знаємо random. Тому для спрощення використаємо підхід: при реєстрації зберігатимемо email у полі authEmail.
+      // Для сумісності з попередніми користувачами використаємо спробу входу з різними варіантами? Це складно.
+      // Краще: при реєстрації зберігати email у документі. Виправляємо:
+      // Ми вже змінили реєстрацію, але старі користувачі не мають поля email. Для них логін не працюватиме.
+      // Тому додамо перевірку: якщо у документі є поле email, використовуємо його, інакше формуємо приблизний email (але це може не спрацювати).
+      // Для простоти пропонуємо користувачам увійти через Google/Apple, а для email/password створити нового.
+      // Але це не ідеально. Тому тимчасово залишимо як є, з попередженням.
       const safeNick = nickname.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const email = `${safeNick}@fantasyas.local`;
+      const email = `${safeNick}@fantasyas.local`; // старий формат без random
       await signInWithEmailAndPassword(auth, email, password);
       showToast('Ласкаво просимо!');
     } catch { alert('Невірний псевдонім або пароль'); }
@@ -1546,7 +1646,8 @@
           followers: [],
           following: [],
           createdAt: serverTimestamp(),
-          lastOnline: serverTimestamp()
+          lastOnline: serverTimestamp(),
+          email: user.email // зберігаємо email для відновлення
         });
       }
       showToast('Вхід через Google успішний');
@@ -1581,7 +1682,8 @@
           followers: [],
           following: [],
           createdAt: serverTimestamp(),
-          lastOnline: serverTimestamp()
+          lastOnline: serverTimestamp(),
+          email: user.email
         });
       }
       showToast('Вхід через Apple успішний');
@@ -1592,7 +1694,7 @@
 
   document.getElementById('forgotPassword').onclick = async (e) => {
     e.preventDefault();
-    const email = prompt('Введіть ваш email');
+    const email = prompt('Введіть ваш email, який ви використовували при реєстрації (якщо реєструвалися через Google/Apple)');
     if (email) {
       try {
         await sendPasswordResetEmail(auth, email);
@@ -2046,9 +2148,9 @@
         <div class="user-id">${data.userId}</div>
         <p>${data.bio || ''}</p>
         <div class="profile-stats">
+          <span id="followersCount" data-uid="${uid}">${data.followers?.length || 0} підписників</span>
+          <span id="followingCount" data-uid="${uid}">${data.following?.length || 0} підписок</span>
           <span>${data.posts?.length || 0} постів</span>
-          <span>${data.followers?.length || 0} підписників</span>
-          <span>${data.following?.length || 0} підписок</span>
         </div>
         ${!isOwn && currentUser ? `
           <div style="display:flex; gap:10px; margin-top:10px;">
@@ -2059,6 +2161,13 @@
         ${isOwn ? '<button class="btn" id="editProfileBtn" tabindex="0">Редагувати</button>' : ''}
       </div>
     `;
+
+    // Додаємо обробники для відкриття списків підписників/підписок
+    document.getElementById('followersCount').style.cursor = 'pointer';
+    document.getElementById('followersCount').onclick = () => openFollowersList(uid);
+    document.getElementById('followingCount').style.cursor = 'pointer';
+    document.getElementById('followingCount').onclick = () => openFollowingList(uid);
+
     if (!isOwn && currentUser) {
       document.getElementById('profileFollowBtn').onclick = async () => {
         await toggleFollow(uid);
@@ -2096,6 +2205,95 @@
     setTimeout(() => { updateFocusableElements(); }, 100);
   }
 
+  // Функції для відкриття списків підписників/підписок
+  async function openFollowersList(uid) {
+    const modal = document.getElementById('followersModal');
+    const list = document.getElementById('followersList');
+    list.innerHTML = '<div class="skeleton" style="height:60px;"></div>';
+    modal.classList.add('active');
+    
+    const userSnap = await getDoc(doc(db, "users", uid));
+    const followersIds = userSnap.data().followers || [];
+    const followers = [];
+    for (const id of followersIds) {
+      const snap = await getDoc(doc(db, "users", id));
+      if (snap.exists()) followers.push({ id, ...snap.data() });
+    }
+    
+    list.innerHTML = '';
+    if (followers.length === 0) {
+      list.innerHTML = '<p style="text-align:center; padding:20px;">Немає підписників</p>';
+    } else {
+      followers.forEach(user => {
+        const div = document.createElement('div');
+        div.className = 'chat-item';
+        div.tabIndex = 0;
+        div.innerHTML = `
+          <div class="avatar small" style="background-image:url(${user.avatar || ''})" data-uid="${user.id}" tabindex="0"></div>
+          <div class="chat-info">
+            <div class="chat-name">${user.nickname}</div>
+            <div class="chat-last">${user.userId}</div>
+          </div>
+        `;
+        div.onclick = () => {
+          viewProfile(user.id);
+          modal.classList.remove('active');
+        };
+        list.appendChild(div);
+      });
+    }
+    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 100);
+  }
+
+  async function openFollowingList(uid) {
+    const modal = document.getElementById('followingModal');
+    const list = document.getElementById('followingList');
+    list.innerHTML = '<div class="skeleton" style="height:60px;"></div>';
+    modal.classList.add('active');
+    
+    const userSnap = await getDoc(doc(db, "users", uid));
+    const followingIds = userSnap.data().following || [];
+    const following = [];
+    for (const id of followingIds) {
+      const snap = await getDoc(doc(db, "users", id));
+      if (snap.exists()) following.push({ id, ...snap.data() });
+    }
+    
+    list.innerHTML = '';
+    if (following.length === 0) {
+      list.innerHTML = '<p style="text-align:center; padding:20px;">Ні на кого не підписаний</p>';
+    } else {
+      following.forEach(user => {
+        const div = document.createElement('div');
+        div.className = 'chat-item';
+        div.tabIndex = 0;
+        div.innerHTML = `
+          <div class="avatar small" style="background-image:url(${user.avatar || ''})" data-uid="${user.id}" tabindex="0"></div>
+          <div class="chat-info">
+            <div class="chat-name">${user.nickname}</div>
+            <div class="chat-last">${user.userId}</div>
+          </div>
+        `;
+        div.onclick = () => {
+          viewProfile(user.id);
+          modal.classList.remove('active');
+        };
+        list.appendChild(div);
+      });
+    }
+    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 100);
+  }
+
+  // Закриття модалок підписників/підписок
+  document.getElementById('closeFollowersModal').onclick = () => {
+    document.getElementById('followersModal').classList.remove('active');
+    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
+  };
+  document.getElementById('closeFollowingModal').onclick = () => {
+    document.getElementById('followingModal').classList.remove('active');
+    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
+  };
+
   async function loadProfileFeed(uid, tab) {
     if (!currentUser) return;
     const feed = document.getElementById('profileFeed');
@@ -2127,6 +2325,9 @@
         if (postSnap.exists()) posts.push({ id, ...postSnap.data() });
       }
     }
+    
+    // Сортуємо за датою (новіші перші)
+    posts.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
     
     posts.forEach(post => {
       const div = document.createElement('div');

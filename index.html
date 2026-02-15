@@ -960,8 +960,16 @@
         <div class="feed" id="profileFeed"></div>
       </div>
 
+      <!-- ========== ОНОВЛЕНИЙ РОЗДІЛ ЧАТІВ ========== -->
       <div id="chats" class="section">
+        <!-- Пошук користувачів (як в Instagram) -->
+        <div class="chat-search-container" style="padding: 0 0 12px 0;">
+          <input type="text" id="chatSearchInput" class="input" placeholder="Пошук користувачів..." tabindex="0">
+          <div id="chatSearchResults" class="user-list" style="margin-top:10px; display:none;"></div>
+        </div>
+        <!-- Список наявних чатів -->
         <div class="chat-list" id="chatList"></div>
+        <!-- Вікно чату -->
         <div class="chat-window" id="chatWindow" style="display:none;">
           <div class="chat-header">
             <div class="avatar" id="chatAvatar"></div>
@@ -1360,6 +1368,9 @@
       if (section === 'chats' && currentUser) {
         document.getElementById('chatWindow').style.display = 'none';
         loadChatList();
+        // Сховати результати пошуку при перемиканні на чати
+        document.getElementById('chatSearchResults').style.display = 'none';
+        document.getElementById('chatSearchInput').value = '';
       }
       if (section === 'groups' && currentUser) {
         document.getElementById('groupChatWindow').style.display = 'none';
@@ -2399,6 +2410,68 @@
       document.getElementById('sendMessage').click();
     }
   });
+
+  // ================= НОВА ФУНКЦІЯ: ПОШУК КОРИСТУВАЧІВ У ЧАТАХ =================
+  let searchTimeout;
+  document.getElementById('chatSearchInput').addEventListener('input', (e) => {
+    clearTimeout(searchTimeout);
+    const val = e.target.value.trim();
+    if (!val) {
+      document.getElementById('chatSearchResults').style.display = 'none';
+      return;
+    }
+    searchTimeout = setTimeout(() => searchUsersForChat(val), 300);
+  });
+
+  async function searchUsersForChat(queryText) {
+    if (!currentUser) return;
+    const val = queryText.toLowerCase();
+    const resultsContainer = document.getElementById('chatSearchResults');
+    resultsContainer.innerHTML = '';
+    
+    const q1 = query(collection(db, "users"), where("userId", ">=", val.startsWith('@') ? val : `@${val}`), where("userId", "<=", (val.startsWith('@') ? val : `@${val}`) + '\uf8ff'));
+    const q2 = query(collection(db, "users"), where("nickname_lower", ">=", val), where("nickname_lower", "<=", val + '\uf8ff'));
+    
+    const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+    const usersMap = new Map();
+    snap1.forEach(d => usersMap.set(d.id, d.data()));
+    snap2.forEach(d => usersMap.set(d.id, d.data()));
+    
+    if (usersMap.size === 0) {
+      resultsContainer.style.display = 'none';
+      return;
+    }
+    
+    resultsContainer.style.display = 'block';
+    usersMap.forEach((data, uid) => {
+      if (uid === currentUser.uid) return;
+      const div = document.createElement('div');
+      div.className = 'chat-item';
+      div.tabIndex = 0;
+      div.innerHTML = `
+        <div class="avatar small" style="background-image:url(${data.avatar || ''})" tabindex="0"></div>
+        <div class="chat-info">
+          <div class="chat-name">${data.nickname}</div>
+          <div class="chat-last">${data.userId}</div>
+        </div>
+        <button class="btn" tabindex="0">Написати</button>
+      `;
+      // При кліку на весь елемент або на кнопку відкриваємо чат
+      div.onclick = () => {
+        openChat(data.nickname, uid, data.userId);
+        resultsContainer.style.display = 'none';
+        document.getElementById('chatSearchInput').value = '';
+      };
+      div.querySelector('button').onclick = (e) => {
+        e.stopPropagation();
+        openChat(data.nickname, uid, data.userId);
+        resultsContainer.style.display = 'none';
+        document.getElementById('chatSearchInput').value = '';
+      };
+      resultsContainer.appendChild(div);
+    });
+    setTimeout(() => { updateFocusableElements(); }, 100);
+  }
 
   // ================= Групи ================= (повна реалізація)
   async function loadGroups() {

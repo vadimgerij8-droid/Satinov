@@ -65,6 +65,12 @@
       cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>') 12 12, auto;
     }
 
+    body.tv-mode .key:focus {
+      outline: 3px solid var(--accent);
+      background: var(--accent);
+      color: var(--bg);
+    }
+
     /* Віртуальна клавіатура */
     .virtual-keyboard {
       display: none;
@@ -91,6 +97,7 @@
       font-size: 1.2rem;
       cursor: pointer;
       user-select: none;
+      tab-index: 0;
     }
     .key:active {
       background: var(--accent);
@@ -125,6 +132,10 @@
       overflow-y: auto;
       transition: transform var(--transition);
       z-index: 1000;
+      transform: translateX(-100%);
+    }
+    .sidebar.open {
+      transform: translateX(0);
     }
 
     .sidebar-header {
@@ -150,11 +161,14 @@
       transition: all var(--transition);
       cursor: pointer;
       font-weight: 500;
+      tab-index: 0;
     }
 
-    .nav-item:hover {
+    .nav-item:hover,
+    .nav-item:focus {
       background: var(--card);
       color: var(--text-primary);
+      outline: none;
     }
 
     .nav-item.active {
@@ -200,7 +214,7 @@
     }
 
     .menu-toggle {
-      display: none;
+      display: flex;
       width: 28px;
       height: 20px;
       flex-direction: column;
@@ -239,23 +253,6 @@
       display: block;
     }
 
-    /* Mobile sidebar */
-    @media (max-width: 768px) {
-      .sidebar {
-        position: fixed;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        transform: translateX(-100%);
-      }
-      .sidebar.open {
-        transform: translateX(0);
-      }
-      .menu-toggle {
-        display: flex;
-      }
-    }
-
     /* ========== КОМПОНЕНТИ ========== */
     .card {
       background: var(--card);
@@ -280,6 +277,7 @@
       border: 2px solid var(--border);
       cursor: pointer;
       transition: border-color var(--transition);
+      tab-index: 0;
     }
 
     .avatar.small {
@@ -318,12 +316,15 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
+      tab-index: 0;
     }
 
-    .btn:hover {
+    .btn:hover,
+    .btn:focus {
       background: var(--accent);
       color: var(--bg);
       border-color: var(--accent);
+      outline: none;
     }
 
     .btn-primary {
@@ -332,7 +333,8 @@
       border-color: var(--accent);
     }
 
-    .btn-primary:hover {
+    .btn-primary:hover,
+    .btn-primary:focus {
       background: var(--accent-hover);
     }
 
@@ -379,10 +381,13 @@
     .post-author {
       font-weight: 700;
       cursor: pointer;
+      tab-index: 0;
     }
 
-    .post-author:hover {
+    .post-author:hover,
+    .post-author:focus {
       text-decoration: underline;
+      outline: none;
     }
 
     .post-meta {
@@ -418,10 +423,13 @@
       font-weight: 500;
       cursor: pointer;
       transition: color var(--transition);
+      tab-index: 0;
     }
 
-    .post-footer button:hover {
+    .post-footer button:hover,
+    .post-footer button:focus {
       color: var(--accent);
+      outline: none;
     }
 
     .post-footer button.liked {
@@ -452,6 +460,7 @@
       background-size: cover;
       background-position: center;
       flex-shrink: 0;
+      tab-index: 0;
     }
 
     .comment-content {
@@ -467,6 +476,11 @@
       cursor: pointer;
       display: inline-block;
       margin-right: 8px;
+      tab-index: 0;
+    }
+
+    .comment-author:focus {
+      outline: 1px solid var(--accent);
     }
 
     .comment-text {
@@ -509,6 +523,7 @@
       cursor: pointer;
       padding: 4px 8px;
       color: var(--text-secondary);
+      tab-index: 0;
     }
 
     .emoji-picker {
@@ -536,10 +551,13 @@
       padding: 4px;
       border-radius: var(--radius-sm);
       transition: background 0.1s;
+      tab-index: 0;
     }
 
-    .emoji-picker span:hover {
+    .emoji-picker span:hover,
+    .emoji-picker span:focus {
       background: var(--surface);
+      outline: none;
     }
 
     /* Чати */
@@ -559,10 +577,13 @@
       border: 1px solid var(--border);
       cursor: pointer;
       transition: background var(--transition);
+      tab-index: 0;
     }
 
-    .chat-item:hover {
+    .chat-item:hover,
+    .chat-item:focus {
       background: var(--surface);
+      outline: none;
     }
 
     .chat-item.unread {
@@ -691,10 +712,15 @@
       border-radius: var(--radius-md);
       cursor: pointer;
       transition: background var(--transition);
+      tab-index: 0;
     }
 
-    .group-item:hover, .channel-item:hover {
+    .group-item:hover,
+    .group-item:focus,
+    .channel-item:hover,
+    .channel-item:focus {
       background: var(--surface);
+      outline: none;
     }
 
     .group-avatar, .channel-avatar {
@@ -746,11 +772,14 @@
       cursor: pointer;
       font-weight: 600;
       color: var(--text-secondary);
+      tab-index: 0;
     }
 
-    .profile-tab.active {
+    .profile-tab.active,
+    .profile-tab:focus {
       background: var(--accent);
       color: var(--bg);
+      outline: none;
     }
 
     /* Модалки */
@@ -834,32 +863,32 @@
       <div class="logo">FANTASYAS</div>
     </div>
     <nav class="nav">
-      <div class="nav-item active" data-section="home">
+      <div class="nav-item active" data-section="home" tabindex="0">
         <svg class="icon" viewBox="0 0 24 24"><path d="M3 10l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         Головна
       </div>
-      <div class="nav-item" data-section="search">
+      <div class="nav-item" data-section="search" tabindex="0">
         <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         Пошук
       </div>
-      <div class="nav-item" data-section="profile">
+      <div class="nav-item" data-section="profile" tabindex="0">
         <svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Профіль
       </div>
-      <div class="nav-item" data-section="chats">
+      <div class="nav-item" data-section="chats" tabindex="0">
         <svg class="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         Чати
         <span class="badge" id="unreadBadge" style="display:none;">0</span>
       </div>
-      <div class="nav-item" data-section="groups">
+      <div class="nav-item" data-section="groups" tabindex="0">
         <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Групи
       </div>
-      <div class="nav-item" data-section="channels">
+      <div class="nav-item" data-section="channels" tabindex="0">
         <svg class="icon" viewBox="0 0 24 24"><path d="M4 4l16 8-16 8V4z"/></svg>
         Канали
       </div>
-      <div class="nav-item" data-section="settings">
+      <div class="nav-item" data-section="settings" tabindex="0">
         <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H5.78a1.65 1.65 0 0 0-1.51 1 1.65 1.65 0 0 0 .33 1.82l.07.07A10 10 0 0 0 12 17.66a10 10 0 0 0 6.26-2.26z"/></svg>
         Налаштування
       </div>
@@ -1018,7 +1047,6 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
           Тема
         </button>
-        <!-- Новий пункт: TV режим -->
         <button class="btn" id="toggleTVMode" style="margin:18px 0;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="16 21 12 17 8 21"/></svg>
           TV режим
@@ -1213,7 +1241,7 @@
       if (section === 'channels' && currentUser) loadChannels();
       if (section === 'profile' && currentUser) loadMyProfile();
       
-      // Закриваємо sidebar на мобільному
+      // Закриваємо sidebar
       document.getElementById('sidebar').classList.remove('open');
       document.getElementById('menuToggle').classList.remove('active');
     });
@@ -1242,6 +1270,7 @@
     emojiList.forEach(emoji => {
       const span = document.createElement('span');
       span.textContent = emoji;
+      span.setAttribute('tabindex', '0');
       span.onclick = (e) => {
         e.stopPropagation();
         const start = input.selectionStart;
@@ -1251,6 +1280,11 @@
         input.focus();
         input.selectionStart = input.selectionEnd = start + emoji.length;
         picker.style.display = 'none';
+      };
+      span.onkeydown = (e) => {
+        if (e.key === 'Enter') {
+          span.click();
+        }
       };
       picker.appendChild(span);
     });
@@ -1286,6 +1320,7 @@
         if (key === ' ') keyDiv.classList.add('special');
         keyDiv.textContent = key === ' ' ? '␣' : key;
         keyDiv.dataset.key = key;
+        keyDiv.setAttribute('tabindex', '0');
         keyDiv.addEventListener('click', () => {
           if (activeInput) {
             if (key === ' ') {
@@ -1294,6 +1329,11 @@
               activeInput.value += key;
             }
             activeInput.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        });
+        keyDiv.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            keyDiv.click();
           }
         });
         rowDiv.appendChild(keyDiv);
@@ -1306,32 +1346,42 @@
     const backspace = document.createElement('div');
     backspace.className = 'key special';
     backspace.textContent = '⌫';
+    backspace.setAttribute('tabindex', '0');
     backspace.addEventListener('click', () => {
       if (activeInput) {
         activeInput.value = activeInput.value.slice(0, -1);
         activeInput.dispatchEvent(new Event('input', { bubbles: true }));
       }
     });
+    backspace.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') backspace.click();
+    });
     const enter = document.createElement('div');
     enter.className = 'key special';
     enter.textContent = '⏎';
+    enter.setAttribute('tabindex', '0');
     enter.addEventListener('click', () => {
       if (activeInput) {
-        // Для textarea додаємо новий рядок, для input – імітуємо Enter
         if (activeInput.tagName === 'TEXTAREA') {
           activeInput.value += '\n';
         } else {
-          // Для простих полів можна відправити форму, але тут просто знімемо фокус
           activeInput.blur();
         }
         activeInput.dispatchEvent(new Event('input', { bubbles: true }));
       }
     });
+    enter.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') enter.click();
+    });
     const done = document.createElement('div');
     done.className = 'key special';
     done.textContent = 'Готово';
+    done.setAttribute('tabindex', '0');
     done.addEventListener('click', () => {
       if (activeInput) activeInput.blur();
+    });
+    done.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') done.click();
     });
     specialRow.appendChild(backspace);
     specialRow.appendChild(enter);
@@ -1349,7 +1399,6 @@
   });
   document.addEventListener('focusout', (e) => {
     if (tvModeEnabled && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
-      // Даємо час на клік по клавіатурі
       setTimeout(() => {
         if (!keyboardElement.contains(document.activeElement)) {
           activeInput = null;
@@ -1377,6 +1426,48 @@
   if (tvModeEnabled) {
     document.body.classList.add('tv-mode');
   }
+
+  // Навігація стрілками та Enter у TV режимі
+  document.addEventListener('keydown', (e) => {
+    if (!tvModeEnabled) return;
+    
+    const focusable = Array.from(document.querySelectorAll('[tabindex="0"], button, .nav-item, .avatar, .post-author, .post-footer button, .chat-item, .group-item, .channel-item, .profile-tab, .key'));
+    const currentIndex = focusable.indexOf(document.activeElement);
+    
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (currentIndex < focusable.length - 1) {
+        focusable[currentIndex + 1].focus();
+      } else {
+        focusable[0].focus();
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (currentIndex > 0) {
+        focusable[currentIndex - 1].focus();
+      } else {
+        focusable[focusable.length - 1].focus();
+      }
+    } else if (e.key === 'ArrowRight') {
+      // maybe move to next in horizontal? Not needed for now
+    } else if (e.key === 'ArrowLeft') {
+      // maybe move to previous
+    } else if (e.key === 'Enter') {
+      // click the focused element
+      if (document.activeElement && document.activeElement.click) {
+        document.activeElement.click();
+      }
+    }
+  });
+
+  // Прокрутка стрічки клавішами PageUp/PageDown
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'PageDown') {
+      document.querySelector('.content').scrollBy(0, window.innerHeight * 0.8);
+    } else if (e.key === 'PageUp') {
+      document.querySelector('.content').scrollBy(0, -window.innerHeight * 0.8);
+    }
+  });
 
   // ================= Авторизація =================
   document.getElementById('toRegister').onclick = () => {
@@ -1625,7 +1716,6 @@
       if (currentFeedType === 'new') {
         q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(10));
       } else {
-        // Для популярних потрібен складений індекс: likesCount DESC, createdAt DESC
         q = query(collection(db, "posts"), orderBy("likesCount", "desc"), orderBy("createdAt", "desc"), limit(10));
       }
       if (lastVisible) q = query(q, startAfter(lastVisible));
@@ -1653,10 +1743,10 @@
       const commentEl = document.createElement('div');
       commentEl.className = 'comment';
       commentEl.innerHTML = `
-        <div class="comment-avatar" style="background-image:url(${comment.authorAvatar || ''})" data-uid="${comment.author}"></div>
+        <div class="comment-avatar" style="background-image:url(${comment.authorAvatar || ''})" data-uid="${comment.author}" tabindex="0"></div>
         <div class="comment-content">
           <div>
-            <span class="comment-author" data-uid="${comment.author}">${comment.authorName}</span>
+            <span class="comment-author" data-uid="${comment.author}" tabindex="0">${comment.authorName}</span>
             <span class="comment-time">${new Date(comment.createdAt?.seconds * 1000).toLocaleString()}</span>
           </div>
           <div class="comment-text">${comment.text}</div>
@@ -1692,27 +1782,27 @@
       postEl.dataset.postId = post.id;
       postEl.innerHTML = `
         <div class="post-header">
-          <div class="avatar" style="background-image:url(${post.authorAvatar || ''})" data-uid="${post.author}"></div>
+          <div class="avatar" style="background-image:url(${post.authorAvatar || ''})" data-uid="${post.author}" tabindex="0"></div>
           <div>
-            <div class="post-author" data-uid="${post.author}">${post.authorName || 'Невідомо'}</div>
+            <div class="post-author" data-uid="${post.author}" tabindex="0">${post.authorName || 'Невідомо'}</div>
             <div class="post-meta">${post.authorUserId || ''}</div>
           </div>
         </div>
         <div class="post-content">${post.text || ''}</div>
         ${post.mediaUrl ? (post.mediaType==='image' ? `<img src="${post.mediaUrl}" class="post-media" loading="lazy">` : `<video src="${post.mediaUrl}" controls class="post-media"></video>`) : ''}
         <div class="post-footer">
-          <button class="like-btn ${liked ? 'liked' : ''}" data-post-id="${post.id}">
+          <button class="like-btn ${liked ? 'liked' : ''}" data-post-id="${post.id}" tabindex="0">
             <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
             <span>${post.likesCount || 0}</span>
           </button>
-          <button class="comment-toggle-btn" data-post-id="${post.id}">
+          <button class="comment-toggle-btn" data-post-id="${post.id}" tabindex="0">
             <svg viewBox="0 0 24 24" width="20" height="20"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             <span>${post.commentsCount || 0}</span>
           </button>
-          <button class="save-btn ${saved ? 'saved' : ''}" data-post-id="${post.id}">
+          <button class="save-btn ${saved ? 'saved' : ''}" data-post-id="${post.id}" tabindex="0">
             <svg viewBox="0 0 24 24" width="20" height="20"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
           </button>
-          <button class="share-btn" data-post-id="${post.id}">
+          <button class="share-btn" data-post-id="${post.id}" tabindex="0">
             <svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
           </button>
         </div>
@@ -1721,10 +1811,10 @@
           <div class="comment-form">
             <input type="text" id="comment-input-${post.id}" class="comment-input" placeholder="Напишіть коментар...">
             <div class="emoji-picker-container" style="position: relative;">
-              <button class="emoji-button" id="comment-emoji-${post.id}">😊</button>
+              <button class="emoji-button" id="comment-emoji-${post.id}" tabindex="0">😊</button>
               <div class="emoji-picker" id="comment-picker-${post.id}" style="display: none; bottom: 100%; right: 0; position: absolute;"></div>
             </div>
-            <button class="btn btn-primary btn-icon" id="submit-comment-${post.id}">
+            <button class="btn btn-primary btn-icon" id="submit-comment-${post.id}" tabindex="0">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
             </button>
           </div>
@@ -1732,13 +1822,11 @@
       `;
       feed.appendChild(postEl);
 
-      // Налаштовуємо емоджі-пікер для коментаря цього поста
       const commentInput = document.getElementById(`comment-input-${post.id}`);
       if (commentInput) {
         setupEmojiPicker(`comment-emoji-${post.id}`, `comment-picker-${post.id}`, `comment-input-${post.id}`);
       }
 
-      // Обробник кнопки коментарів
       const toggleBtn = postEl.querySelector('.comment-toggle-btn');
       const commentsSection = postEl.querySelector('.comments-section');
       toggleBtn.onclick = async () => {
@@ -1750,7 +1838,6 @@
         }
       };
 
-      // Обробник відправки коментаря
       const submitBtn = document.getElementById(`submit-comment-${post.id}`);
       if (submitBtn) {
         submitBtn.onclick = async () => {
@@ -1759,7 +1846,6 @@
           await addComment(post.id, text);
           commentInput.value = '';
           await loadComments(post.id, document.getElementById(`comments-list-${post.id}`));
-          // Оновлюємо лічильник коментарів
           const countSpan = toggleBtn.querySelector('span');
           countSpan.textContent = parseInt(countSpan.textContent) + 1;
         };
@@ -1767,7 +1853,7 @@
     });
   }
 
-  // ================= Пошук (додано кнопку "Написати") =================
+  // ================= Пошук =================
   async function loadSearchUsers() {
     if (!currentUser) return;
     const val = document.getElementById('searchInput').value.trim().toLowerCase();
@@ -1791,14 +1877,15 @@
       const isFollowing = myFollowing.includes(uid);
       const div = document.createElement('div');
       div.className = 'chat-item';
+      div.setAttribute('tabindex', '0');
       div.innerHTML = `
         <div class="avatar small" style="background-image:url(${data.avatar || ''})"></div>
         <div class="chat-info">
           <div class="chat-name">${data.nickname}</div>
           <div class="chat-last">${data.userId}</div>
         </div>
-        <button class="btn follow-btn">${isFollowing ? 'Відписатися' : 'Підписатися'}</button>
-        <button class="btn message-btn">Написати</button>
+        <button class="btn follow-btn" tabindex="-1">${isFollowing ? 'Відписатися' : 'Підписатися'}</button>
+        <button class="btn message-btn" tabindex="-1">Написати</button>
       `;
       div.querySelector('.follow-btn').onclick = async (e) => {
         e.stopPropagation();
@@ -1853,7 +1940,7 @@
     const header = document.getElementById('profileHeader');
     const isFollowing = !isOwn && currentUser ? (data.followers?.includes(currentUser.uid) || false) : false;
     header.innerHTML = `
-      <div class="avatar large" style="background-image:url(${data.avatar || ''})" data-uid="${uid}"></div>
+      <div class="avatar large" style="background-image:url(${data.avatar || ''})" data-uid="${uid}" tabindex="0"></div>
       <div>
         <h2>${data.nickname}</h2>
         <div class="user-id">${data.userId}</div>
@@ -1865,11 +1952,11 @@
         </div>
         ${!isOwn && currentUser ? `
           <div style="display:flex; gap:10px; margin-top:10px;">
-            <button class="btn" id="profileFollowBtn">${isFollowing ? 'Відписатися' : 'Підписатися'}</button>
-            <button class="btn" id="profileMessageBtn">Написати</button>
+            <button class="btn" id="profileFollowBtn" tabindex="0">${isFollowing ? 'Відписатися' : 'Підписатися'}</button>
+            <button class="btn" id="profileMessageBtn" tabindex="0">Написати</button>
           </div>
         ` : ''}
-        ${isOwn ? '<button class="btn" id="editProfileBtn">Редагувати</button>' : ''}
+        ${isOwn ? '<button class="btn" id="editProfileBtn" tabindex="0">Редагувати</button>' : ''}
       </div>
     `;
     if (!isOwn && currentUser) {
@@ -1892,10 +1979,10 @@
     
     const tabs = document.getElementById('profileTabs');
     tabs.innerHTML = `
-      <div class="profile-tab active" data-tab="posts">Пости</div>
-      <div class="profile-tab" data-tab="likes">Лайки</div>
-      <div class="profile-tab" data-tab="media">Медіа</div>
-      <div class="profile-tab" data-tab="saved">Збережене</div>
+      <div class="profile-tab active" data-tab="posts" tabindex="0">Пости</div>
+      <div class="profile-tab" data-tab="likes" tabindex="0">Лайки</div>
+      <div class="profile-tab" data-tab="media" tabindex="0">Медіа</div>
+      <div class="profile-tab" data-tab="saved" tabindex="0">Збережене</div>
     `;
     document.querySelectorAll('.profile-tab').forEach(tab => {
       tab.onclick = () => {
@@ -2002,7 +2089,10 @@
         
         const userSnap = await getDoc(doc(db, "users", otherUid));
         const user = userSnap.data();
-        if (!user) continue;
+        if (!user) {
+          // If user doesn't exist, maybe delete chat? For now, skip
+          continue;
+        }
         
         const unread = chat.unread?.[currentUser.uid] || 0;
         const lastMsg = chat.lastMessage || '';
@@ -2014,6 +2104,7 @@
         item.className = `chat-item ${unread > 0 ? 'unread' : ''}`;
         item.dataset.chatId = docSnap.id;
         item.dataset.otherUid = otherUid;
+        item.setAttribute('tabindex', '0');
         item.innerHTML = `
           <div class="avatar small ${isOnline ? 'online' : ''}" style="background-image:url(${user.avatar || ''})"></div>
           <div class="chat-info">
@@ -2043,9 +2134,13 @@
     subscribeToChat(chatId);
     
     const userSnap = await getDoc(doc(db, "users", otherUid));
-    const lastOnline = userSnap.data().lastOnline?.seconds || 0;
-    const isOnline = (Date.now()/1000 - lastOnline) < 60;
-    document.getElementById('onlineIndicator').style.display = isOnline ? 'inline-block' : 'none';
+    if (userSnap.exists()) {
+      const lastOnline = userSnap.data().lastOnline?.seconds || 0;
+      const isOnline = (Date.now()/1000 - lastOnline) < 60;
+      document.getElementById('onlineIndicator').style.display = isOnline ? 'inline-block' : 'none';
+    } else {
+      document.getElementById('onlineIndicator').style.display = 'none';
+    }
   }
 
   function openChat(otherName, otherUid, otherUserId) {
@@ -2061,6 +2156,8 @@
         const lastOnline = snap.data().lastOnline?.seconds || 0;
         const isOnline = (Date.now()/1000 - lastOnline) < 60;
         document.getElementById('onlineIndicator').style.display = isOnline ? 'inline-block' : 'none';
+      } else {
+        document.getElementById('onlineIndicator').style.display = 'none';
       }
     });
     
@@ -2103,7 +2200,6 @@
       messages.scrollTop = messages.scrollHeight;
     });
     
-    // Стежимо за набором тексту співрозмовника
     if (currentChatPartner) {
       const typingRef = doc(db, `chats/${chatId}/typing/${currentChatPartner}`);
       unsubscribeTyping = onSnapshot(typingRef, (docSnap) => {
@@ -2188,6 +2284,7 @@
         const item = document.createElement('div');
         item.className = 'group-item';
         item.dataset.groupId = docSnap.id;
+        item.setAttribute('tabindex', '0');
         item.innerHTML = `
           <div class="group-avatar" style="background-image:url(${group.avatar || ''})"></div>
           <div class="group-info">
@@ -2236,13 +2333,14 @@
         const user = userSnap.data();
         const div = document.createElement('div');
         div.className = 'chat-item';
+        div.setAttribute('tabindex', '0');
         div.innerHTML = `
           <div class="avatar small" style="background-image:url(${user.avatar || ''})"></div>
           <div class="chat-info">
             <div class="chat-name">${user.nickname} (${m.role})</div>
           </div>
           ${(m.uid === currentUser.uid || currentGroup.members.find(mm => mm.uid === currentUser.uid)?.role === 'admin') && m.uid !== currentUser.uid ? `
-            <button class="btn remove-member" data-uid="${m.uid}">Видалити</button>
+            <button class="btn remove-member" data-uid="${m.uid}" tabindex="-1">Видалити</button>
           ` : ''}
         `;
         div.querySelectorAll('.remove-member').forEach(btn => {
@@ -2345,13 +2443,14 @@
         const item = document.createElement('div');
         item.className = 'channel-item';
         item.dataset.channelId = docSnap.id;
+        item.setAttribute('tabindex', '0');
         item.innerHTML = `
           <div class="channel-avatar" style="background-image:url(${channel.avatar || ''})"></div>
           <div class="channel-info">
             <div class="channel-name">${channel.name}</div>
             <div class="channel-meta">${channel.subscribers.length} підписників</div>
           </div>
-          <button class="btn subscribe-btn">${isSubscribed ? 'Відписатися' : 'Підписатися'}</button>
+          <button class="btn subscribe-btn" tabindex="-1">${isSubscribed ? 'Відписатися' : 'Підписатися'}</button>
         `;
         item.querySelector('.subscribe-btn').onclick = async (e) => {
           e.stopPropagation();
@@ -2373,7 +2472,7 @@
     document.getElementById('channelView').style.display = 'block';
     document.getElementById('channelHeader').innerHTML = `
       <div style="display:flex; gap:20px;">
-        <div class="avatar large" style="background-image:url(${channel.avatar || ''})"></div>
+        <div class="avatar large" style="background-image:url(${channel.avatar || ''})" tabindex="0"></div>
         <div>
           <h2>${channel.name}</h2>
           <p>${channel.description || ''}</p>

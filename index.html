@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"/>
-  <title>FANTASYAS · ТВ версія (покращена)</title>
+  <title>FANTASYAS · ТВ версія (фінальна)</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
     /* ========== ГЛОБАЛЬНІ СТИЛІ ========== */
@@ -378,7 +378,6 @@
       border-color: var(--accent);
     }
 
-    /* ===== Кастомний вибір файлу ===== */
     .file-input-wrapper {
       position: relative;
       display: inline-block;
@@ -1024,7 +1023,6 @@
       background: var(--surface);
     }
 
-    /* ===== Стилі для хештегів у пошуку ===== */
     .hashtag-list {
       display: flex;
       flex-direction: column;
@@ -1126,6 +1124,29 @@
   </style>
 </head>
 <body>
+<!-- Splash Screen -->
+<div id="fantasyas-splash" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg, #ffffff); display: flex; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.5s ease; pointer-events: none;">
+  <div style="font-family: 'Manrope', sans-serif; font-size: min(15vw, 120px); font-weight: 800; letter-spacing: 0.1em; color: var(--accent, #000000); text-transform: uppercase; opacity: 0; transform: scale(0.5); animation: splashIntro 1.3s ease-in-out forwards;">
+    FANTASYAS
+  </div>
+</div>
+<style>
+@keyframes splashIntro {
+  0% { opacity: 0; transform: scale(0.5); }
+  20% { opacity: 1; transform: scale(1.05); }
+  50% { opacity: 1; transform: scale(1); }
+  65% { transform: scale(1.1); }
+  80% { transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+body.dark #fantasyas-splash {
+  background-color: #000000;
+}
+body.dark #fantasyas-splash div {
+  color: #ffffff;
+}
+</style>
+
 <div class="app">
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
@@ -1208,7 +1229,6 @@
               <div class="emoji-picker" id="postEmojiPicker" style="display: none;"></div>
             </div>
           </div>
-          
           <div class="file-input-wrapper">
             <input type="file" id="postMedia" accept="image/*,video/*">
             <div class="file-input-button">
@@ -1217,7 +1237,6 @@
             </div>
           </div>
           <img id="postMediaPreview" class="file-preview" />
-          
           <button class="btn btn-primary" id="addPost" style="margin-top:12px;" tabindex="0">Опублікувати</button>
         </div>
 
@@ -1266,9 +1285,7 @@
             <span id="onlineIndicator" class="online-indicator" style="display:none;"></span>
           </div>
           <div class="chat-messages" id="chatMessages"></div>
-          <div class="typing-indicator" id="typingIndicator" style="display:none;">
-            <span></span> друкує...
-          </div>
+          <div class="typing-indicator" id="typingIndicator" style="display:none;"></div>
           <div class="chat-input-area">
             <input type="text" id="chatText" class="input" placeholder="Напишіть повідомлення..." tabindex="0"/>
             <div class="emoji-picker-container">
@@ -1483,7 +1500,6 @@
   </div>
 </div>
 
-<!-- Модалки для підписників/підписок -->
 <div class="modal" id="followersModal">
   <div class="modal-content">
     <div class="modal-header">
@@ -1504,7 +1520,6 @@
   </div>
 </div>
 
-<!-- Модалка політики конфіденційності -->
 <div class="modal" id="privacyPolicyModal">
   <div class="modal-content">
     <div class="modal-header">
@@ -1512,9 +1527,8 @@
       <span class="modal-close" id="closePrivacyModal" tabindex="0">&times;</span>
     </div>
     <div style="max-height: 60vh; overflow-y: auto; padding-right: 10px;">
-      <p><strong>Останнє оновлення:</strong> 15 лютого 2026</p>
+      <p><strong>Останнє оновлення:</strong> 16 лютого 2026</p>
       <p>FANTASYAS поважає вашу конфіденційність і зобов'язується захищати ваші персональні дані. Ця політика пояснює, як ми збираємо, використовуємо, розголошуємо та захищаємо вашу інформацію.</p>
-      <!-- решта тексту -->
     </div>
   </div>
 </div>
@@ -1549,7 +1563,7 @@
   let currentChatId = null;
   let currentGroup = null;
   let currentChannel = null;
-  let currentProfileUid = null;  // UID поточного переглянутого профілю
+  let currentProfileUid = null;
   let currentEditingPost = null;
   
   let unsubscribeFeed = null;
@@ -1847,7 +1861,6 @@
         loadChannels();
       }
       if (section === 'profile' && currentUser) {
-        // При переході на профіль через меню завжди показуємо свій профіль
         viewProfile(currentUser.uid);
       }
       
@@ -1986,7 +1999,6 @@
     list.innerHTML = '<div class="skeleton" style="height:60px;"></div>';
 
     try {
-      // Отримуємо всі пости, рахуємо частоту тегів
       const postsSnap = await getDocs(collection(db, "posts"));
       const tagCount = new Map();
       postsSnap.forEach(doc => {
@@ -2023,12 +2035,11 @@
   }
 
   function searchHashtag(tag) {
-    // Переходимо на сторінку пошуку і вставляємо тег у поле
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
-      searchInput.value = tag;
+      searchInput.value = '#' + tag;
       document.querySelector('[data-section="search"]').click();
-      loadSearchUsers(); // це перезавантажить результати
+      loadSearchUsers();
     }
   }
 
@@ -2206,12 +2217,22 @@
     }
   };
 
+  // Приховування заставки після завантаження
+  const splash = document.getElementById('fantasyas-splash');
+  if (splash) {
+    setTimeout(() => {
+      splash.style.opacity = '0';
+      setTimeout(() => {
+        splash.style.display = 'none';
+      }, 500);
+    }, 1500);
+  }
+
   onAuthStateChanged(auth, (user) => {
     cleanupListeners();
     
     if (user) {
       currentUser = user;
-      // Ініціалізуємо currentProfileUid своїм UID
       currentProfileUid = user.uid;
       const authBox = document.getElementById('authBox');
       if (authBox) authBox.style.display = 'none';
@@ -2315,7 +2336,6 @@
       const userSnap = await getDoc(doc(db, "users", currentUser.uid));
       const userData = userSnap.data();
       
-      // Парсимо хештеги
       const hashtags = extractHashtags(text);
       
       const postDoc = await addDoc(collection(db, "posts"), {
@@ -2446,7 +2466,6 @@
         `;
       }
       
-      // Обробка тексту з хештегами
       let contentHtml = post.text || '';
       const hashtagRegex = /#(\w+)/g;
       contentHtml = contentHtml.replace(hashtagRegex, '<span class="hashtag" data-tag="$1">#$1</span>');
@@ -2504,12 +2523,11 @@
         postEl.querySelector('.edit-post-btn').onclick = () => openEditPostModal(post);
       }
 
-      // Клік на хештег
       postEl.querySelectorAll('.hashtag').forEach(span => {
         span.onclick = (e) => {
           e.stopPropagation();
           const tag = span.dataset.tag;
-          searchHashtag('#' + tag);
+          searchHashtag(tag);
         };
       });
 
@@ -2578,7 +2596,6 @@
     try {
       const postRef = doc(db, "posts", currentEditingPost.id);
       let updateData = { text: newText };
-      // Оновлюємо хештеги
       updateData.hashtags = extractHashtags(newText);
       if (file) {
         if (currentEditingPost.mediaUrl) {
@@ -2621,14 +2638,13 @@
     }
   };
 
-  // ================= Пошук (розширений для хештегів) =================
+  // ================= Пошук =================
   async function loadSearchUsers() {
     if (!currentUser) return;
     const val = document.getElementById('searchInput').value.trim().toLowerCase();
     const userList = document.getElementById('userList');
     if (!val) { userList.innerHTML = ''; return; }
 
-    // Якщо це хештег
     if (val.startsWith('#')) {
       const tag = val.substring(1);
       const q = query(collection(db, "posts"), where("hashtags", "array-contains", tag));
@@ -2683,6 +2699,7 @@
   }
   document.getElementById('searchInput').addEventListener('input', loadSearchUsers);
 
+  // ================= Виправлена функція підписки/відписки =================
   async function toggleFollow(targetUid) {
     if (!currentUser) return;
     const myRef = doc(db, "users", currentUser.uid);
@@ -2690,11 +2707,15 @@
     const mySnap = await getDoc(myRef);
     const following = mySnap.data().following || [];
     if (following.includes(targetUid)) {
+      // Відписатися
       await updateDoc(myRef, { following: arrayRemove(targetUid) });
       await updateDoc(targetRef, { followers: arrayRemove(currentUser.uid) });
+      showToast('Відписано');
     } else {
+      // Підписатися
       await updateDoc(myRef, { following: arrayUnion(targetUid) });
       await updateDoc(targetRef, { followers: arrayUnion(currentUser.uid) });
+      showToast('Підписано');
     }
   }
 
@@ -3068,7 +3089,7 @@
     }
   };
 
-  // ================= ЧАТИ (покращені) =================
+  // ================= ЧАТИ =================
   const getChatId = (uid1, uid2) => [uid1, uid2].sort().join('_');
 
   async function loadChatList() {
@@ -3292,7 +3313,6 @@
       throw new Error('chatMessages container not found');
     }
 
-    // Отримуємо інформацію про співрозмовника (аватар)
     const otherUserSnap = await getDoc(doc(db, "users", currentChatPartner));
     const otherUser = otherUserSnap.data();
 

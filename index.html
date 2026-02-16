@@ -1576,7 +1576,7 @@
   let currentChatId = null;
   let currentGroup = null;
   let currentChannel = null;
-  let currentProfileUid = null;  // UID поточного переглянутого профілю
+  let currentProfileUid = null;
   let currentEditingPost = null;
   
   let unsubscribeFeed = null;
@@ -1602,7 +1602,7 @@
     tvNavEnabled: localStorage.getItem('tvNav') !== 'false',
     remoteNavEnabled: localStorage.getItem('remoteNav') !== 'false',
     focusOptimized: localStorage.getItem('focusOptimized') !== 'false',
-    tvCursorEnabled: localStorage.getItem('tvCursor') === 'true' // за замовчуванням вимкнено
+    tvCursorEnabled: localStorage.getItem('tvCursor') === 'true'
   };
 
   // ================= Допоміжні функції =================
@@ -1743,7 +1743,6 @@
     return null;
   }
 
-  // Функція оновлення TV-стрілочки
   function updateTVCursor() {
     const cursor = document.getElementById('tvCursor');
     if (!cursor) return;
@@ -1899,7 +1898,6 @@
         loadChannels();
       }
       if (section === 'profile' && currentUser) {
-        // При переході на профіль через меню завжди показуємо свій профіль
         viewProfile(currentUser.uid);
       }
       
@@ -2038,7 +2036,6 @@
     list.innerHTML = '<div class="skeleton" style="height:60px;"></div>';
 
     try {
-      // Отримуємо всі пости, рахуємо частоту тегів
       const postsSnap = await getDocs(collection(db, "posts"));
       const tagCount = new Map();
       postsSnap.forEach(doc => {
@@ -2075,12 +2072,11 @@
   }
 
   function searchHashtag(tag) {
-    // Переходимо на сторінку пошуку і вставляємо тег у поле
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
       searchInput.value = '#' + tag;
       document.querySelector('[data-section="search"]').click();
-      loadSearchUsers(); // це перезавантажить результати
+      loadSearchUsers();
     }
   }
 
@@ -2263,7 +2259,6 @@
     
     if (user) {
       currentUser = user;
-      // Ініціалізуємо currentProfileUid своїм UID
       currentProfileUid = user.uid;
       const authBox = document.getElementById('authBox');
       if (authBox) authBox.style.display = 'none';
@@ -2367,7 +2362,6 @@
       const userSnap = await getDoc(doc(db, "users", currentUser.uid));
       const userData = userSnap.data();
       
-      // Парсимо хештеги
       const hashtags = extractHashtags(text);
       
       const postDoc = await addDoc(collection(db, "posts"), {
@@ -2475,8 +2469,9 @@
     }
   }
 
-  function renderPosts(docs) {
-    const feed = document.getElementById('feed');
+  // Функція рендеру постів з можливістю вказати контейнер (для пошуку за хештегом)
+  function renderPosts(docs, container = null) {
+    const feed = container || document.getElementById('feed');
     if (!feed) return;
     docs.forEach(docSnap => {
       const post = { id: docSnap.id, ...docSnap.data() };
@@ -2498,7 +2493,6 @@
         `;
       }
       
-      // Обробка тексту з хештегами
       let contentHtml = post.text || '';
       const hashtagRegex = /#(\w+)/g;
       contentHtml = contentHtml.replace(hashtagRegex, '<span class="hashtag" data-tag="$1">#$1</span>');
@@ -2556,7 +2550,6 @@
         postEl.querySelector('.edit-post-btn').onclick = () => openEditPostModal(post);
       }
 
-      // Клік на хештег
       postEl.querySelectorAll('.hashtag').forEach(span => {
         span.onclick = (e) => {
           e.stopPropagation();
@@ -2588,12 +2581,18 @@
         submitBtn.onclick = async () => {
           const text = commentInput.value.trim();
           if (!text) return;
-          await addComment(post.id, text);
-          commentInput.value = '';
-          const commentsList = document.getElementById(`comments-list-${post.id}`);
-          if (commentsList) await loadComments(post.id, commentsList);
-          const countSpan = toggleBtn.querySelector('span');
-          if (countSpan) countSpan.textContent = parseInt(countSpan.textContent) + 1;
+          try {
+            await addComment(post.id, text);
+            commentInput.value = '';
+            const commentsList = document.getElementById(`comments-list-${post.id}`);
+            if (commentsList) await loadComments(post.id, commentsList);
+            const countSpan = toggleBtn.querySelector('span');
+            if (countSpan) countSpan.textContent = parseInt(countSpan.textContent) + 1;
+            showToast('Коментар додано');
+          } catch (error) {
+            console.error('Error adding comment:', error);
+            showToast('Помилка: ' + error.message);
+          }
         };
       }
     });
@@ -2631,7 +2630,6 @@
     try {
       const postRef = doc(db, "posts", currentEditingPost.id);
       let updateData = { text: newText };
-      // Оновлюємо хештеги
       updateData.hashtags = extractHashtags(newText);
       if (file) {
         if (currentEditingPost.mediaUrl) {
@@ -2681,7 +2679,6 @@
     const userList = document.getElementById('userList');
     if (!val) { userList.innerHTML = ''; return; }
 
-    // Якщо це хештег
     if (val.startsWith('#')) {
       const tag = val.substring(1);
       const q = query(collection(db, "posts"), where("hashtags", "array-contains", tag));
@@ -2693,7 +2690,7 @@
         const feedDiv = document.createElement('div');
         feedDiv.className = 'feed';
         userList.appendChild(feedDiv);
-        renderPosts(snapshot.docs, feedDiv);
+        renderPosts(snapshot.docs, feedDiv); // передаємо контейнер
       }
       return;
     }
@@ -3121,7 +3118,7 @@
     }
   };
 
-  // ================= ЧАТИ (покращені) =================
+  // ================= ЧАТИ =================
   const getChatId = (uid1, uid2) => [uid1, uid2].sort().join('_');
 
   async function loadChatList() {
@@ -3345,7 +3342,6 @@
       throw new Error('chatMessages container not found');
     }
 
-    // Отримуємо інформацію про співрозмовника (аватар)
     const otherUserSnap = await getDoc(doc(db, "users", currentChatPartner));
     const otherUser = otherUserSnap.data();
 

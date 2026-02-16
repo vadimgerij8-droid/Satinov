@@ -6,7 +6,7 @@
   <title>FANTASYAS · ТВ версія (виправлено)</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
-    /* ========== ГЛОБАЛЬНІ СТИЛІ (не змінені) ========== */
+    /* ========== ГЛОБАЛЬНІ СТИЛІ ========== */
     * {
       margin: 0;
       padding: 0;
@@ -1076,16 +1076,12 @@
         <div class="feed" id="profileFeed"></div>
       </div>
 
-      <!-- ========== ОНОВЛЕНИЙ РОЗДІЛ ЧАТІВ ========== -->
       <div id="chats" class="section">
-        <!-- Пошук користувачів (як в Instagram) -->
         <div class="chat-search-container" style="padding: 0 0 12px 0;">
           <input type="text" id="chatSearchInput" class="input" placeholder="Пошук користувачів..." tabindex="0">
           <div id="chatSearchResults" class="user-list" style="margin-top:10px; display:none;"></div>
         </div>
-        <!-- Список наявних чатів -->
         <div class="chat-list" id="chatList"></div>
-        <!-- Вікно чату -->
         <div class="chat-window" id="chatWindow" style="display:none;">
           <div class="chat-header">
             <div class="avatar" id="chatAvatar"></div>
@@ -1178,7 +1174,6 @@
           Політика конфіденційності
         </button>
 
-        <!-- Пункт "Телевізор" (оновлено) -->
         <div style="margin-top:20px; border-top:1px solid var(--border); padding-top:20px;">
           <h3>Телевізор</h3>
           <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
@@ -1204,16 +1199,182 @@
   <div class="keyboard-row" id="keyboardRow5"></div>
 </div>
 
-<!-- Модалки (без змін) -->
-<div class="modal" id="editProfileModal">...</div>
-<div class="modal" id="editPostModal">...</div>
-<div class="modal" id="createGroupModal">...</div>
-<div class="modal" id="createChannelModal">...</div>
-<div class="modal" id="groupMembersModal">...</div>
-<div class="modal" id="editGroupModal">...</div>
-<div class="modal" id="followersModal">...</div>
-<div class="modal" id="followingModal">...</div>
-<div class="modal" id="privacyPolicyModal">...</div>
+<!-- Модальні вікна -->
+<div class="modal" id="editProfileModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Редагувати профіль</h3>
+      <span class="modal-close" id="closeModal" tabindex="0">&times;</span>
+    </div>
+    <input type="text" id="editNickname" class="input" placeholder="Псевдонім" tabindex="0"/>
+    <textarea id="editBio" class="input" placeholder="Про себе" rows="4" style="margin:14px 0;" tabindex="0"></textarea>
+    <input type="file" id="editAvatar" accept="image/*" style="margin:14px 0;" tabindex="0" />
+    <button class="btn btn-primary" id="saveProfileEdit" tabindex="0">Зберегти</button>
+  </div>
+</div>
+
+<div class="modal" id="editPostModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Редагувати пост</h3>
+      <span class="modal-close" id="closeEditPostModal" tabindex="0">&times;</span>
+    </div>
+    <textarea id="editPostText" class="input" placeholder="Текст посту" rows="4" tabindex="0"></textarea>
+    <input type="file" id="editPostMedia" accept="image/*,video/*" style="margin:14px 0;" tabindex="0" />
+    <button class="btn btn-primary" id="savePostEdit" tabindex="0">Зберегти</button>
+    <button class="btn" id="deletePostBtn" style="margin-top:10px; background:#ff3040; color:white;" tabindex="0">Видалити пост</button>
+  </div>
+</div>
+
+<div class="modal" id="createGroupModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Створити групу</h3>
+      <span class="modal-close" id="closeGroupModal" tabindex="0">&times;</span>
+    </div>
+    <input type="text" id="groupName" class="input" placeholder="Назва групи" tabindex="0"/>
+    <textarea id="groupDesc" class="input" placeholder="Опис" rows="3" style="margin:14px 0;" tabindex="0"></textarea>
+    <input type="file" id="groupAvatar" accept="image/*" tabindex="0"/>
+    <button class="btn btn-primary" id="saveGroup" tabindex="0">Створити</button>
+  </div>
+</div>
+
+<div class="modal" id="createChannelModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Створити канал</h3>
+      <span class="modal-close" id="closeChannelModal" tabindex="0">&times;</span>
+    </div>
+    <input type="text" id="channelName" class="input" placeholder="Назва каналу" tabindex="0"/>
+    <textarea id="channelDesc" class="input" placeholder="Опис" rows="3" style="margin:14px 0;" tabindex="0"></textarea>
+    <input type="file" id="channelAvatar" accept="image/*" tabindex="0"/>
+    <button class="btn btn-primary" id="saveChannel" tabindex="0">Створити</button>
+  </div>
+</div>
+
+<div class="modal" id="groupMembersModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Учасники групи</h3>
+      <span class="modal-close" id="closeGroupMembers" tabindex="0">&times;</span>
+    </div>
+    <div id="membersList"></div>
+    <div style="margin-top:20px;">
+      <input type="text" id="addMemberInput" class="input" placeholder="ID користувача (наприклад, @username)" tabindex="0"/>
+      <button class="btn btn-primary" id="addMemberBtn" tabindex="0">Додати</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="editGroupModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Редагувати групу</h3>
+      <span class="modal-close" id="closeEditGroupModal" tabindex="0">&times;</span>
+    </div>
+    <input type="text" id="editGroupName" class="input" placeholder="Назва групи" tabindex="0"/>
+    <textarea id="editGroupDesc" class="input" placeholder="Опис" rows="3" style="margin:14px 0;" tabindex="0"></textarea>
+    <input type="file" id="editGroupAvatar" accept="image/*" tabindex="0"/>
+    <button class="btn btn-primary" id="saveGroupEdit" tabindex="0">Зберегти</button>
+  </div>
+</div>
+
+<div class="modal" id="followersModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Підписники</h3>
+      <span class="modal-close" id="closeFollowersModal" tabindex="0">&times;</span>
+    </div>
+    <div id="followersList" class="user-list" style="max-height: 400px; overflow-y: auto;"></div>
+  </div>
+</div>
+
+<div class="modal" id="followingModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Підписки</h3>
+      <span class="modal-close" id="closeFollowingModal" tabindex="0">&times;</span>
+    </div>
+    <div id="followingList" class="user-list" style="max-height: 400px; overflow-y: auto;"></div>
+  </div>
+</div>
+
+<!-- Модальне вікно політики конфіденційності (відновлено) -->
+<div class="modal" id="privacyPolicyModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Політика конфіденційності</h3>
+      <span class="modal-close" id="closePrivacyModal" tabindex="0">&times;</span>
+    </div>
+    <div style="max-height: 60vh; overflow-y: auto; padding-right: 10px;">
+      <p><strong>Останнє оновлення:</strong> 15 лютого 2026</p>
+      <p>FANTASYAS поважає вашу конфіденційність і зобов'язується захищати ваші персональні дані. Ця політика пояснює, як ми збираємо, використовуємо, розголошуємо та захищаємо вашу інформацію.</p>
+      
+      <h4>1. Які дані ми збираємо</h4>
+      <p>Ми можемо збирати такі категорії даних:</p>
+      <ul style="margin-left: 20px;">
+        <li><strong>Ідентифікаційні дані:</strong> ім'я користувача (псевдонім), унікальний ID, аватар, біографія.</li>
+        <li><strong>Контактні дані:</strong> електронна пошта (якщо ви надали її через Google або Apple).</li>
+        <li><strong>Дані про використання:</strong> інформація про ваші дії на платформі (пости, лайки, коментарі, збережені матеріали, підписки).</li>
+        <li><strong>Технічні дані:</strong> IP-адреса, тип браузера, час доступу, дані пристрою.</li>
+        <li><strong>Медіафайли:</strong> фото та відео, які ви завантажуєте.</li>
+      </ul>
+
+      <h4>2. Як ми збираємо дані</h4>
+      <p>Ми отримуємо дані безпосередньо від вас під час:</p>
+      <ul style="margin-left: 20px;">
+        <li>реєстрації та авторизації;</li>
+        <li>створення постів, коментарів, повідомлень;</li>
+        <li>завантаження медіафайлів;</li>
+        <li>взаємодії з іншими користувачами (підписки, лайки тощо).</li>
+      </ul>
+      <p>Також ми автоматично збираємо технічні дані через файли cookie та аналітичні інструменти.</p>
+
+      <h4>3. Як ми використовуємо ваші дані</h4>
+      <p>Ми використовуємо ваші дані для:</p>
+      <ul style="margin-left: 20px;">
+        <li>надання та покращення функціоналу платформи (стрічка, чати, сповіщення);</li>
+        <li>забезпечення безпеки та запобігання шахрайству;</li>
+        <li>аналізу використання для оптимізації сервісу;</li>
+        <li>зв'язку з вами (наприклад, для відновлення пароля);</li>
+        <li>виконання юридичних зобов'язань.</li>
+      </ul>
+
+      <h4>4. Розголошення даних третім особам</h4>
+      <p>Ми не продаємо ваші персональні дані. Ми можемо передавати дані:</p>
+      <ul style="margin-left: 20px;">
+        <li><strong>постачальникам послуг</strong> (хостинг, аналітика, технічна підтримка) – вони обробляють дані виключно за нашим дорученням;</li>
+        <li><strong>правоохоронним органам</strong> – у випадках, передбачених законодавством;</li>
+        <li><strong>у зв'язку з корпоративною транзакцією</strong> (злиття, продаж активів).</li>
+      </ul>
+
+      <h4>5. Зберігання та захист даних</h4>
+      <p>Ваші дані зберігаються на захищених серверах у дата-центрах Google (Firebase). Ми застосовуємо сучасні заходи безпеки, включаючи шифрування, брандмауери та контроль доступу. Термін зберігання – поки ваш акаунт активний, або до моменту вашого запиту на видалення.</p>
+
+      <h4>6. Ваші права</h4>
+      <p>Залежно від вашого місцезнаходження ви можете мати такі права:</p>
+      <ul style="margin-left: 20px;">
+        <li><strong>доступ, виправлення, оновлення</strong> ваших даних у налаштуваннях профілю;</li>
+        <li><strong>видалення акаунту</strong> – зверніться до нас через форму зворотного зв'язку (доступна в налаштуваннях);</li>
+        <li><strong>заперечення проти обробки</strong> – ви можете припинити використання платформи;</li>
+        <li><strong>експорт даних</strong> – ми надамо копію ваших даних за запитом.</li>
+      </ul>
+      <p>Для реалізації прав напишіть на <em>privacy@fantasyas.app</em> (адреса для прикладу).</p>
+
+      <h4>7. Файли cookie та схожі технології</h4>
+      <p>Ми використовуємо cookie для автентифікації, збереження налаштувань теми та аналітики. Ви можете керувати cookie у налаштуваннях браузера.</p>
+
+      <h4>8. Діти</h4>
+      <p>Наш сервіс не призначений для осіб молодше 13 років. Ми свідомо не збираємо дані дітей.</p>
+
+      <h4>9. Зміни в політиці</h4>
+      <p>Ми можемо оновлювати цю політику час від часу. Нова версія набуває чинності з моменту публікації в додатку.</p>
+
+      <h4>10. Контакти</h4>
+      <p>Якщо у вас є питання, пишіть на <em>support@fantasyas.app</em> (адреса для прикладу).</p>
+    </div>
+  </div>
+</div>
 
 <div id="toast"></div>
 
@@ -1541,7 +1702,7 @@
     enterKey.tabIndex = 0;
     enterKey.onclick = () => {
       if (currentInput) {
-        // Імітуємо Enter – зазвичай це відправка форми, але для textarea – новий рядок
+        // Імітуємо Enter – для textarea новий рядок
         if (currentInput.tagName === 'TEXTAREA') {
           insertText('\n');
         } else {
@@ -1712,7 +1873,7 @@
 
   backdrop.addEventListener('click', closeSidebar);
 
-  // ================= Емоджі-пікер (залишаємо для сумісності) =================
+  // ================= Емоджі-пікер =================
   const emojiList = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥸','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','💩','👻','💀','☠️','👽','👾','🤖','🎃','😺','😸','😹','😻','😼','😽','🙀','😿','😾'];
 
   function closeAllEmojiPickers() {
@@ -2670,7 +2831,7 @@
     }
   };
 
-  // ================= ЧАТИ (ВИПРАВЛЕНО) =================
+  // ================= ЧАТИ =================
   const getChatId = (uid1, uid2) => [uid1, uid2].sort().join('_');
 
   async function loadChatList() {
@@ -3401,6 +3562,7 @@
           vibrate(30);
         }
       } catch {
+        // Відкотити зміни при помилці
         target.classList.toggle('liked');
         countSpan.textContent = oldCount;
       }
@@ -3420,7 +3582,9 @@
           await updateDoc(userRef, { savedPosts: arrayUnion(postId) });
           await updateDoc(postRef, { saves: arrayUnion(currentUser.uid) });
         }
-      } catch { target.classList.toggle('saved'); }
+      } catch {
+        target.classList.toggle('saved');
+      }
     }
   });
 

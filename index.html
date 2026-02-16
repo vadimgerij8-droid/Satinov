@@ -25,6 +25,7 @@
       --text-tertiary: #8e8e93;
       --accent: #000000;
       --accent-hover: #333333;
+      --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       --danger: #ff3040;
       --danger-hover: #e02b38;
       --warning: #f5a623;
@@ -33,11 +34,15 @@
       --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
       --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
       --transition: 0.2s ease;
+      --transition-bounce: 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
       --radius-sm: 12px;
       --radius-md: 16px;
       --radius-lg: 24px;
       --sidebar-width: 280px;
       --header-height: 60px;
+      --glass-bg: rgba(255, 255, 255, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     }
 
     body.dark {
@@ -50,11 +55,14 @@
       --text-tertiary: #666668;
       --accent: #ffffff;
       --accent-hover: #e0e0e0;
+      --accent-gradient: linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%);
       --danger: #ff3040;
       --danger-hover: #e02b38;
       --shadow-sm: 0 2px 8px rgba(255,255,255,0.04);
       --shadow-md: 0 4px 16px rgba(255,255,255,0.08);
       --shadow-lg: 0 8px 24px rgba(255,255,255,0.12);
+      --glass-bg: rgba(44, 44, 46, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.1);
     }
 
     body {
@@ -145,6 +153,10 @@
       font-weight: 800;
       letter-spacing: -0.5px;
       color: var(--text-primary);
+      transition: transform var(--transition-bounce);
+    }
+    .logo:hover {
+      transform: scale(1.05);
     }
 
     .nav-item {
@@ -155,7 +167,7 @@
       margin: 4px 8px;
       border-radius: var(--radius-md);
       color: var(--text-secondary);
-      transition: all var(--transition);
+      transition: all var(--transition-bounce);
       cursor: pointer;
       font-weight: 500;
     }
@@ -163,11 +175,13 @@
     .nav-item:hover {
       background: var(--card);
       color: var(--text-primary);
+      transform: translateX(5px);
     }
 
     .nav-item.active {
-      background: var(--accent);
+      background: var(--accent-gradient);
       color: var(--bg);
+      transform: scale(1.02);
     }
 
     .nav-item .icon {
@@ -176,6 +190,10 @@
       stroke: currentColor;
       stroke-width: 1.8;
       fill: none;
+      transition: transform var(--transition-bounce);
+    }
+    .nav-item:hover .icon {
+      transform: translateX(3px);
     }
 
     .nav-item .badge {
@@ -198,12 +216,17 @@
 
     .top-bar {
       height: var(--header-height);
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--glass-border);
       display: flex;
       align-items: center;
       padding: 0 20px;
       gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
     .menu-toggle {
@@ -232,6 +255,9 @@
     .top-bar-title {
       font-size: 1.4rem;
       font-weight: 700;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .content {
@@ -269,16 +295,19 @@
     }
 
     .card {
-      background: var(--card);
-      border: 1px solid var(--border);
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
       border-radius: var(--radius-lg);
       padding: 20px;
-      box-shadow: var(--shadow-sm);
-      transition: box-shadow var(--transition), transform var(--transition);
+      box-shadow: var(--glass-shadow);
+      transition: box-shadow var(--transition), transform var(--transition-bounce);
     }
 
     .card:hover {
-      box-shadow: var(--shadow-md);
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
     }
 
     .avatar {
@@ -290,7 +319,11 @@
       background-position: center;
       border: 2px solid var(--border);
       cursor: pointer;
-      transition: border-color var(--transition);
+      transition: border-color var(--transition), transform var(--transition-bounce);
+    }
+    .avatar:hover {
+      border-color: var(--accent);
+      transform: scale(1.05);
     }
 
     .avatar.small {
@@ -311,6 +344,13 @@
       border-radius: 50%;
       border: 2px solid var(--card);
       margin-left: 8px;
+      animation: pulse-online 2s infinite;
+    }
+
+    @keyframes pulse-online {
+      0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+      70% { box-shadow: 0 0 0 6px rgba(76, 175, 80, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
     }
 
     .btn {
@@ -321,7 +361,7 @@
       color: var(--text-primary);
       font-weight: 600;
       cursor: pointer;
-      transition: all var(--transition);
+      transition: all var(--transition-bounce);
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -337,7 +377,7 @@
       left: 50%;
       width: 5px;
       height: 5px;
-      background: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.5);
       opacity: 0;
       border-radius: 100%;
       transform: scale(1, 1) translate(-50%);
@@ -354,28 +394,33 @@
     }
 
     .btn:hover, .btn.focused {
-      background: var(--accent);
+      background: var(--accent-gradient);
       color: var(--bg);
-      border-color: var(--accent);
+      border-color: transparent;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
     }
 
     .btn-primary {
-      background: var(--accent);
+      background: var(--accent-gradient);
       color: var(--bg);
-      border-color: var(--accent);
+      border-color: transparent;
     }
 
     .btn-primary:hover, .btn-primary.focused {
-      background: var(--accent-hover);
+      background: var(--accent-gradient);
+      filter: brightness(1.1);
+      transform: translateY(-2px) scale(1.02);
     }
 
     .btn-danger {
       background: var(--danger);
       color: white;
-      border-color: var(--danger);
+      border-color: transparent;
     }
     .btn-danger:hover {
       background: var(--danger-hover);
+      transform: translateY(-2px);
     }
 
     .btn-icon {
@@ -387,15 +432,17 @@
       padding: 14px 18px;
       border-radius: var(--radius-md);
       border: 1px solid var(--border);
-      background: var(--surface);
+      background: var(--glass-bg);
+      backdrop-filter: blur(5px);
       color: var(--text-primary);
       font-size: 1rem;
       outline: none;
-      transition: border-color var(--transition);
+      transition: border-color var(--transition), box-shadow var(--transition);
     }
 
     .input:focus, .input.focused {
       border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
     /* ===== Кастомний вибір файлу ===== */
@@ -421,7 +468,8 @@
       gap: 8px;
       width: 100%;
       padding: 12px;
-      background: var(--surface);
+      background: var(--glass-bg);
+      backdrop-filter: blur(5px);
       border: 1px dashed var(--border);
       border-radius: var(--radius-md);
       color: var(--text-secondary);
@@ -430,6 +478,7 @@
     .file-input-button:hover {
       border-color: var(--accent);
       color: var(--accent);
+      transform: scale(1.02);
     }
     .file-preview {
       margin-top: 8px;
@@ -450,21 +499,23 @@
     }
 
     .post {
-      background: var(--card);
-      border: 1px solid var(--border);
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
       border-radius: var(--radius-lg);
       padding: 16px 16px 12px;
-      box-shadow: var(--shadow-sm);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: var(--glass-shadow);
+      transition: all var(--transition-bounce);
       animation: fadeIn 0.3s ease;
       position: relative;
     }
     .post:hover, .post.focused {
-      box-shadow: var(--shadow-md);
-      transform: scale(1.01);
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-4px) scale(1.01);
     }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
+      from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
@@ -515,10 +566,11 @@
       font-size: 1.2rem;
       padding: 4px;
       border-radius: 50%;
-      transition: background var(--transition);
+      transition: background var(--transition), transform var(--transition-bounce);
     }
     .post-actions button:hover, .post-actions button.focused {
       background: var(--surface);
+      transform: rotate(90deg);
     }
 
     .post-content {
@@ -534,9 +586,11 @@
       cursor: pointer;
       display: inline-block;
       margin-right: 4px;
+      transition: transform var(--transition-bounce);
     }
     .hashtag:hover {
       text-decoration: underline;
+      transform: scale(1.05);
     }
 
     .post-media {
@@ -546,6 +600,10 @@
       cursor: pointer;
       max-height: 500px;
       object-fit: cover;
+      transition: transform var(--transition-bounce);
+    }
+    .post-media:hover {
+      transform: scale(1.02);
     }
 
     .post-footer {
@@ -566,12 +624,13 @@
       color: var(--text-secondary);
       font-weight: 600;
       cursor: pointer;
-      transition: color var(--transition);
+      transition: all var(--transition-bounce);
       font-size: 0.9rem;
     }
 
     .post-footer button:hover, .post-footer button.focused {
       color: var(--accent);
+      transform: scale(1.1);
     }
 
     .post-footer button.liked {
@@ -579,6 +638,13 @@
     }
     .post-footer button.liked svg {
       fill: #ff3040;
+      animation: heartBeat 0.3s;
+    }
+
+    @keyframes heartBeat {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(1); }
     }
 
     .post-footer button.saved {
@@ -607,6 +673,12 @@
       display: flex;
       gap: 10px;
       margin-bottom: 12px;
+      animation: slideIn 0.2s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
     }
 
     .comment-avatar {
@@ -616,6 +688,10 @@
       background-size: cover;
       background-position: center;
       flex-shrink: 0;
+      transition: transform var(--transition-bounce);
+    }
+    .comment-avatar:hover {
+      transform: scale(1.1);
     }
 
     .comment-content {
@@ -675,22 +751,23 @@
       transition: transform 0.1s;
     }
     .emoji-button:hover {
-      transform: scale(1.2);
+      transform: scale(1.2) rotate(10deg);
     }
 
     .emoji-picker {
       position: absolute;
       bottom: 100%;
       right: 0;
-      background: var(--card);
-      border: 1px solid var(--border);
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
       border-radius: var(--radius-md);
       padding: 8px;
       display: grid;
       grid-template-columns: repeat(8, 1fr);
       gap: 6px;
       z-index: 100;
-      box-shadow: var(--shadow-lg);
+      box-shadow: var(--glass-shadow);
       width: 280px;
       max-height: 220px;
       overflow-y: auto;
@@ -703,13 +780,13 @@
       text-align: center;
       padding: 4px;
       border-radius: var(--radius-sm);
-      transition: background 0.1s;
+      transition: all var(--transition-bounce);
       line-height: 1;
     }
 
     .emoji-picker span:hover, .emoji-picker span.focused {
       background: var(--surface);
-      transform: scale(1.1);
+      transform: scale(1.2);
     }
 
     .chat-list {
@@ -724,14 +801,16 @@
       gap: 14px;
       padding: 12px;
       border-radius: var(--radius-md);
-      background: var(--card);
-      border: 1px solid var(--border);
+      background: var(--glass-bg);
+      backdrop-filter: blur(5px);
+      border: 1px solid var(--glass-border);
       cursor: pointer;
-      transition: background var(--transition);
+      transition: all var(--transition-bounce);
     }
 
     .chat-item:hover, .chat-item.focused {
       background: var(--surface);
+      transform: translateX(5px);
     }
 
     .chat-item.unread {
@@ -763,7 +842,7 @@
     }
 
     .chat-badge {
-      background: var(--accent);
+      background: var(--accent-gradient);
       color: var(--bg);
       border-radius: 50%;
       min-width: 22px;
@@ -773,15 +852,23 @@
       justify-content: center;
       font-size: 0.8rem;
       font-weight: 600;
+      animation: pulse-badge 2s infinite;
+    }
+
+    @keyframes pulse-badge {
+      0% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7); }
+      70% { box-shadow: 0 0 0 6px rgba(102, 126, 234, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0); }
     }
 
     .chat-window {
       display: flex;
       flex-direction: column;
       height: 100%;
-      background: var(--card);
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
       border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
+      border: 1px solid var(--glass-border);
       overflow: hidden;
     }
 
@@ -827,10 +914,14 @@
       border-radius: 20px;
       word-break: break-word;
       position: relative;
+      transition: transform var(--transition-bounce);
+    }
+    .message-bubble:hover {
+      transform: scale(1.02);
     }
 
     .message-bubble.sent {
-      background: var(--accent);
+      background: var(--accent-gradient);
       color: var(--bg);
       border-bottom-right-radius: 4px;
     }
@@ -928,10 +1019,11 @@
     }
     .profile-stats span {
       cursor: pointer;
-      transition: opacity 0.2s;
+      transition: all var(--transition-bounce);
     }
     .profile-stats span:hover {
       opacity: 0.7;
+      transform: scale(1.1);
     }
 
     .profile-tabs {
@@ -948,11 +1040,13 @@
       cursor: pointer;
       font-weight: 600;
       color: var(--text-secondary);
+      transition: all var(--transition-bounce);
     }
 
     .profile-tab.active, .profile-tab.focused {
-      background: var(--accent);
+      background: var(--accent-gradient);
       color: var(--bg);
+      transform: translateY(-2px);
     }
 
     .profile-menu {
@@ -968,29 +1062,35 @@
       cursor: pointer;
       padding: 0 8px;
       color: var(--text-secondary);
+      transition: transform var(--transition-bounce);
+    }
+    .profile-menu-btn:hover {
+      transform: rotate(90deg);
     }
 
     .profile-menu-dropdown {
       position: absolute;
       right: 0;
       top: 100%;
-      background: var(--card);
-      border: 1px solid var(--border);
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
       border-radius: var(--radius-md);
       min-width: 200px;
-      box-shadow: var(--shadow-lg);
+      box-shadow: var(--glass-shadow);
       z-index: 100;
       display: none;
     }
 
     .profile-menu-dropdown.show {
       display: block;
+      animation: fadeIn 0.2s ease;
     }
 
     .profile-menu-item {
       padding: 12px 16px;
       cursor: pointer;
-      transition: background var(--transition);
+      transition: all var(--transition);
       display: flex;
       align-items: center;
       gap: 8px;
@@ -998,6 +1098,7 @@
 
     .profile-menu-item:hover {
       background: var(--surface);
+      transform: translateX(5px);
     }
 
     /* ===== Стилі для хештегів у пошуку ===== */
@@ -1011,13 +1112,16 @@
       align-items: center;
       justify-content: space-between;
       padding: 12px;
-      background: var(--card);
-      border: 1px solid var(--border);
+      background: var(--glass-bg);
+      backdrop-filter: blur(5px);
+      border: 1px solid var(--glass-border);
       border-radius: var(--radius-md);
       cursor: pointer;
+      transition: all var(--transition-bounce);
     }
     .hashtag-item:hover {
       background: var(--surface);
+      transform: translateX(5px);
     }
     .hashtag-name {
       font-weight: 600;
@@ -1043,13 +1147,23 @@
     }
 
     .modal-content {
-      background: var(--card);
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
       border-radius: var(--radius-lg);
       padding: 24px;
       max-width: 480px;
       width: 90%;
       max-height: 90vh;
       overflow-y: auto;
+      box-shadow: var(--glass-shadow);
+      animation: modalAppear 0.3s ease;
+    }
+
+    @keyframes modalAppear {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
     }
 
     .modal-header {
@@ -1063,6 +1177,10 @@
       font-size: 2rem;
       line-height: 1;
       cursor: pointer;
+      transition: transform var(--transition-bounce);
+    }
+    .modal-close:hover {
+      transform: rotate(90deg) scale(1.2);
     }
 
     #toast {
@@ -1070,12 +1188,12 @@
       bottom: 30px;
       left: 50%;
       transform: translateX(-50%);
-      background: var(--accent);
+      background: var(--accent-gradient);
       color: var(--bg);
       padding: 12px 24px;
       border-radius: 40px;
       font-weight: 500;
-      box-shadow: var(--shadow-lg);
+      box-shadow: var(--glass-shadow);
       z-index: 3000;
       opacity: 0;
       transition: opacity 0.3s;
@@ -1099,6 +1217,67 @@
     .text-danger { color: var(--danger); }
     .text-warning { color: var(--warning); }
     .text-success { color: var(--success); }
+
+    /* Прогрес-бар для завантаження */
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 8px;
+      display: none;
+    }
+    .progress-bar.active {
+      display: block;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent-gradient);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Ліниве завантаження зображень */
+    img[loading="lazy"] {
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    img[loading="lazy"].loaded {
+      opacity: 1;
+    }
+
+    /* Бенто-сітка для профілю */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+    }
+    .bento-item {
+      background: var(--glass-bg);
+      backdrop-filter: blur(5px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      transition: all var(--transition-bounce);
+      cursor: pointer;
+    }
+    .bento-item:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: var(--glass-shadow);
+    }
+    .bento-item.large {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
+    .bento-item.medium {
+      grid-column: span 2;
+    }
+    .bento-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
   </style>
 </head>
 <body>
@@ -1150,21 +1329,21 @@
       <div id="home" class="section active">
         <div class="card" id="authBox">
           <div id="loginForm">
-            <input type="text" id="loginNickname" class="input" placeholder="Псевдонім (без @)" autocomplete="off" tabindex="0"/>
-            <input type="password" id="loginPassword" class="input" placeholder="Пароль" tabindex="0"/>
-            <button class="btn btn-primary" id="loginBtn" style="width:100%; margin-top:12px;" tabindex="0">Увійти</button>
+            <input type="text" id="loginNickname" class="input" placeholder="Ваше ім'я (без @)" autocomplete="off" tabindex="0"/>
+            <input type="password" id="loginPassword" class="input" placeholder="Ваш пароль" tabindex="0"/>
+            <button class="btn btn-primary" id="loginBtn" style="width:100%; margin-top:12px;" tabindex="0">Заходьте, ми скучили!</button>
             <div style="display:flex; gap:10px; margin-top:15px;">
               <button class="btn" id="googleLoginBtn" style="flex:1;" tabindex="0">Google</button>
               <button class="btn" id="appleLoginBtn" style="flex:1;" tabindex="0">Apple</button>
             </div>
-            <p style="margin-top:18px;">Немає акаунта? <span id="toRegister" style="color:var(--accent);cursor:pointer;" tabindex="0">Зареєструватися</span></p>
+            <p style="margin-top:18px;">Новачок? <span id="toRegister" style="color:var(--accent);cursor:pointer;" tabindex="0">Створити казку</span></p>
             <p><a href="#" id="forgotPassword" style="color:var(--accent);" tabindex="0">Забули пароль?</a></p>
           </div>
           <div id="registerForm" style="display:none;">
-            <input type="text" id="registerNickname" class="input" placeholder="Псевдонім (без @)" tabindex="0"/>
-            <input type="password" id="registerPassword" class="input" placeholder="Пароль" tabindex="0"/>
-            <button class="btn btn-primary" id="registerBtn" style="width:100%; margin-top:12px;" tabindex="0">Зареєструватися</button>
-            <p style="margin-top:18px;">Вже є акаунт? <span id="toLogin" style="color:var(--accent);cursor:pointer;" tabindex="0">Увійти</span></p>
+            <input type="text" id="registerNickname" class="input" placeholder="Ваше ім'я (без @)" tabindex="0"/>
+            <input type="password" id="registerPassword" class="input" placeholder="Ваш пароль" tabindex="0"/>
+            <button class="btn btn-primary" id="registerBtn" style="width:100%; margin-top:12px;" tabindex="0">Розпочати пригоду</button>
+            <p style="margin-top:18px;">Вже є акаунт? <span id="toLogin" style="color:var(--accent);cursor:pointer;" tabindex="0">Повернутися</span></p>
           </div>
         </div>
 
@@ -1185,6 +1364,11 @@
             </div>
           </div>
           <img id="postMediaPreview" class="file-preview" />
+          
+          <!-- Прогрес-бар завантаження -->
+          <div class="progress-bar" id="uploadProgress">
+            <div class="progress-bar-fill" id="uploadProgressFill"></div>
+          </div>
           
           <button class="btn btn-primary" id="addPost" style="margin-top:12px;" tabindex="0">Опублікувати</button>
         </div>
@@ -1220,7 +1404,7 @@
 
       <div id="chats" class="section">
         <div class="chat-search-container" style="padding: 0 0 12px 0;">
-          <input type="text" id="chatSearchInput" class="input" placeholder="Пошук користувачів..." tabindex="0">
+          <input type="text" id="chatSearchInput" class="input" placeholder="Знайдіть друга..." tabindex="0">
           <div id="chatSearchResults" class="user-list" style="margin-top:10px; display:none;"></div>
         </div>
         <div class="chat-list" id="chatList"></div>
@@ -1367,7 +1551,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, OAuthProvider, signInWithPopup, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, where, onSnapshot, orderBy, serverTimestamp, arrayUnion, arrayRemove, deleteDoc, getDocs, increment, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-  import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
+  import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
   // ================= Конфігурація =================
   const firebaseConfig = {
@@ -2139,14 +2323,45 @@
     const text = document.getElementById('postText').value.trim();
     const file = document.getElementById('postMedia').files[0];
     if (!text && !file) return alert('Додайте текст або медіа');
+    
     try {
       let mediaUrl = '', mediaType = '';
       if (file) {
         const storageRef = ref(storage, `posts/${currentUser.uid}/${Date.now()}_${file.name}`);
-        await uploadBytes(storageRef, file);
-        mediaUrl = await getDownloadURL(storageRef);
-        mediaType = file.type.split('/')[0];
+        
+        // Показуємо прогрес-бар
+        const progressBar = document.getElementById('uploadProgress');
+        const progressFill = document.getElementById('uploadProgressFill');
+        progressBar.classList.add('active');
+        progressFill.style.width = '0%';
+        
+        // Завантаження з відстеженням прогресу
+        const uploadTask = uploadBytesResumable(storageRef, file);
+        
+        await new Promise((resolve, reject) => {
+          uploadTask.on('state_changed', 
+            (snapshot) => {
+              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              progressFill.style.width = progress + '%';
+            },
+            (error) => {
+              reject(error);
+            },
+            async () => {
+              mediaUrl = await getDownloadURL(uploadTask.snapshot.ref);
+              mediaType = file.type.split('/')[0];
+              resolve();
+            }
+          );
+        });
+        
+        // Ховаємо прогрес-бар після завершення
+        setTimeout(() => {
+          progressBar.classList.remove('active');
+          progressFill.style.width = '0%';
+        }, 500);
       }
+      
       const userSnap = await getDoc(doc(db, "users", currentUser.uid));
       const userData = userSnap.data();
       
@@ -2175,7 +2390,10 @@
       document.getElementById('postMediaLabel').textContent = 'Обрати фото/відео';
       document.getElementById('postMediaPreview').classList.remove('show');
       showToast('Пост опубліковано!');
-    } catch (e) { showToast(e.message); }
+    } catch (e) { 
+      showToast('Помилка: ' + e.message);
+      document.getElementById('uploadProgress').classList.remove('active');
+    }
   };
 
   async function loadMorePosts() {
@@ -2382,6 +2600,21 @@
           }
         };
       }
+
+      // Ліниве завантаження зображень
+      const img = postEl.querySelector('img[loading="lazy"]');
+      if (img) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const img = entry.target;
+              img.classList.add('loaded');
+              observer.unobserve(img);
+            }
+          });
+        });
+        observer.observe(img);
+      }
     });
     setTimeout(updateFocusableElements, 100);
   }
@@ -2426,7 +2659,7 @@
           } catch (e) {}
         }
         const storageRef = ref(storage, `posts/${currentUser.uid}/${Date.now()}_${file.name}`);
-        await uploadBytes(storageRef, file);
+        await uploadBytesResumable(storageRef, file);
         const mediaUrl = await getDownloadURL(storageRef);
         const mediaType = file.type.split('/')[0];
         updateData.mediaUrl = mediaUrl;
@@ -2853,12 +3086,29 @@
     
     posts.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
     
-    posts.forEach(post => {
+    // Бенто-сітка для профілю
+    const bentoGrid = document.createElement('div');
+    bentoGrid.className = 'bento-grid';
+    feed.appendChild(bentoGrid);
+    
+    posts.forEach((post, index) => {
       const div = document.createElement('div');
-      div.className = 'post';
+      div.className = 'bento-item';
+      if (index === 0) div.classList.add('large');
+      if (index === 1) div.classList.add('medium');
       div.tabIndex = 0;
-      div.innerHTML = `<div class="post-content">${post.text || ''}</div>`;
-      feed.appendChild(div);
+      
+      if (post.mediaUrl && post.mediaType === 'image') {
+        div.innerHTML = `<img src="${post.mediaUrl}" loading="lazy" alt="post">`;
+      } else {
+        div.innerHTML = `<div class="post-content" style="padding:16px;">${post.text?.substring(0, 50) || 'Пост'}</div>`;
+      }
+      
+      div.onclick = () => {
+        // Відкрити пост (можна додати модальне вікно)
+      };
+      
+      bentoGrid.appendChild(div);
     });
     setTimeout(() => { updateFocusableElements(); }, 100);
   }
@@ -2884,7 +3134,7 @@
       let avatarUrl;
       if (avatarFile) {
         const storageRef = ref(storage, `avatars/${currentUser.uid}/${Date.now()}_${avatarFile.name}`);
-        await uploadBytes(storageRef, avatarFile);
+        await uploadBytesResumable(storageRef, avatarFile);
         avatarUrl = await getDownloadURL(storageRef);
       }
       
@@ -2919,7 +3169,7 @@
       const snapshot = await getDocs(q);
 
       if (snapshot.empty) {
-        list.innerHTML = '<p style="text-align:center; padding:20px;">Немає чатів</p>';
+        list.innerHTML = '<p style="text-align:center; padding:20px;">Ваша розмова може стати початком великої дружби.</p>';
         return;
       }
 
@@ -2955,7 +3205,7 @@
       chatItems.sort((a, b) => b.updatedAt - a.updatedAt);
 
       if (chatItems.length === 0) {
-        list.innerHTML = '<p style="text-align:center; padding:20px;">Немає чатів</p>';
+        list.innerHTML = '<p style="text-align:center; padding:20px;">Ваша розмова може стати початком великої дружби.</p>';
         return;
       }
 

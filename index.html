@@ -1407,8 +1407,20 @@
       <span class="modal-close" id="closePrivacyModal" tabindex="0">&times;</span>
     </div>
     <div style="max-height: 60vh; overflow-y: auto; padding-right: 10px;">
-      <p><strong>Останнє оновлення:</strong> 15 лютого 2026</p>
-      <p>FANTASYAS поважає вашу конфіденційність...</p>
+      <p><strong>Останнє оновлення:</strong> 17 лютого 2026</p>
+      <p>FANTASYAS (далі — «ми») поважає конфіденційність наших користувачів. Ця Політика пояснює, які дані ми збираємо, як їх використовуємо та захищаємо.</p>
+      <h4>1. Які дані ми збираємо</h4>
+      <p>• Ім’я користувача, адреса електронної пошти (для входу), аватар, біографія.<br>
+      • Інформація про активність: пости, лайки, коментарі, підписки.<br>
+      • Технічні дані: IP-адреса, тип пристрою, файли cookie.</p>
+      <h4>2. Як ми використовуємо дані</h4>
+      <p>Для надання функціоналу соціальної мережі, персоналізації контенту, покращення сервісу, зв’язку з вами.</p>
+      <h4>3. Передача даних третім особам</h4>
+      <p>Ми не продаємо ваші дані. Деякі дані можуть передаватися Firebase (Google) для зберігання та обробки.</p>
+      <h4>4. Ваші права</h4>
+      <p>Ви можете видалити свій акаунт, експортувати дані або звернутися до нас через форму зворотного зв’язку.</p>
+      <h4>5. Контакти</h4>
+      <p>support@fantasyas.app</p>
     </div>
   </div>
 </div>
@@ -1520,6 +1532,14 @@
       minutes: 'хв',
       hours: 'год',
       days: 'дн',
+      follow: 'Підписатися',
+      unfollow: 'Відписатися',
+      noChats: 'Немає чатів',
+      noSaved: 'Немає збережених постів',
+      noFollowers: 'Немає підписників',
+      noFollowing: 'Ні на кого не підписаний',
+      today: 'Сьогодні',
+      yesterday: 'Вчора'
     },
     ru: {
       home: 'Главная',
@@ -1573,6 +1593,14 @@
       minutes: 'мин',
       hours: 'ч',
       days: 'дн',
+      follow: 'Подписаться',
+      unfollow: 'Отписаться',
+      noChats: 'Нет чатов',
+      noSaved: 'Нет сохраненных постов',
+      noFollowers: 'Нет подписчиков',
+      noFollowing: 'Ни на кого не подписан',
+      today: 'Сегодня',
+      yesterday: 'Вчера'
     },
     en: {
       home: 'Home',
@@ -1626,6 +1654,14 @@
       minutes: 'min',
       hours: 'h',
       days: 'd',
+      follow: 'Follow',
+      unfollow: 'Unfollow',
+      noChats: 'No chats',
+      noSaved: 'No saved posts',
+      noFollowers: 'No followers',
+      noFollowing: 'Not following anyone',
+      today: 'Today',
+      yesterday: 'Yesterday'
     }
   };
 
@@ -1918,7 +1954,7 @@
 
   backdrop.addEventListener('click', closeSidebar);
 
-  // ================= Емоджі-пікер =================
+  // ================= Емоджі-пікер з підтримкою TV =================
   const emojiList = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥸','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','💩','👻','💀','☠️','👽','👾','🤖','🎃','😺','😸','😹','😻','😼','😽','🙀','😿','😾'];
 
   function closeAllEmojiPickers() {
@@ -1936,7 +1972,11 @@
       closeAllEmojiPickers();
       picker.style.display = picker.style.display === 'none' ? 'grid' : 'none';
       if (picker.style.display === 'grid') {
-        setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
+        setTimeout(() => {
+          const firstEmoji = picker.querySelector('span');
+          if (firstEmoji) firstEmoji.focus();
+          updateFocusableElements();
+        }, 50);
       }
     });
 
@@ -1951,20 +1991,35 @@
       const span = document.createElement('span');
       span.textContent = emoji;
       span.tabIndex = 0;
+      
+      // Обробник кліку (миша)
       span.onclick = (e) => {
         e.stopPropagation();
-        const start = input.selectionStart;
-        const end = input.selectionEnd;
-        const text = input.value;
-        input.value = text.substring(0, start) + emoji + text.substring(end);
-        input.focus();
-        input.selectionStart = input.selectionEnd = start + emoji.length;
-        picker.style.display = 'none';
-        updateFocusableElements();
-        setFocus(currentFocusIndex);
+        insertEmoji(emoji);
       };
+      
+      // Обробник клавіш (TV)
+      span.onkeydown = (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          insertEmoji(emoji);
+        }
+        // Навігація стрілками всередині picker (за замовчуванням)
+      };
+      
       picker.appendChild(span);
     });
+    
+    function insertEmoji(emoji) {
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
+      input.value = input.value.substring(0, start) + emoji + input.value.substring(end);
+      input.focus();
+      input.selectionStart = input.selectionEnd = start + emoji.length;
+      picker.style.display = 'none';
+      // Оновлюємо фокус після закриття
+      setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
+    }
     
     document.addEventListener('click', (e) => {
       if (!picker.contains(e.target) && e.target !== btn) {
@@ -2716,10 +2771,22 @@
         </div>
         <button class="btn follow-btn" tabindex="0">${isFollowing ? (translations[currentLanguage]?.unfollow || 'Відписатися') : (translations[currentLanguage]?.follow || 'Підписатися')}</button>
       `;
-      div.querySelector('.follow-btn').onclick = async (e) => {
+      const followBtn = div.querySelector('.follow-btn');
+      followBtn.onclick = async (e) => {
         e.stopPropagation();
-        await toggleFollow(uid);
-        loadSearchUsers();
+        const wasFollowing = followBtn.textContent === (translations[currentLanguage]?.unfollow || 'Відписатися');
+        // Оптимістична зміна
+        followBtn.textContent = wasFollowing 
+          ? (translations[currentLanguage]?.follow || 'Підписатися')
+          : (translations[currentLanguage]?.unfollow || 'Відписатися');
+        try {
+          await toggleFollow(uid);
+        } catch {
+          followBtn.textContent = wasFollowing 
+            ? (translations[currentLanguage]?.unfollow || 'Відписатися')
+            : (translations[currentLanguage]?.follow || 'Підписатися');
+          showToast('Помилка');
+        }
       };
       div.onclick = () => viewProfile(uid);
       userList.appendChild(div);
@@ -2847,9 +2914,34 @@
     if (!isOwn && currentUser) {
       const profileFollowBtn = document.getElementById('profileFollowBtn');
       if (profileFollowBtn) {
-        profileFollowBtn.onclick = async () => {
-          await toggleFollow(uid);
-          loadUserProfile(uid);
+        profileFollowBtn.onclick = async (e) => {
+          e.stopPropagation();
+          const wasFollowing = profileFollowBtn.textContent === (translations[currentLanguage]?.unfollow || 'Відписатися');
+          // Оптимістична зміна
+          profileFollowBtn.textContent = wasFollowing 
+            ? (translations[currentLanguage]?.follow || 'Підписатися')
+            : (translations[currentLanguage]?.unfollow || 'Відписатися');
+          
+          // Оновлюємо лічильник підписників
+          const followersSpan = document.getElementById('followersCount');
+          if (followersSpan) {
+            let count = parseInt(followersSpan.textContent.split(' ')[0]);
+            followersSpan.textContent = `${wasFollowing ? count - 1 : count + 1} ${translations[currentLanguage]?.followers || 'підписників'}`;
+          }
+          
+          try {
+            await toggleFollow(uid);
+          } catch (error) {
+            // Відкочуємо зміни у разі помилки
+            profileFollowBtn.textContent = wasFollowing 
+              ? (translations[currentLanguage]?.unfollow || 'Відписатися')
+              : (translations[currentLanguage]?.follow || 'Підписатися');
+            if (followersSpan) {
+              let count = parseInt(followersSpan.textContent.split(' ')[0]);
+              followersSpan.textContent = `${wasFollowing ? count + 1 : count - 1} ${translations[currentLanguage]?.followers || 'підписників'}`;
+            }
+            showToast('Помилка, спробуйте ще');
+          }
         };
       }
       const profileMessageBtn = document.getElementById('profileMessageBtn');
@@ -3061,13 +3153,14 @@
     
     posts.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
     
-    posts.forEach(post => {
-      const div = document.createElement('div');
-      div.className = 'post';
-      div.tabIndex = 0;
-      div.innerHTML = `<div class="post-content">${post.text || ''}</div>`;
-      feed.appendChild(div);
-    });
+    // Використовуємо ту саму функцію renderPosts, але передаємо feed як контейнер
+    if (posts.length) {
+      // Перетворюємо масив об'єктів у масив DocumentSnapshot-подібних об'єктів
+      const docs = posts.map(p => ({ id: p.id, data: () => p }));
+      renderPosts(docs, feed);
+    } else {
+      feed.innerHTML = '<p style="text-align:center; padding:20px;">' + (translations[currentLanguage]?.noPosts || 'Немає постів') + '</p>';
+    }
     setTimeout(() => { updateFocusableElements(); }, 100);
   }
 
@@ -3576,6 +3669,9 @@
       
       const typingRef = doc(db, `chats/${currentChatId}/typing/${currentUser.uid}`);
       await setDoc(typingRef, { isTyping: false }, { merge: true });
+
+      // Оновлюємо список чатів, щоб відобразити останнє повідомлення
+      loadChatList();
     } catch (error) {
       console.error('Send message error:', error);
       showToast('Помилка відправлення повідомлення');
@@ -3669,13 +3765,9 @@
       feed.innerHTML = '<p style="text-align:center; padding:20px;">' + (translations[currentLanguage]?.noSaved || 'Немає збережених постів') + '</p>';
       return;
     }
-    posts.forEach(post => {
-      const div = document.createElement('div');
-      div.className = 'post';
-      div.tabIndex = 0;
-      div.innerHTML = `<div class="post-content">${post.text || ''}</div>`;
-      feed.appendChild(div);
-    });
+    // Використовуємо renderPosts для однакового відображення
+    const docs = posts.map(p => ({ id: p.id, data: () => p }));
+    renderPosts(docs, feed);
     setTimeout(updateFocusableElements, 100);
   }
 

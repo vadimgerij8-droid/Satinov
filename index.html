@@ -29,6 +29,8 @@
       --danger: #ff0000;
       --danger-hover: #cc0000;
       --success: #00aa00;
+      --like: #ff3040;
+      --save: #fbbf24;
       --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
       --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
       --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
@@ -54,6 +56,8 @@
       --danger: #ff4444;
       --danger-hover: #ff6666;
       --success: #4caf50;
+      --like: #ff6b7c;
+      --save: #fcd34d;
       --shadow-sm: 0 2px 8px rgba(255,255,255,0.05);
       --shadow-md: 0 4px 12px rgba(255,255,255,0.08);
       --shadow-lg: 0 8px 24px rgba(255,255,255,0.12);
@@ -74,7 +78,7 @@
       overflow: hidden;
     }
 
-    /* ========== САЙДБАР (СУЧАСНИЙ) ========== */
+    /* ========== САЙДБАР (СУЧАСНИЙ МІНІМАЛІЗМ) ========== */
     .sidebar {
       width: var(--sidebar-width);
       background: rgba(255, 255, 255, 0.7);
@@ -178,15 +182,30 @@
       margin: 4px 12px;
       border-radius: var(--radius-md);
       color: var(--text-secondary);
-      transition: all var(--transition);
+      transition: all 0.3s ease;
       cursor: pointer;
       font-weight: 500;
       font-size: 1rem;
       border: 1px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
+      opacity: 0.1;
+      transition: width 0.3s ease;
+    }
+    .nav-item:hover::before {
+      width: 100%;
     }
     .nav-item:hover {
-      background: var(--bg);
-      border-color: var(--border);
+      color: var(--accent);
       transform: translateX(4px);
     }
     .nav-item:active {
@@ -199,11 +218,15 @@
       box-shadow: var(--shadow-sm);
     }
     .nav-item .icon {
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       stroke: currentColor;
-      stroke-width: 1.5;
+      stroke-width: 1.8;
       fill: none;
+      transition: transform 0.2s;
+    }
+    .nav-item:hover .icon {
+      transform: scale(1.1);
     }
     .nav-item .badge {
       margin-left: auto;
@@ -232,7 +255,6 @@
 
     .top-bar {
       height: var(--header-height);
-      background: var(--surface);
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
@@ -627,26 +649,25 @@
       min-height: 44px;
     }
     .post-footer button:hover {
-      color: var(--accent);
       transform: scale(1.05);
     }
     .post-footer button:active {
       transform: scale(0.95);
     }
     .post-footer button.liked {
-      color: var(--accent);
+      color: var(--like);
     }
     .post-footer button.liked svg {
-      fill: var(--accent);
-      stroke: var(--accent);
+      fill: var(--like);
+      stroke: var(--like);
       animation: heartPop 0.3s ease;
     }
     .post-footer button.saved {
-      color: var(--accent);
+      color: var(--save);
     }
     .post-footer button.saved svg {
-      fill: var(--accent);
-      stroke: var(--accent);
+      fill: var(--save);
+      stroke: var(--save);
       animation: bookmarkPop 0.3s ease;
     }
     @keyframes heartPop {
@@ -669,6 +690,7 @@
       margin-left: auto;
     }
 
+    /* ========== КОМЕНТАРІ З ВІДПОВІДЯМИ ========== */
     .comments-section {
       margin-top: 16px;
       border-top: 1px solid var(--border);
@@ -681,9 +703,11 @@
     }
 
     .comment {
+      margin-bottom: 16px;
+    }
+    .comment-main {
       display: flex;
       gap: 10px;
-      margin-bottom: 14px;
     }
     .comment-avatar {
       width: 36px;
@@ -721,83 +745,64 @@
       color: var(--text-tertiary);
       margin-top: 4px;
     }
-    .comment-form {
+    .comment-actions {
       display: flex;
-      gap: 10px;
-      margin-top: 16px;
-      align-items: center;
-      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+      margin-left: 46px;
     }
-    .comment-input {
-      flex: 1;
-      min-width: 150px;
-      padding: 12px 16px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text-primary);
-      font-size: 0.95rem;
-      min-height: 44px;
-    }
-
-    .emoji-picker-container {
-      position: relative;
-      display: inline-block;
-    }
-    .emoji-button {
+    .comment-actions button {
       background: none;
       border: none;
-      font-size: 1.8rem;
+      color: var(--text-tertiary);
+      font-size: 0.85rem;
       cursor: pointer;
-      padding: 8px;
-      color: var(--text-primary);
-      min-width: 44px;
-      min-height: 44px;
-      transition: transform 0.2s;
-    }
-    .emoji-button:hover {
-      transform: scale(1.2);
-    }
-    .emoji-button:active {
-      transform: scale(0.95);
-    }
-    .emoji-picker {
-      position: absolute;
-      bottom: 100%;
-      right: 0;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 8px;
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 6px;
-      z-index: 10000;
-      box-shadow: var(--shadow-lg);
-      width: 220px;
-      max-height: 200px;
-      overflow-y: auto;
-      margin-bottom: 8px;
-      backdrop-filter: blur(4px);
-    }
-    .emoji-picker span {
-      font-size: 1.6rem;
-      cursor: pointer;
-      text-align: center;
-      padding: 6px;
-      border-radius: var(--radius-sm);
-      transition: background 0.2s, transform 0.1s;
-      aspect-ratio: 1/1;
       display: flex;
       align-items: center;
-      justify-content: center;
+      gap: 4px;
+      padding: 6px;
+      transition: color 0.2s;
     }
-    .emoji-picker span:hover {
+    .comment-actions button:hover {
+      color: var(--accent);
+    }
+    .comment-actions .like-btn.liked {
+      color: var(--like);
+    }
+    .comment-actions .like-btn.liked svg {
+      fill: var(--like);
+      stroke: var(--like);
+    }
+
+    .replies {
+      margin-left: 46px;
+      margin-top: 12px;
+      border-left: 2px solid var(--border);
+      padding-left: 16px;
+    }
+    .reply {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .reply .comment-avatar {
+      width: 28px;
+      height: 28px;
+    }
+    .reply-form {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      margin-left: 46px;
+    }
+    .reply-input {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
       background: var(--surface);
-      transform: scale(1.2);
-    }
-    .emoji-picker span:active {
-      transform: scale(0.95);
+      color: var(--text-primary);
+      font-size: 0.9rem;
     }
 
     /* ========== ЧАТИ ========== */
@@ -1460,7 +1465,7 @@
             <textarea id="postText" class="input" placeholder="Що нового? #хештег" rows="2" style="flex:1;" data-i18n-placeholder="newPostPlaceholder"></textarea>
             <div class="emoji-picker-container">
               <button class="emoji-button" id="postEmojiBtn">😊</button>
-              <div class="emoji-picker" id="postEmojiPicker" style="display: none;"></div>
+              <div class="emoji-picker" id="postEmojiPicker" style="display: none; bottom: 100%; right: 0; position: absolute; width: 250px; max-height: 250px;"></div>
             </div>
           </div>
           
@@ -1792,7 +1797,9 @@
       noFollowers: 'Немає підписників',
       noFollowing: 'Ні на кого не підписаний',
       today: 'Сьогодні',
-      yesterday: 'Вчора'
+      yesterday: 'Вчора',
+      reply: 'Відповісти',
+      likeComment: 'Лайк'
     },
     ru: {
       home: 'Главная',
@@ -1852,7 +1859,9 @@
       noFollowers: 'Нет подписчиков',
       noFollowing: 'Ни на кого не подписан',
       today: 'Сегодня',
-      yesterday: 'Вчера'
+      yesterday: 'Вчера',
+      reply: 'Ответить',
+      likeComment: 'Нравится'
     },
     en: {
       home: 'Home',
@@ -1912,7 +1921,9 @@
       noFollowers: 'No followers',
       noFollowing: 'Not following anyone',
       today: 'Today',
-      yesterday: 'Yesterday'
+      yesterday: 'Yesterday',
+      reply: 'Reply',
+      likeComment: 'Like'
     }
   };
 
@@ -2611,25 +2622,135 @@
     }
   }
 
+  // ================= ФУНКЦІЇ ДЛЯ КОМЕНТАРІВ З ВІДПОВІДЯМИ =================
   async function loadComments(postId, container) {
     const q = query(collection(db, `posts/${postId}/comments`), orderBy("createdAt", "asc"));
     const snapshot = await getDocs(q);
     container.innerHTML = '';
-    snapshot.forEach(doc => {
-      const comment = doc.data();
+    for (const docSnap of snapshot.docs) {
+      const comment = docSnap.data();
+      const commentId = docSnap.id;
       const commentEl = document.createElement('div');
       commentEl.className = 'comment';
+      commentEl.dataset.commentId = commentId;
+      
+      // Завантажуємо відповіді для цього коментаря
+      const repliesSnapshot = await getDocs(query(collection(db, `posts/${postId}/comments/${commentId}/replies`), orderBy("createdAt", "asc")));
+      const replies = [];
+      repliesSnapshot.forEach(r => replies.push({ id: r.id, ...r.data() }));
+
+      const liked = comment.likes?.includes(currentUser?.uid) || false;
+      
       commentEl.innerHTML = `
-        <div class="comment-avatar" style="background-image:url(${comment.authorAvatar || ''})" data-uid="${comment.author}"></div>
-        <div class="comment-content">
-          <div>
-            <span class="comment-author" data-uid="${comment.author}">${comment.authorName}</span>
-            <span class="comment-time">${new Date(comment.createdAt?.seconds * 1000).toLocaleString()}</span>
+        <div class="comment-main">
+          <div class="comment-avatar" style="background-image:url(${comment.authorAvatar || ''})" data-uid="${comment.author}"></div>
+          <div class="comment-content">
+            <div>
+              <span class="comment-author" data-uid="${comment.author}">${comment.authorName}</span>
+              <span class="comment-time">${new Date(comment.createdAt?.seconds * 1000).toLocaleString()}</span>
+            </div>
+            <div class="comment-text">${comment.text}</div>
           </div>
-          <div class="comment-text">${comment.text}</div>
+        </div>
+        <div class="comment-actions">
+          <button class="like-comment-btn ${liked ? 'liked' : ''}" data-post-id="${postId}" data-comment-id="${commentId}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            <span>${comment.likesCount || 0}</span>
+          </button>
+          <button class="reply-btn" data-post-id="${postId}" data-comment-id="${commentId}">${translations[currentLanguage]?.reply || 'Відповісти'}</button>
+        </div>
+        <div class="replies" id="replies-${postId}-${commentId}">
+          ${replies.map(r => `
+            <div class="reply">
+              <div class="comment-avatar" style="background-image:url(${r.authorAvatar || ''})" data-uid="${r.author}"></div>
+              <div class="comment-content">
+                <div>
+                  <span class="comment-author" data-uid="${r.author}">${r.authorName}</span>
+                  <span class="comment-time">${new Date(r.createdAt?.seconds * 1000).toLocaleString()}</span>
+                </div>
+                <div class="comment-text">${r.text}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="reply-form" id="reply-form-${postId}-${commentId}" style="display: none;">
+          <input type="text" class="reply-input" placeholder="Ваша відповідь..." id="reply-input-${postId}-${commentId}">
+          <button class="btn btn-primary btn-icon send-reply" data-post-id="${postId}" data-comment-id="${commentId}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
         </div>
       `;
       container.appendChild(commentEl);
+    }
+
+    // Додаємо обробники для кнопок відповіді
+    document.querySelectorAll('.reply-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const postId = btn.dataset.postId;
+        const commentId = btn.dataset.commentId;
+        const form = document.getElementById(`reply-form-${postId}-${commentId}`);
+        form.style.display = form.style.display === 'none' ? 'flex' : 'none';
+      });
+    });
+
+    // Обробники для надсилання відповіді
+    document.querySelectorAll('.send-reply').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const postId = btn.dataset.postId;
+        const commentId = btn.dataset.commentId;
+        const input = document.getElementById(`reply-input-${postId}-${commentId}`);
+        const text = input.value.trim();
+        if (!text) return;
+
+        try {
+          const userSnap = await getDoc(doc(db, "users", currentUser.uid));
+          const user = userSnap.data();
+          const replyRef = collection(db, `posts/${postId}/comments/${commentId}/replies`);
+          await addDoc(replyRef, {
+            author: currentUser.uid,
+            authorName: user.nickname,
+            authorAvatar: user.avatar || '',
+            text: text,
+            createdAt: serverTimestamp()
+          });
+          input.value = '';
+          document.getElementById(`reply-form-${postId}-${commentId}`).style.display = 'none';
+          // Перезавантажити коментарі
+          const commentsContainer = document.getElementById(`comments-list-${postId}`);
+          await loadComments(postId, commentsContainer);
+        } catch (error) {
+          console.error('Error sending reply:', error);
+          showToast('Помилка при відповіді');
+        }
+      });
+    });
+
+    // Обробники для лайків коментарів
+    document.querySelectorAll('.like-comment-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const postId = btn.dataset.postId;
+        const commentId = btn.dataset.commentId;
+        const liked = btn.classList.contains('liked');
+        const countSpan = btn.querySelector('span');
+        const oldCount = parseInt(countSpan.textContent);
+        
+        btn.classList.toggle('liked');
+        countSpan.textContent = liked ? oldCount - 1 : oldCount + 1;
+        
+        try {
+          const commentRef = doc(db, `posts/${postId}/comments`, commentId);
+          if (liked) {
+            await updateDoc(commentRef, { likes: arrayRemove(currentUser.uid), likesCount: increment(-1) });
+          } else {
+            await updateDoc(commentRef, { likes: arrayUnion(currentUser.uid), likesCount: increment(1) });
+          }
+        } catch (error) {
+          btn.classList.toggle('liked');
+          countSpan.textContent = oldCount;
+          showToast('Помилка');
+        }
+      });
     });
   }
 
@@ -2643,7 +2764,9 @@
       authorName: user.nickname,
       authorAvatar: user.avatar || '',
       text: text.trim(),
-      createdAt: serverTimestamp()
+      createdAt: serverTimestamp(),
+      likes: [],
+      likesCount: 0
     });
     await updateDoc(doc(db, "posts", postId), { commentsCount: increment(1) });
   }

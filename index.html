@@ -38,7 +38,7 @@
       --radius-sm: 8px;
       --radius-md: 12px;
       --radius-lg: 16px;
-      --sidebar-width: 280px;
+      --sidebar-width: 240px;
       --header-height: 64px;
     }
 
@@ -87,7 +87,7 @@
       border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
-      padding: 24px 0;
+      padding: 16px 0;
       overflow-y: auto;
       transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1), background-color 0.3s;
       z-index: 1000;
@@ -120,7 +120,7 @@
     }
 
     .sidebar-header {
-      padding: 0 20px 20px;
+      padding: 0 16px 16px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
@@ -128,7 +128,7 @@
     }
 
     .logo {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: 700;
       letter-spacing: -1px;
       color: var(--text-primary);
@@ -139,20 +139,20 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 16px 0;
+      padding: 12px 0;
     }
     .nav-item {
       display: flex;
       align-items: center;
-      gap: 14px;
-      padding: 14px 20px;
-      margin: 4px 12px;
+      gap: 10px;
+      padding: 10px 16px;
+      margin: 2px 8px;
       border-radius: var(--radius-md);
       color: var(--text-secondary);
       transition: all 0.3s ease;
       cursor: pointer;
       font-weight: 500;
-      font-size: 1rem;
+      font-size: 0.95rem;
       border: 1px solid transparent;
       position: relative;
       overflow: hidden;
@@ -185,8 +185,8 @@
       box-shadow: var(--shadow-sm);
     }
     .nav-item .icon {
-      width: 24px;
-      height: 24px;
+      width: 20px;
+      height: 20px;
       stroke: currentColor;
       stroke-width: 1.8;
       fill: none;
@@ -207,7 +207,7 @@
 
     .sidebar-footer {
       border-top: 1px solid var(--border);
-      padding-top: 16px;
+      padding-top: 12px;
     }
 
     /* ========== ОСНОВНИЙ КОНТЕНТ ========== */
@@ -315,8 +315,8 @@
       position: absolute;
       bottom: 100%;
       right: 0;
-      width: 320px;
-      max-height: 400px;
+      width: 400px;
+      max-height: 500px;
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
@@ -329,13 +329,13 @@
     }
     .emoji-picker .emoji-search {
       width: 100%;
-      padding: 8px 12px;
+      padding: 12px;
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
       background: var(--surface);
       color: var(--text-primary);
       margin-bottom: 8px;
-      font-size: 0.9rem;
+      font-size: 1.2rem;
     }
     .emoji-picker .emoji-categories {
       display: flex;
@@ -346,10 +346,10 @@
       border-bottom: 1px solid var(--border);
     }
     .emoji-picker .emoji-category {
-      padding: 6px 12px;
+      padding: 10px 16px;
       background: var(--surface);
       border-radius: 30px;
-      font-size: 0.9rem;
+      font-size: 1.4rem;
       cursor: pointer;
       white-space: nowrap;
       color: var(--text-secondary);
@@ -371,19 +371,23 @@
       max-height: 200px;
     }
     .emoji-picker .emoji-grid span {
-      font-size: 1.5rem;
+      font-size: 2.5rem;
       text-align: center;
       cursor: pointer;
-      padding: 4px;
-      border-radius: var(--radius-sm);
+      padding: 8px;
+      border-radius: 12px;
       transition: background 0.2s, transform 0.1s;
+      outline: none;
     }
     .emoji-picker .emoji-grid span:hover {
       background: var(--surface);
       transform: scale(1.2);
     }
-    .emoji-picker .emoji-grid span:active {
-      transform: scale(1);
+    .emoji-picker .emoji-grid span:focus {
+      background: var(--accent);
+      color: var(--bg);
+      transform: scale(1.1);
+      box-shadow: 0 0 0 3px var(--bg), 0 0 0 6px var(--accent);
     }
 
     /* ========== КАРТКИ ========== */
@@ -2189,15 +2193,22 @@
     const categoriesDiv = document.createElement('div');
     categoriesDiv.classList.add('emoji-categories');
     const categoryNames = ['smileys', 'animals', 'food', 'travel', 'objects', 'symbols'];
-    categoryNames.forEach(cat => {
+    const categoryLabels = ['😊', '🐶', '🍔', '✈️', '📱', '🔣'];
+    categoryNames.forEach((cat, idx) => {
       const catBtn = document.createElement('span');
       catBtn.classList.add('emoji-category');
-      catBtn.textContent = cat === 'smileys' ? '😊' : cat === 'animals' ? '🐶' : cat === 'food' ? '🍔' : cat === 'travel' ? '✈️' : cat === 'objects' ? '📱' : '🔣';
+      catBtn.textContent = categoryLabels[idx];
       catBtn.dataset.category = cat;
+      catBtn.setAttribute('tabindex', '0');
       catBtn.onclick = () => {
-        document.querySelectorAll('.emoji-category').forEach(c => c.classList.remove('active'));
-        catBtn.classList.add('active');
-        filterEmojis(cat, '');
+        setActiveCategory(catBtn);
+        filterEmojis(cat, searchInput.value);
+      };
+      catBtn.onkeydown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          catBtn.click();
+        }
       };
       categoriesDiv.appendChild(catBtn);
     });
@@ -2209,23 +2220,55 @@
 
     let currentCategory = 'smileys';
     let currentSearch = '';
+    let emojiElements = [];
+
+    function setActiveCategory(activeBtn) {
+      document.querySelectorAll('.emoji-category').forEach(c => c.classList.remove('active'));
+      activeBtn.classList.add('active');
+    }
 
     function renderEmojis(category, search) {
       let emojis = emojiCategories[category] || [];
       if (search) {
-        // простий пошук за назвою емоджі не реалізуємо, можна по самому символу, але це складно
-        // для простоти фільтруємо, якщо символ містить пошуковий рядок (це не точно)
         emojis = emojis.filter(e => e.includes(search));
       }
       gridDiv.innerHTML = '';
+      emojiElements = [];
       emojis.forEach(emoji => {
         const span = document.createElement('span');
         span.textContent = emoji;
+        span.setAttribute('tabindex', '0');
+        span.setAttribute('role', 'button');
         span.onclick = () => {
           insertEmoji(emoji);
           pickerElement.style.display = 'none';
         };
+        span.onkeydown = (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            span.click();
+          }
+          // Навігація стрілками всередині сітки
+          const siblings = Array.from(gridDiv.children);
+          const idx = siblings.indexOf(span);
+          if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            if (idx + 1 < siblings.length) siblings[idx + 1].focus();
+          } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            if (idx - 1 >= 0) siblings[idx - 1].focus();
+          } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const nextIdx = idx + 8; // приблизно на ряд нижче
+            if (nextIdx < siblings.length) siblings[nextIdx].focus();
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const prevIdx = idx - 8;
+            if (prevIdx >= 0) siblings[prevIdx].focus();
+          }
+        };
         gridDiv.appendChild(span);
+        emojiElements.push(span);
       });
     }
 
@@ -2240,7 +2283,7 @@
     });
 
     // Встановити активну першу категорію
-    const firstCat = categoriesDiv.querySelector('.emoji-category');
+    const firstCat = categoriesDiv.firstChild;
     if (firstCat) {
       firstCat.classList.add('active');
       renderEmojis('smileys', '');

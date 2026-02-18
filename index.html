@@ -94,9 +94,6 @@
     body.tv-mode .profile-tab {
       cursor: pointer;
     }
-    body.tv-mode .post {
-      tab-index: 0;
-    }
 
     .app {
       display: flex;
@@ -2691,7 +2688,6 @@
   async function addPostToFeed(post) {
     const feed = document.getElementById('feed');
     if (!feed) return;
-    // Create post element (similar to renderPosts but for single post)
     const liked = post.likes?.includes(currentUser?.uid) || false;
     const saved = post.saves?.includes(currentUser?.uid) || false;
     const postTime = post.createdAt ? new Date(post.createdAt.seconds * 1000).toLocaleString() : '';
@@ -2699,7 +2695,7 @@
     const postEl = document.createElement('div');
     postEl.className = 'post';
     postEl.dataset.postId = post.id;
-    postEl.tabIndex = 0; // make focusable
+    postEl.tabIndex = 0;
     
     let actionsHtml = '';
     if (isAuthor) {
@@ -2780,13 +2776,21 @@
 
     const toggleBtn = postEl.querySelector('.comment-toggle-btn');
     const commentsSection = postEl.querySelector('.comments-section');
+    const commentsList = document.getElementById(`comments-list-${post.id}`);
+    let unsubscribeComments = null;
     toggleBtn.onclick = async () => {
       if (commentsSection.style.display === 'none') {
         commentsSection.style.display = 'block';
-        const commentsList = document.getElementById(`comments-list-${post.id}`);
-        if (commentsList) await loadComments(post.id, commentsList);
+        if (commentsList) {
+          if (unsubscribeComments) unsubscribeComments();
+          unsubscribeComments = subscribeToComments(post.id, commentsList);
+        }
       } else {
         commentsSection.style.display = 'none';
+        if (unsubscribeComments) {
+          unsubscribeComments();
+          unsubscribeComments = null;
+        }
       }
     };
 
@@ -2798,8 +2802,6 @@
         try {
           await addComment(post.id, text);
           commentInput.value = '';
-          const commentsList = document.getElementById(`comments-list-${post.id}`);
-          if (commentsList) await loadComments(post.id, commentsList);
           const countSpan = toggleBtn.querySelector('span');
           if (countSpan) countSpan.textContent = parseInt(countSpan.textContent) + 1;
           showToast('Коментар додано');
@@ -2848,7 +2850,6 @@
       });
       await updateDoc(doc(db, "users", currentUser.uid), { posts: arrayUnion(postDoc.id) });
       
-      // Add the new post to the feed immediately
       const newPost = {
         id: postDoc.id,
         author: currentUser.uid,
@@ -2906,22 +2907,10 @@
   }
 
   // ================= ФУНКЦІЇ ДЛЯ КОМЕНТАРІВ =================
-  // Use onSnapshot for real-time comments
   function subscribeToComments(postId, container) {
     const q = query(collection(db, `posts/${postId}/comments`), orderBy("createdAt", "asc"));
     return onSnapshot(q, async (snapshot) => {
-      container.innerHTML = '';
-      for (const change of snapshot.docChanges()) {
-        if (change.type === 'added' || change.type === 'modified') {
-          // Reload all comments for simplicity (could be optimized)
-          await loadComments(postId, container);
-          break;
-        }
-      }
-      // If no changes, just render
-      if (snapshot.docs.length > 0 && container.children.length === 0) {
-        await loadComments(postId, container);
-      }
+      await loadComments(postId, container);
     }, (error) => {
       console.error('Comments snapshot error:', error);
     });
@@ -3016,8 +3005,7 @@
           });
           input.value = '';
           document.getElementById(`reply-form-${postId}-${commentId}`).style.display = 'none';
-          const commentsContainer = document.getElementById(`comments-list-${postId}`);
-          await loadComments(postId, commentsContainer);
+          // No need to reload, listener will update
         } catch (error) {
           console.error('Error sending reply:', error);
           showToast('Помилка при відповіді');
@@ -3182,7 +3170,6 @@
         if (commentsSection.style.display === 'none') {
           commentsSection.style.display = 'block';
           if (commentsList) {
-            // Subscribe to real-time comments
             if (unsubscribeComments) unsubscribeComments();
             unsubscribeComments = subscribeToComments(post.id, commentsList);
           }
@@ -3203,7 +3190,6 @@
           try {
             await addComment(post.id, text);
             commentInput.value = '';
-            // No need to reload, listener will update
             const countSpan = toggleBtn.querySelector('span');
             if (countSpan) countSpan.textContent = parseInt(countSpan.textContent) + 1;
             showToast('Коментар додано');

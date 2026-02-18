@@ -87,6 +87,16 @@
     body.tv-mode .modal-content {
       outline: none;
     }
+    /* Make posts focusable in TV mode */
+    body.tv-mode .post,
+    body.tv-mode .chat-item,
+    body.tv-mode .hashtag-item,
+    body.tv-mode .profile-tab {
+      cursor: pointer;
+    }
+    body.tv-mode .post {
+      tab-index: 0;
+    }
 
     .app {
       display: flex;
@@ -327,6 +337,7 @@
     .emoji-button:active {
       transform: scale(0.95);
     }
+    /* Звичайний пікер (для мобільного) */
     .emoji-picker {
       position: absolute;
       bottom: 100%;
@@ -342,6 +353,30 @@
       flex-direction: column;
       padding: 10px;
       backdrop-filter: blur(10px);
+    }
+    /* TV-режим: центрований модальний пікер */
+    body.tv-mode .emoji-picker {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 600px;
+      height: 80vh;
+      max-height: 600px;
+      bottom: auto;
+      right: auto;
+      z-index: 10000;
+    }
+    body.tv-mode .emoji-picker::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: -1;
     }
     .emoji-picker .emoji-search {
       width: 100%;
@@ -385,6 +420,9 @@
       overflow-y: auto;
       padding: 4px 0;
       max-height: 200px;
+    }
+    body.tv-mode .emoji-picker .emoji-grid {
+      max-height: 400px;
     }
     .emoji-picker .emoji-grid span {
       font-size: 1.5rem;
@@ -2251,6 +2289,7 @@
           insertEmoji(emoji);
           pickerElement.style.display = 'none';
         };
+        span.tabIndex = 0; // make focusable
         gridDiv.appendChild(span);
       });
     }
@@ -2294,6 +2333,11 @@
       e.stopPropagation();
       closeAllEmojiPickers();
       picker.style.display = picker.style.display === 'none' ? 'flex' : 'none';
+      if (tvModeEnabled && picker.style.display === 'flex') {
+        // In TV mode, focus the first emoji
+        const firstEmoji = picker.querySelector('.emoji-grid span');
+        if (firstEmoji) firstEmoji.focus();
+      }
     });
 
     document.addEventListener('click', (e) => {
@@ -2378,6 +2422,7 @@
           <span class="hashtag-count">${count} ${translations[currentLanguage]?.posts || 'постів'}</span>
         `;
         div.onclick = () => searchHashtag(tag);
+        div.tabIndex = 0;
         list.appendChild(div);
       });
     } catch (e) {
@@ -2643,6 +2688,129 @@
     loadMorePosts();
   }
 
+  async function addPostToFeed(post) {
+    const feed = document.getElementById('feed');
+    if (!feed) return;
+    // Create post element (similar to renderPosts but for single post)
+    const liked = post.likes?.includes(currentUser?.uid) || false;
+    const saved = post.saves?.includes(currentUser?.uid) || false;
+    const postTime = post.createdAt ? new Date(post.createdAt.seconds * 1000).toLocaleString() : '';
+    const isAuthor = currentUser && post.author === currentUser.uid;
+    const postEl = document.createElement('div');
+    postEl.className = 'post';
+    postEl.dataset.postId = post.id;
+    postEl.tabIndex = 0; // make focusable
+    
+    let actionsHtml = '';
+    if (isAuthor) {
+      actionsHtml = `
+        <div class="post-actions">
+          <button class="edit-post-btn" title="Редагувати пост">⋯</button>
+        </div>
+      `;
+    }
+    
+    let contentHtml = post.text || '';
+    const hashtagRegex = /#(\w+)/g;
+    contentHtml = contentHtml.replace(hashtagRegex, '<span class="hashtag" data-tag="$1">#$1</span>');
+    
+    postEl.innerHTML = `
+      ${actionsHtml}
+      <div class="post-header">
+        <div class="avatar small" style="background-image:url(${post.authorAvatar || ''})" data-uid="${post.author}"></div>
+        <div class="post-author-info">
+          <div>
+            <span class="post-author" data-uid="${post.author}">${post.authorName || 'Невідомо'}</span>
+            <span class="post-meta">${post.authorUserId || ''}</span>
+          </div>
+          <div class="post-time">${postTime}</div>
+        </div>
+      </div>
+      <div class="post-content">${contentHtml}</div>
+      ${post.mediaUrl ? (post.mediaType==='image' ? `<img src="${post.mediaUrl}" class="post-media" loading="lazy">` : `<video src="${post.mediaUrl}" controls class="post-media"></video>`) : ''}
+      <div class="post-footer">
+        <button class="like-btn ${liked ? 'liked' : ''}" data-post-id="${post.id}">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <span>${post.likesCount || 0}</span>
+        </button>
+        <button class="comment-toggle-btn" data-post-id="${post.id}">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>${post.commentsCount || 0}</span>
+        </button>
+        <button class="save-btn ${saved ? 'saved' : ''}" data-post-id="${post.id}">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        </button>
+        <span class="view-count" title="Перегляди">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="2"/><path d="M22 12c-2.667 4.667-6 7-10 7s-7.333-2.333-10-7c2.667-4.667 6-7 10-7s7.333 2.333 10 7z"/></svg>
+          ${post.views || 0}
+        </span>
+      </div>
+      <div class="comments-section" id="comments-${post.id}" style="display: none;">
+        <div class="comments-list" id="comments-list-${post.id}"></div>
+        <div class="comment-form">
+          <input type="text" id="comment-input-${post.id}" class="comment-input" placeholder="Напишіть коментар...">
+          <div class="emoji-picker-container" style="position: relative;">
+            <button class="emoji-button" id="comment-emoji-${post.id}">😊</button>
+            <div class="emoji-picker" id="comment-picker-${post.id}" style="display: none; bottom: 100%; right: 0; position: absolute;"></div>
+          </div>
+          <button class="btn btn-primary btn-icon" id="submit-comment-${post.id}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    `;
+    feed.prepend(postEl);
+
+    if (isAuthor) {
+      postEl.querySelector('.edit-post-btn').onclick = () => openEditPostModal(post);
+    }
+
+    postEl.querySelectorAll('.hashtag').forEach(span => {
+      span.onclick = (e) => {
+        e.stopPropagation();
+        const tag = span.dataset.tag;
+        searchHashtag(tag);
+      };
+    });
+
+    const commentInput = document.getElementById(`comment-input-${post.id}`);
+    if (commentInput) {
+      setupEmojiPicker(`comment-emoji-${post.id}`, `comment-picker-${post.id}`, `comment-input-${post.id}`);
+    }
+
+    const toggleBtn = postEl.querySelector('.comment-toggle-btn');
+    const commentsSection = postEl.querySelector('.comments-section');
+    toggleBtn.onclick = async () => {
+      if (commentsSection.style.display === 'none') {
+        commentsSection.style.display = 'block';
+        const commentsList = document.getElementById(`comments-list-${post.id}`);
+        if (commentsList) await loadComments(post.id, commentsList);
+      } else {
+        commentsSection.style.display = 'none';
+      }
+    };
+
+    const submitBtn = document.getElementById(`submit-comment-${post.id}`);
+    if (submitBtn) {
+      submitBtn.onclick = async () => {
+        const text = commentInput.value.trim();
+        if (!text) return;
+        try {
+          await addComment(post.id, text);
+          commentInput.value = '';
+          const commentsList = document.getElementById(`comments-list-${post.id}`);
+          if (commentsList) await loadComments(post.id, commentsList);
+          const countSpan = toggleBtn.querySelector('span');
+          if (countSpan) countSpan.textContent = parseInt(countSpan.textContent) + 1;
+          showToast('Коментар додано');
+        } catch (error) {
+          console.error('Error adding comment:', error);
+          showToast('Помилка: ' + error.message);
+        }
+      };
+    }
+  }
+
   document.getElementById('addPost').onclick = async () => {
     if (!currentUser) return alert('Увійдіть');
     const text = document.getElementById('postText').value.trim();
@@ -2679,6 +2847,27 @@
         hashtags: hashtags
       });
       await updateDoc(doc(db, "users", currentUser.uid), { posts: arrayUnion(postDoc.id) });
+      
+      // Add the new post to the feed immediately
+      const newPost = {
+        id: postDoc.id,
+        author: currentUser.uid,
+        authorName: userData.nickname,
+        authorUserId: userData.userId,
+        authorAvatar: userData.avatar || '',
+        text,
+        mediaUrl,
+        mediaType,
+        createdAt: { seconds: Date.now() / 1000 },
+        likes: [],
+        likesCount: 0,
+        commentsCount: 0,
+        saves: [],
+        views: 0,
+        hashtags
+      };
+      addPostToFeed(newPost);
+      
       document.getElementById('postText').value = '';
       document.getElementById('postMedia').value = '';
       document.getElementById('postMediaLabel').textContent = translations[currentLanguage]?.chooseMedia || 'Обрати фото/відео';
@@ -2717,6 +2906,27 @@
   }
 
   // ================= ФУНКЦІЇ ДЛЯ КОМЕНТАРІВ =================
+  // Use onSnapshot for real-time comments
+  function subscribeToComments(postId, container) {
+    const q = query(collection(db, `posts/${postId}/comments`), orderBy("createdAt", "asc"));
+    return onSnapshot(q, async (snapshot) => {
+      container.innerHTML = '';
+      for (const change of snapshot.docChanges()) {
+        if (change.type === 'added' || change.type === 'modified') {
+          // Reload all comments for simplicity (could be optimized)
+          await loadComments(postId, container);
+          break;
+        }
+      }
+      // If no changes, just render
+      if (snapshot.docs.length > 0 && container.children.length === 0) {
+        await loadComments(postId, container);
+      }
+    }, (error) => {
+      console.error('Comments snapshot error:', error);
+    });
+  }
+
   async function loadComments(postId, container) {
     const q = query(collection(db, `posts/${postId}/comments`), orderBy("createdAt", "asc"));
     const snapshot = await getDocs(q);
@@ -2883,6 +3093,7 @@
       const postEl = document.createElement('div');
       postEl.className = 'post';
       postEl.dataset.postId = post.id;
+      postEl.tabIndex = 0; // make focusable
       
       let actionsHtml = '';
       if (isAuthor) {
@@ -2965,13 +3176,22 @@
 
       const toggleBtn = postEl.querySelector('.comment-toggle-btn');
       const commentsSection = postEl.querySelector('.comments-section');
+      const commentsList = document.getElementById(`comments-list-${post.id}`);
+      let unsubscribeComments = null;
       toggleBtn.onclick = async () => {
         if (commentsSection.style.display === 'none') {
           commentsSection.style.display = 'block';
-          const commentsList = document.getElementById(`comments-list-${post.id}`);
-          if (commentsList) await loadComments(post.id, commentsList);
+          if (commentsList) {
+            // Subscribe to real-time comments
+            if (unsubscribeComments) unsubscribeComments();
+            unsubscribeComments = subscribeToComments(post.id, commentsList);
+          }
         } else {
           commentsSection.style.display = 'none';
+          if (unsubscribeComments) {
+            unsubscribeComments();
+            unsubscribeComments = null;
+          }
         }
       };
 
@@ -2983,8 +3203,7 @@
           try {
             await addComment(post.id, text);
             commentInput.value = '';
-            const commentsList = document.getElementById(`comments-list-${post.id}`);
-            if (commentsList) await loadComments(post.id, commentsList);
+            // No need to reload, listener will update
             const countSpan = toggleBtn.querySelector('span');
             if (countSpan) countSpan.textContent = parseInt(countSpan.textContent) + 1;
             showToast('Коментар додано');
@@ -3361,6 +3580,7 @@
           tab.classList.add('active');
           loadProfileFeed(uid, tab.dataset.tab);
         };
+        tab.tabIndex = 0;
       });
     }
     loadProfileFeed(uid, 'posts');
@@ -3593,6 +3813,7 @@
         div.className = `chat-item ${item.unread > 0 ? 'unread' : ''}`;
         div.dataset.chatId = item.chatId;
         div.dataset.otherUid = item.otherUid;
+        div.tabIndex = 0; // make focusable
         
         const lastSeenText = getLastSeenText(item.lastOnline);
         
@@ -4114,17 +4335,25 @@
     localStorage.setItem('tvMode', tvModeEnabled);
     document.body.classList.toggle('tv-mode', tvModeEnabled);
     if (tvModeEnabled) {
-      // Make all emoji spans focusable
-      document.querySelectorAll('.emoji-grid span').forEach(span => span.setAttribute('tabindex', '0'));
+      // Make all interactive elements focusable
+      document.querySelectorAll('.post, .chat-item, .hashtag-item, .profile-tab, .emoji-grid span, button, input, select, textarea, [tabindex]').forEach(el => {
+        if (!el.hasAttribute('tabindex') && el.tagName !== 'BUTTON' && el.tagName !== 'INPUT' && el.tagName !== 'SELECT' && el.tagName !== 'TEXTAREA') {
+          el.setAttribute('tabindex', '0');
+        }
+      });
     } else {
-      document.querySelectorAll('.emoji-grid span').forEach(span => span.removeAttribute('tabindex'));
+      document.querySelectorAll('[tabindex="0"]').forEach(el => {
+        if (!el.classList.contains('post') && !el.classList.contains('chat-item') && !el.classList.contains('hashtag-item') && !el.classList.contains('profile-tab') && !el.classList.contains('emoji-grid span')) {
+          el.removeAttribute('tabindex');
+        }
+      });
     }
   }
 
   // Set initial TV mode state
   if (tvModeEnabled) {
     document.body.classList.add('tv-mode');
-    document.querySelectorAll('.emoji-grid span').forEach(span => span.setAttribute('tabindex', '0'));
+    document.querySelectorAll('.post, .chat-item, .hashtag-item, .profile-tab, .emoji-grid span').forEach(el => el.setAttribute('tabindex', '0'));
   }
 
   document.getElementById('toggleTvMode').onclick = toggleTvMode;
@@ -4173,7 +4402,7 @@
       }
 
       // General focus navigation: get all focusable elements
-      const focusableSelectors = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"]), .emoji-grid span, .nav-item, .post, .comment, .chat-item, .hashtag-item, .profile-tab, .btn, .avatar[data-uid]';
+      const focusableSelectors = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"]), .post, .chat-item, .hashtag-item, .profile-tab, .avatar[data-uid], .nav-item';
       let focusable = Array.from(document.querySelectorAll(focusableSelectors)).filter(el => {
         if (el.hasAttribute('disabled')) return false;
         if (el.offsetParent === null) return false; // hidden

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"/>
-  <title>FANTASYAS · ТВ версія (покращена)</title>
+  <title>FANTASYAS · Android TV</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
     /* ========== ГЛОБАЛЬНІ СТИЛІ ========== */
@@ -64,59 +64,76 @@
       transition: background var(--transition), color var(--transition);
       font-size: 16px;
       line-height: 1.5;
+      overflow: hidden;
     }
 
+    /* ===== ФОКУС – головний елемент для ТВ ===== */
     .focused {
       outline: 4px solid var(--accent) !important;
       outline-offset: 4px;
-      box-shadow: 0 0 0 4px var(--bg), 0 0 20px var(--accent) !important;
+      box-shadow: 0 0 0 4px var(--bg), 0 0 30px var(--accent) !important;
       transform: scale(1.02);
       transition: all 0.15s ease;
       z-index: 100;
-      animation: pulse 1.5s infinite;
+      animation: tv-pulse 2s infinite;
     }
 
-    @keyframes pulse {
+    @keyframes tv-pulse {
       0% { box-shadow: 0 0 0 4px var(--bg), 0 0 20px var(--accent); }
-      50% { box-shadow: 0 0 0 4px var(--bg), 0 0 30px var(--accent); }
+      50% { box-shadow: 0 0 0 4px var(--bg), 0 0 40px var(--accent); }
       100% { box-shadow: 0 0 0 4px var(--bg), 0 0 20px var(--accent); }
     }
 
-    /* TV-стрілочка */
-    #tvCursor {
-      position: fixed;
-      width: 32px;
-      height: 32px;
-      background: transparent;
-      display: none;
-      z-index: 9999;
-      pointer-events: none;
-      transition: all 0.1s ease;
-      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
-    }
-    #tvCursor svg {
-      width: 100%;
-      height: 100%;
-      fill: var(--accent);
-      stroke: var(--bg);
-      stroke-width: 1.5;
+    /* Вимикаємо hover-ефекти, які заважають фокусу */
+    .btn:hover, .nav-item:hover, .post:hover, .chat-item:hover {
+      opacity: 0.9;
     }
 
-    .sidebar-backdrop {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(4px);
-      z-index: 999;
-      opacity: 0;
-      transition: opacity 0.3s ease;
+    /* ===== Емоджі-пікер для ТВ – великий, сітка 6 колонок ===== */
+    .emoji-picker-container {
+      position: relative;
+      display: inline-block;
     }
-    .sidebar-backdrop.active {
-      display: block;
-      opacity: 1;
+    .emoji-picker {
+      position: absolute;
+      bottom: 100%;
+      right: 0;
+      background: var(--card);
+      border: 2px solid var(--accent);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      z-index: 2000;
+      box-shadow: var(--shadow-lg);
+      width: 420px;
+      max-height: 400px;
+      overflow-y: auto;
+      margin-bottom: 12px;
+    }
+    .emoji-picker span {
+      font-size: 3rem;
+      cursor: pointer;
+      text-align: center;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      transition: all 0.1s;
+      line-height: 1;
+      background: var(--surface);
+      border: 2px solid transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .emoji-picker span.focused {
+      border-color: var(--accent);
+      background: var(--card);
+      transform: scale(1.1);
+      box-shadow: 0 0 20px var(--accent);
     }
 
+    /* Інші елементи інтерфейсу – збільшені для ТВ */
     .app {
       display: flex;
       height: 100vh;
@@ -151,41 +168,20 @@
       display: flex;
       align-items: center;
       gap: 14px;
-      padding: 12px 20px;
+      padding: 16px 20px;
       margin: 4px 8px;
       border-radius: var(--radius-md);
       color: var(--text-secondary);
       transition: all var(--transition);
       cursor: pointer;
-      font-weight: 500;
-    }
-
-    .nav-item:hover {
-      background: var(--card);
-      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 1.2rem;
+      border: 2px solid transparent;
     }
 
     .nav-item.active {
       background: var(--accent);
       color: var(--bg);
-    }
-
-    .nav-item .icon {
-      width: 24px;
-      height: 24px;
-      stroke: currentColor;
-      stroke-width: 1.8;
-      fill: none;
-    }
-
-    .nav-item .badge {
-      margin-left: auto;
-      background: var(--accent);
-      color: var(--bg);
-      padding: 2px 8px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
     }
 
     .main {
@@ -216,7 +212,6 @@
       position: relative;
       z-index: 1001;
     }
-
     .menu-toggle span {
       height: 2px;
       width: 100%;
@@ -224,23 +219,20 @@
       border-radius: 2px;
       transition: transform 0.3s ease, opacity 0.2s ease;
     }
-
     .menu-toggle.active span:nth-child(1) { transform: rotate(45deg) translate(6px, 5px); }
     .menu-toggle.active span:nth-child(2) { opacity: 0; }
     .menu-toggle.active span:nth-child(3) { transform: rotate(-45deg) translate(6px, -5px); }
 
     .top-bar-title {
-      font-size: 1.4rem;
+      font-size: 1.6rem;
       font-weight: 700;
     }
 
     .content {
       flex: 1;
-      overflow-y: auto !important;
-      padding: 20px;
+      overflow-y: auto;
+      padding: 24px;
       scroll-behavior: smooth;
-      height: 100%;
-      max-height: 100%;
       outline: none;
     }
 
@@ -272,18 +264,14 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 20px;
+      padding: 24px;
       box-shadow: var(--shadow-sm);
       transition: box-shadow var(--transition), transform var(--transition);
     }
 
-    .card:hover {
-      box-shadow: var(--shadow-md);
-    }
-
     .avatar {
-      width: 48px;
-      height: 48px;
+      width: 56px;
+      height: 56px;
       border-radius: 50%;
       background: var(--surface);
       background-size: cover;
@@ -292,21 +280,19 @@
       cursor: pointer;
       transition: border-color var(--transition);
     }
-
     .avatar.small {
-      width: 32px;
-      height: 32px;
+      width: 44px;
+      height: 44px;
     }
-
     .avatar.large {
-      width: 80px;
-      height: 80px;
+      width: 100px;
+      height: 100px;
     }
 
     .online-indicator {
       display: inline-block;
-      width: 12px;
-      height: 12px;
+      width: 14px;
+      height: 14px;
       background: #4caf50;
       border-radius: 50%;
       border: 2px solid var(--card);
@@ -314,91 +300,50 @@
     }
 
     .btn {
-      padding: 10px 18px;
+      padding: 16px 28px;
       border-radius: var(--radius-md);
       background: var(--surface);
-      border: 1px solid var(--border);
+      border: 2px solid var(--border);
       color: var(--text-primary);
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       transition: all var(--transition);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      position: relative;
-      overflow: hidden;
+      gap: 8px;
+      font-size: 1.2rem;
+      min-width: 120px;
     }
-
-    .btn::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 5px;
-      height: 5px;
-      background: rgba(255,255,255,0.3);
-      opacity: 0;
-      border-radius: 100%;
-      transform: scale(1, 1) translate(-50%);
-      transform-origin: 50% 50%;
-    }
-
-    .btn:active::after {
-      animation: ripple 0.3s ease-out;
-    }
-
-    @keyframes ripple {
-      0% { transform: scale(0, 0); opacity: 0.5; }
-      100% { transform: scale(20, 20); opacity: 0; }
-    }
-
-    .btn:hover, .btn.focused {
-      background: var(--accent);
-      color: var(--bg);
-      border-color: var(--accent);
-    }
-
     .btn-primary {
       background: var(--accent);
       color: var(--bg);
       border-color: var(--accent);
     }
-
-    .btn-primary:hover, .btn-primary.focused {
-      background: var(--accent-hover);
-    }
-
     .btn-danger {
       background: var(--danger);
       color: white;
       border-color: var(--danger);
     }
-    .btn-danger:hover {
-      background: var(--danger-hover);
-    }
-
     .btn-icon {
-      padding: 10px;
+      padding: 16px;
     }
 
     .input {
       width: 100%;
-      padding: 14px 18px;
+      padding: 18px 22px;
       border-radius: var(--radius-md);
-      border: 1px solid var(--border);
+      border: 2px solid var(--border);
       background: var(--surface);
       color: var(--text-primary);
-      font-size: 1rem;
+      font-size: 1.2rem;
       outline: none;
       transition: border-color var(--transition);
     }
-
     .input:focus, .input.focused {
       border-color: var(--accent);
     }
 
-    /* ===== Кастомний вибір файлу ===== */
     .file-input-wrapper {
       position: relative;
       display: inline-block;
@@ -420,21 +365,18 @@
       justify-content: center;
       gap: 8px;
       width: 100%;
-      padding: 12px;
+      padding: 18px;
       background: var(--surface);
-      border: 1px dashed var(--border);
+      border: 2px dashed var(--border);
       border-radius: var(--radius-md);
       color: var(--text-secondary);
       transition: all var(--transition);
-    }
-    .file-input-button:hover {
-      border-color: var(--accent);
-      color: var(--accent);
+      font-size: 1.2rem;
     }
     .file-preview {
-      margin-top: 8px;
+      margin-top: 12px;
       max-width: 100%;
-      max-height: 200px;
+      max-height: 300px;
       border-radius: var(--radius-sm);
       object-fit: cover;
       display: none;
@@ -446,635 +388,349 @@
     .feed {
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 32px;
     }
 
     .post {
       background: var(--card);
-      border: 1px solid var(--border);
+      border: 2px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 16px 16px 12px;
+      padding: 24px 24px 20px;
       box-shadow: var(--shadow-sm);
       transition: transform 0.15s ease, box-shadow 0.15s ease;
-      animation: fadeIn 0.3s ease;
       position: relative;
-    }
-    .post:hover, .post.focused {
-      box-shadow: var(--shadow-md);
-      transform: scale(1.01);
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
     }
 
     .post-header {
       display: flex;
-      gap: 12px;
-      margin-bottom: 12px;
+      gap: 16px;
+      margin-bottom: 16px;
       align-items: center;
-    }
-    .post-header .avatar {
-      width: 42px;
-      height: 42px;
-    }
-    .post-author-info {
-      flex: 1;
     }
     .post-author {
       font-weight: 700;
+      font-size: 1.2rem;
       cursor: pointer;
-      display: inline-block;
-      margin-right: 6px;
-    }
-    .post-author:hover {
-      text-decoration: underline;
     }
     .post-meta {
       color: var(--text-tertiary);
-      font-size: 0.85rem;
+      font-size: 1rem;
     }
     .post-time {
       color: var(--text-tertiary);
-      font-size: 0.75rem;
-      margin-left: auto;
+      font-size: 0.9rem;
     }
 
     .post-actions {
       position: absolute;
-      top: 16px;
-      right: 16px;
+      top: 20px;
+      right: 20px;
       display: flex;
-      gap: 8px;
+      gap: 12px;
     }
     .post-actions button {
-      background: none;
-      border: none;
+      background: var(--surface);
+      border: 2px solid var(--border);
       color: var(--text-secondary);
       cursor: pointer;
-      font-size: 1.2rem;
-      padding: 4px;
+      font-size: 1.5rem;
+      padding: 8px 12px;
       border-radius: 50%;
-      transition: background var(--transition);
-    }
-    .post-actions button:hover, .post-actions button.focused {
-      background: var(--surface);
+      transition: all var(--transition);
     }
 
     .post-content {
-      margin-bottom: 14px;
+      margin-bottom: 20px;
       white-space: pre-wrap;
-      font-size: 1rem;
-      line-height: 1.5;
+      font-size: 1.2rem;
+      line-height: 1.6;
     }
 
     .hashtag {
       color: var(--accent);
       font-weight: 600;
       cursor: pointer;
-      display: inline-block;
-      margin-right: 4px;
-    }
-    .hashtag:hover {
-      text-decoration: underline;
+      font-size: 1.2rem;
+      margin-right: 6px;
     }
 
     .post-media {
       width: 100%;
       border-radius: var(--radius-md);
-      margin: 10px 0;
-      cursor: pointer;
-      max-height: 500px;
+      margin: 16px 0;
+      max-height: 600px;
       object-fit: cover;
     }
 
     .post-footer {
       display: flex;
-      gap: 20px;
+      gap: 28px;
       flex-wrap: wrap;
-      padding-top: 8px;
+      padding-top: 12px;
       border-top: 1px solid var(--border);
       align-items: center;
+      font-size: 1.2rem;
     }
-
     .post-footer button {
       background: none;
       border: none;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       color: var(--text-secondary);
       font-weight: 600;
       cursor: pointer;
-      transition: color var(--transition);
-      font-size: 0.9rem;
+      font-size: 1.1rem;
+      padding: 8px 12px;
+      border-radius: var(--radius-md);
+      transition: all var(--transition);
     }
-
-    .post-footer button:hover, .post-footer button.focused {
-      color: var(--accent);
-    }
-
     .post-footer button.liked {
       color: #ff3040;
     }
-    .post-footer button.liked svg {
-      fill: #ff3040;
-    }
-
     .post-footer button.saved {
       color: #f5a623;
-    }
-    .post-footer button.saved svg {
-      fill: #f5a623;
     }
 
     .view-count {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       color: var(--text-tertiary);
-      font-size: 0.9rem;
+      font-size: 1.1rem;
       margin-left: auto;
     }
 
     .comments-section {
-      margin-top: 16px;
+      margin-top: 20px;
       border-top: 1px solid var(--border);
-      padding-top: 16px;
+      padding-top: 20px;
     }
-
     .comment {
       display: flex;
-      gap: 10px;
-      margin-bottom: 12px;
+      gap: 12px;
+      margin-bottom: 16px;
     }
-
     .comment-avatar {
-      width: 32px;
-      height: 32px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       background-size: cover;
       background-position: center;
       flex-shrink: 0;
     }
-
     .comment-content {
       flex: 1;
       background: var(--surface);
-      padding: 8px 12px;
+      padding: 12px 16px;
       border-radius: var(--radius-md);
     }
-
     .comment-author {
       font-weight: 600;
-      font-size: 0.9rem;
+      font-size: 1.1rem;
       cursor: pointer;
-      display: inline-block;
-      margin-right: 8px;
+      margin-right: 10px;
     }
-
     .comment-text {
-      font-size: 0.95rem;
-      word-break: break-word;
+      font-size: 1.1rem;
     }
-
     .comment-time {
-      font-size: 0.75rem;
+      font-size: 0.9rem;
       color: var(--text-tertiary);
-      margin-top: 4px;
+      margin-top: 6px;
     }
-
     .comment-form {
       display: flex;
-      gap: 8px;
-      margin-top: 16px;
+      gap: 12px;
+      margin-top: 20px;
       align-items: center;
     }
-
     .comment-input {
       flex: 1;
-      padding: 10px 14px;
+      padding: 16px 20px;
       border-radius: var(--radius-md);
-      border: 1px solid var(--border);
+      border: 2px solid var(--border);
       background: var(--surface);
       color: var(--text-primary);
-    }
-
-    .emoji-picker-container {
-      position: relative;
-      display: inline-block;
-    }
-
-    .emoji-button {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      padding: 4px 8px;
-      color: var(--text-secondary);
-      transition: transform 0.1s;
-    }
-    .emoji-button:hover {
-      transform: scale(1.2);
-    }
-
-    .emoji-picker {
-      position: absolute;
-      bottom: 100%;
-      right: 0;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 8px;
-      display: grid;
-      grid-template-columns: repeat(8, 1fr);
-      gap: 6px;
-      z-index: 100;
-      box-shadow: var(--shadow-lg);
-      width: 280px;
-      max-height: 220px;
-      overflow-y: auto;
-      margin-bottom: 8px;
-    }
-
-    .emoji-picker span {
-      font-size: 1.8rem;
-      cursor: pointer;
-      text-align: center;
-      padding: 4px;
-      border-radius: var(--radius-sm);
-      transition: background 0.1s;
-      line-height: 1;
-    }
-
-    .emoji-picker span:hover, .emoji-picker span.focused {
-      background: var(--surface);
-      transform: scale(1.1);
+      font-size: 1.1rem;
     }
 
     .chat-list {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 12px;
     }
-
     .chat-item {
       display: flex;
       align-items: center;
-      gap: 14px;
-      padding: 12px;
+      gap: 16px;
+      padding: 20px;
       border-radius: var(--radius-md);
       background: var(--card);
-      border: 1px solid var(--border);
+      border: 2px solid var(--border);
       cursor: pointer;
-      transition: background var(--transition);
+      transition: all var(--transition);
+      font-size: 1.2rem;
     }
-
-    .chat-item:hover, .chat-item.focused {
-      background: var(--surface);
-    }
-
     .chat-item.unread {
-      border-left: 3px solid var(--accent);
+      border-left: 6px solid var(--accent);
     }
-
     .chat-info {
       flex: 1;
     }
-
     .chat-name {
       font-weight: 600;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      font-size: 1.3rem;
     }
-
     .chat-last {
       color: var(--text-tertiary);
-      font-size: 0.9rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      font-size: 1.1rem;
     }
-
     .chat-time {
       color: var(--text-tertiary);
-      font-size: 0.8rem;
+      font-size: 1rem;
     }
-
     .chat-badge {
       background: var(--accent);
       color: var(--bg);
       border-radius: 50%;
-      min-width: 22px;
-      height: 22px;
+      min-width: 32px;
+      height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.8rem;
+      font-size: 1.1rem;
       font-weight: 600;
     }
 
     .chat-window {
       display: flex;
       flex-direction: column;
-      height: 100%;
+      height: 70vh;
       background: var(--card);
       border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
+      border: 2px solid var(--border);
       overflow: hidden;
     }
-
     .chat-header {
-      padding: 16px;
+      padding: 20px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 16px;
     }
-
     .chat-messages {
       flex: 1;
-      padding: 16px;
+      padding: 20px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
     }
-
-    .message-wrapper {
-      display: flex;
-      flex-direction: column;
-      animation: messageAppear 0.2s ease;
-    }
-
-    @keyframes messageAppear {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .message-wrapper.sent {
-      align-items: flex-end;
-    }
-
-    .message-wrapper.received {
-      align-items: flex-start;
-    }
-
     .message-bubble {
       max-width: 70%;
-      padding: 10px 14px;
-      border-radius: 20px;
+      padding: 16px 20px;
+      border-radius: 28px;
       word-break: break-word;
-      position: relative;
+      font-size: 1.1rem;
     }
-
     .message-bubble.sent {
       background: var(--accent);
       color: var(--bg);
-      border-bottom-right-radius: 4px;
     }
-
     .message-bubble.received {
       background: var(--surface);
       color: var(--text-primary);
-      border-bottom-left-radius: 4px;
     }
-
-    .message-sender {
-      font-weight: 600;
-      font-size: 0.85rem;
-      margin-bottom: 2px;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .message-sender-avatar {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background-size: cover;
-    }
-
     .message-time {
-      font-size: 0.7rem;
+      font-size: 0.9rem;
       color: var(--text-tertiary);
-      margin-top: 2px;
+      margin-top: 4px;
       text-align: right;
     }
-
-    .date-divider {
-      text-align: center;
-      margin: 16px 0;
-      font-size: 0.8rem;
-      color: var(--text-tertiary);
-      position: relative;
-    }
-
-    .date-divider::before,
-    .date-divider::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      width: 30%;
-      height: 1px;
-      background: var(--border);
-    }
-
-    .date-divider::before {
-      left: 0;
-    }
-
-    .date-divider::after {
-      right: 0;
-    }
-
-    .typing-indicator {
-      color: var(--text-tertiary);
-      font-size: 0.9rem;
-      padding: 4px 8px;
-      font-style: italic;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
     .chat-input-area {
       display: flex;
-      padding: 12px;
+      padding: 16px;
       border-top: 1px solid var(--border);
-      gap: 8px;
+      gap: 12px;
       align-items: center;
     }
-
     .chat-input-area input {
       flex: 1;
     }
 
     .profile-header {
       display: flex;
-      gap: 24px;
-      margin-bottom: 24px;
+      gap: 32px;
+      margin-bottom: 32px;
       flex-wrap: wrap;
       align-items: flex-start;
     }
-
     .profile-stats {
       display: flex;
-      gap: 24px;
-      margin: 16px 0;
+      gap: 32px;
+      margin: 20px 0;
+      font-size: 1.2rem;
     }
-    .profile-stats span {
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .profile-stats span:hover {
-      opacity: 0.7;
-    }
-
     .profile-tabs {
       display: flex;
-      gap: 8px;
+      gap: 12px;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 8px;
-      margin-bottom: 20px;
+      padding-bottom: 12px;
+      margin-bottom: 24px;
     }
-
     .profile-tab {
-      padding: 8px 16px;
+      padding: 12px 24px;
       border-radius: var(--radius-md);
       cursor: pointer;
       font-weight: 600;
+      font-size: 1.2rem;
       color: var(--text-secondary);
+      border: 2px solid transparent;
     }
-
     .profile-tab.active, .profile-tab.focused {
       background: var(--accent);
       color: var(--bg);
     }
 
-    .profile-menu {
-      position: relative;
-      display: inline-block;
-      margin-left: auto;
-    }
-
-    .profile-menu-btn {
-      background: none;
-      border: none;
-      font-size: 1.8rem;
-      cursor: pointer;
-      padding: 0 8px;
-      color: var(--text-secondary);
-    }
-
-    .profile-menu-dropdown {
-      position: absolute;
-      right: 0;
-      top: 100%;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      min-width: 200px;
-      box-shadow: var(--shadow-lg);
-      z-index: 100;
-      display: none;
-    }
-
-    .profile-menu-dropdown.show {
-      display: block;
-    }
-
-    .profile-menu-item {
-      padding: 12px 16px;
-      cursor: pointer;
-      transition: background var(--transition);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .profile-menu-item:hover {
-      background: var(--surface);
-    }
-
-    /* ===== Стилі для хештегів у пошуку ===== */
-    .hashtag-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .hashtag-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      cursor: pointer;
-    }
-    .hashtag-item:hover {
-      background: var(--surface);
-    }
-    .hashtag-name {
-      font-weight: 600;
-      color: var(--accent);
-    }
-    .hashtag-count {
-      color: var(--text-tertiary);
-    }
-
     .modal {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.7);
       backdrop-filter: blur(8px);
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 2000;
     }
-
     .modal.active {
       display: flex;
     }
-
     .modal-content {
       background: var(--card);
       border-radius: var(--radius-lg);
-      padding: 24px;
-      max-width: 480px;
+      padding: 32px;
+      max-width: 600px;
       width: 90%;
-      max-height: 90vh;
+      max-height: 80vh;
       overflow-y: auto;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-
-    .modal-close {
-      font-size: 2rem;
-      line-height: 1;
-      cursor: pointer;
+      border: 2px solid var(--accent);
     }
 
     #toast {
       position: fixed;
-      bottom: 30px;
+      bottom: 40px;
       left: 50%;
       transform: translateX(-50%);
       background: var(--accent);
       color: var(--bg);
-      padding: 12px 24px;
-      border-radius: 40px;
-      font-weight: 500;
+      padding: 16px 32px;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 1.2rem;
       box-shadow: var(--shadow-lg);
       z-index: 3000;
       opacity: 0;
@@ -1099,6 +755,10 @@
     .text-danger { color: var(--danger); }
     .text-warning { color: var(--warning); }
     .text-success { color: var(--success); }
+
+    :focus {
+      outline: none;
+    }
   </style>
 </head>
 <body>
@@ -1111,28 +771,28 @@
     </div>
     <nav class="nav">
       <div class="nav-item active" data-section="home" tabindex="0">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M3 10l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <svg class="icon" viewBox="0 0 24 24" width="28" height="28"><path d="M3 10l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         Головна
       </div>
       <div class="nav-item" data-section="search" tabindex="0">
-        <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <svg class="icon" viewBox="0 0 24 24" width="28" height="28"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         Пошук
       </div>
       <div class="nav-item" data-section="hashtags" tabindex="0">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M4 9h16M4 15h16M10 3L8 21M16 3l-2 18"/></svg>
+        <svg class="icon" viewBox="0 0 24 24" width="28" height="28"><path d="M4 9h16M4 15h16M10 3L8 21M16 3l-2 18"/></svg>
         Хештеги
       </div>
       <div class="nav-item" data-section="profile" tabindex="0">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <svg class="icon" viewBox="0 0 24 24" width="28" height="28"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="12" r="4"/></svg>
         Профіль
       </div>
       <div class="nav-item" data-section="chats" tabindex="0">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <svg class="icon" viewBox="0 0 24 24" width="28" height="28"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         Чати
         <span class="badge" id="unreadBadge" style="display:none;">0</span>
       </div>
       <div class="nav-item" data-section="settings" tabindex="0">
-        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H5.78a1.65 1.65 0 0 0-1.51 1 1.65 1.65 0 0 0 .33 1.82l.07.07A10 10 0 0 0 12 17.66a10 10 0 0 0 6.26-2.26z"/></svg>
+        <svg class="icon" viewBox="0 0 24 24" width="28" height="28"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H5.78a1.65 1.65 0 0 0-1.51 1 1.65 1.65 0 0 0 .33 1.82l.07.07A10 10 0 0 0 12 17.66a10 10 0 0 0 6.26-2.26z"/></svg>
         Налаштування
       </div>
     </nav>
@@ -1146,7 +806,8 @@
       <div class="top-bar-title" id="pageTitle">Головна</div>
     </div>
 
-    <div class="content" id="content">
+    <div class="content" id="content" tabindex="-1">
+      <!-- Секція ГОЛОВНА -->
       <div id="home" class="section active">
         <div class="card" id="authBox">
           <div id="loginForm">
@@ -1172,7 +833,7 @@
           <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px;">
             <textarea id="postText" class="input" placeholder="Що нового? #хештег" rows="3" style="flex:1;" tabindex="0"></textarea>
             <div class="emoji-picker-container">
-              <button class="emoji-button" id="postEmojiBtn" tabindex="0">😊</button>
+              <button class="emoji-button btn btn-icon" id="postEmojiBtn" tabindex="0">😊</button>
               <div class="emoji-picker" id="postEmojiPicker" style="display: none;"></div>
             </div>
           </div>
@@ -1180,7 +841,7 @@
           <div class="file-input-wrapper">
             <input type="file" id="postMedia" accept="image/*,video/*">
             <div class="file-input-button">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18"/><circle cx="7.5" cy="7.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18"/><circle cx="7.5" cy="7.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
               <span id="postMediaLabel">Обрати фото/відео</span>
             </div>
           </div>
@@ -1202,22 +863,26 @@
         </div>
       </div>
 
+      <!-- Секція ПОШУК -->
       <div id="search" class="section">
         <input type="text" id="searchInput" class="input" placeholder="Пошук за @id, ім'ям або #хештегом..." tabindex="0"/>
         <div class="user-list" id="userList" style="margin-top:20px;"></div>
       </div>
 
+      <!-- Секція ХЕШТЕГИ -->
       <div id="hashtags" class="section">
         <h2 style="margin-bottom:16px;">Популярні хештеги</h2>
         <div class="hashtag-list" id="hashtagList"></div>
       </div>
 
+      <!-- Секція ПРОФІЛЬ -->
       <div id="profile" class="section">
         <div class="profile-header" id="profileHeader"></div>
         <div class="profile-tabs" id="profileTabs"></div>
         <div class="feed" id="profileFeed"></div>
       </div>
 
+      <!-- Секція ЧАТИ -->
       <div id="chats" class="section">
         <div class="chat-search-container" style="padding: 0 0 12px 0;">
           <input type="text" id="chatSearchInput" class="input" placeholder="Пошук користувачів..." tabindex="0">
@@ -1228,36 +893,37 @@
           <div class="chat-header">
             <div class="avatar" id="chatAvatar"></div>
             <div>
-              <div id="chatName"></div>
+              <div id="chatName" style="font-size:1.4rem;"></div>
               <div class="chat-meta" id="chatUserId"></div>
             </div>
             <span id="onlineIndicator" class="online-indicator" style="display:none;"></span>
           </div>
           <div class="chat-messages" id="chatMessages"></div>
-          <div class="typing-indicator" id="typingIndicator" style="display:none;">
+          <div class="typing-indicator" id="typingIndicator" style="display:none; padding:8px; font-size:1.1rem;">
             <span></span> друкує...
           </div>
           <div class="chat-input-area">
             <input type="text" id="chatText" class="input" placeholder="Напишіть повідомлення..." tabindex="0"/>
             <div class="emoji-picker-container">
-              <button class="emoji-button" id="chatEmojiBtn" tabindex="0">😊</button>
+              <button class="emoji-button btn btn-icon" id="chatEmojiBtn" tabindex="0">😊</button>
               <div class="emoji-picker" id="chatEmojiPicker" style="display: none;"></div>
             </div>
             <button class="btn btn-primary btn-icon" id="sendMessage" tabindex="0">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
             </button>
           </div>
         </div>
       </div>
 
+      <!-- Секція НАЛАШТУВАННЯ -->
       <div id="settings" class="section card">
         <h2>Налаштування</h2>
         <button class="btn" id="toggleTheme" style="margin:18px 0;" tabindex="0">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
           Тема
         </button>
         <button class="btn" id="privacyPolicyBtn" style="margin:18px 0;" tabindex="0">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           Політика конфіденційності
         </button>
 
@@ -1277,7 +943,7 @@
   </main>
 </div>
 
-<!-- Модалки -->
+<!-- МОДАЛКИ -->
 <div class="modal" id="editProfileModal">
   <div class="modal-content">
     <div class="modal-header">
@@ -1289,7 +955,7 @@
     <div class="file-input-wrapper" style="margin:14px 0;">
       <input type="file" id="editAvatar" accept="image/*">
       <div class="file-input-button">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18"/><circle cx="7.5" cy="7.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18"/><circle cx="7.5" cy="7.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
         <span id="editAvatarLabel">Обрати аватар</span>
       </div>
     </div>
@@ -1308,7 +974,7 @@
     <div class="file-input-wrapper" style="margin:14px 0;">
       <input type="file" id="editPostMedia" accept="image/*,video/*">
       <div class="file-input-button">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18"/><circle cx="7.5" cy="7.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18"/><circle cx="7.5" cy="7.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
         <span id="editPostMediaLabel">Змінити медіа</span>
       </div>
     </div>
@@ -1318,7 +984,6 @@
   </div>
 </div>
 
-<!-- Модалки для підписників/підписок -->
 <div class="modal" id="followersModal">
   <div class="modal-content">
     <div class="modal-header">
@@ -1339,7 +1004,6 @@
   </div>
 </div>
 
-<!-- Модалка політики конфіденційності -->
 <div class="modal" id="privacyPolicyModal">
   <div class="modal-content">
     <div class="modal-header">
@@ -1348,15 +1012,15 @@
     </div>
     <div style="max-height: 60vh; overflow-y: auto; padding-right: 10px;">
       <p><strong>Останнє оновлення:</strong> 15 лютого 2026</p>
-      <p>FANTASYAS поважає вашу конфіденційність і зобов'язується захищати ваші персональні дані. Ця політика пояснює, як ми збираємо, використовуємо, розголошуємо та захищаємо вашу інформацію.</p>
-      <!-- решта тексту -->
+      <p>FANTASYAS поважає вашу конфіденційність...</p>
     </div>
   </div>
 </div>
 
 <div id="toast"></div>
-<!-- TV-стрілочка -->
-<div id="tvCursor">
+
+<!-- Стрілочка (необов'язково) -->
+<div id="tvCursor" style="display:none;">
   <svg viewBox="0 0 32 32">
     <polygon points="2,2 30,16 2,30 8,16 2,2" fill="currentColor" stroke="white" stroke-width="2"/>
   </svg>
@@ -1369,7 +1033,7 @@
   import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, where, onSnapshot, orderBy, serverTimestamp, arrayUnion, arrayRemove, deleteDoc, getDocs, increment, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
   import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
-  // ================= Конфігурація =================
+  // ================= Конфігурація Firebase =================
   const firebaseConfig = {
     apiKey: "AIzaSyDRzC-QDE0-UXd-XL0i3iqayFiKcc6wmvc",
     authDomain: "fantasyasapp.firebaseapp.com",
@@ -1406,6 +1070,7 @@
 
   const viewedPosts = new Set();
 
+  // ================= НАЛАШТУВАННЯ ТВ =================
   const tvSettings = {
     tvNavEnabled: localStorage.getItem('tvNav') !== 'false',
     remoteNavEnabled: localStorage.getItem('remoteNav') !== 'false',
@@ -1413,7 +1078,163 @@
     tvCursorEnabled: localStorage.getItem('tvCursor') === 'true'
   };
 
-  // ================= Допоміжні функції =================
+  // ========== СИСТЕМА ФОКУСУ ДЛЯ ТВ ==========
+  let focusableElements = [];
+  let currentFocusIndex = -1;
+  let activeModal = null;
+
+  function updateFocusableElements() {
+    const modals = document.querySelectorAll('.modal.active');
+    if (modals.length > 0) {
+      activeModal = modals[modals.length - 1];
+      focusableElements = Array.from(activeModal.querySelectorAll(
+        'button, [tabindex="0"], input, textarea, .nav-item, .post, .chat-item, .profile-tab, .emoji-picker span'
+      )).filter(el => {
+        const style = window.getComputedStyle(el);
+        return style.display !== 'none' && style.visibility !== 'hidden' && el.offsetParent !== null;
+      });
+    } else {
+      activeModal = null;
+      const activeSection = document.querySelector('.section.active');
+      if (!activeSection) return;
+      focusableElements = Array.from(activeSection.querySelectorAll(
+        'button, [tabindex="0"], input, textarea, .nav-item, .post, .chat-item, .profile-tab, .emoji-picker span'
+      )).filter(el => {
+        const style = window.getComputedStyle(el);
+        return style.display !== 'none' && style.visibility !== 'hidden' && el.offsetParent !== null;
+      });
+    }
+  }
+
+  function setFocus(index) {
+    if (!tvSettings.tvNavEnabled && !tvSettings.remoteNavEnabled) return;
+    if (focusableElements.length === 0) return;
+    if (index < 0) index = focusableElements.length - 1;
+    if (index >= focusableElements.length) index = 0;
+    
+    focusableElements.forEach(el => el.classList.remove('focused'));
+    const el = focusableElements[index];
+    el.classList.add('focused');
+    el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    currentFocusIndex = index;
+  }
+
+  function moveFocus(direction) {
+    if (focusableElements.length === 0) return;
+    
+    const currentEl = focusableElements[currentFocusIndex];
+    const currentRect = currentEl.getBoundingClientRect();
+    let bestCandidate = null;
+    let bestDistance = Infinity;
+
+    for (let i = 0; i < focusableElements.length; i++) {
+      if (i === currentFocusIndex) continue;
+      const candidate = focusableElements[i];
+      const rect = candidate.getBoundingClientRect();
+      
+      if (direction === 'left' && rect.right <= currentRect.left) {
+        const distance = currentRect.left - rect.right;
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestCandidate = i;
+        }
+      } else if (direction === 'right' && rect.left >= currentRect.right) {
+        const distance = rect.left - currentRect.right;
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestCandidate = i;
+        }
+      } else if (direction === 'up' && rect.bottom <= currentRect.top) {
+        const distance = currentRect.top - rect.bottom;
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestCandidate = i;
+        }
+      } else if (direction === 'down' && rect.top >= currentRect.bottom) {
+        const distance = rect.top - currentRect.bottom;
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestCandidate = i;
+        }
+      }
+    }
+
+    if (bestCandidate !== null) {
+      setFocus(bestCandidate);
+    }
+  }
+
+  function handleKeyDown(e) {
+    if (!tvSettings.tvNavEnabled && !tvSettings.remoteNavEnabled) return;
+    
+    const key = e.key;
+    const activeModals = document.querySelectorAll('.modal.active');
+    
+    if (key === 'Escape') {
+      if (activeModals.length > 0) {
+        e.preventDefault();
+        const modal = activeModals[activeModals.length - 1];
+        modal.classList.remove('active');
+        updateFocusableElements();
+        setFocus(0);
+      }
+      return;
+    }
+    
+    if (activeModals.length === 0 && key >= '1' && key <= '5') {
+      e.preventDefault();
+      const sectionMap = { '1': 'home', '2': 'search', '3': 'profile', '4': 'chats', '5': 'settings' };
+      const section = sectionMap[key];
+      if (section) {
+        const navItem = document.querySelector(`.nav-item[data-section="${section}"]`);
+        if (navItem) navItem.click();
+      }
+      return;
+    }
+
+    if (key === 'ArrowLeft' || key === 'ArrowRight' || key === 'ArrowUp' || key === 'ArrowDown') {
+      e.preventDefault();
+      if (focusableElements.length === 0) {
+        updateFocusableElements();
+      }
+      if (focusableElements.length > 0) {
+        if (currentFocusIndex === -1) {
+          setFocus(0);
+        } else {
+          moveFocus(key.slice(5).toLowerCase());
+        }
+      }
+    }
+
+    if (key === 'Enter') {
+      if (currentFocusIndex >= 0 && focusableElements[currentFocusIndex]) {
+        e.preventDefault();
+        const el = focusableElements[currentFocusIndex];
+        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+          el.focus();
+        } else {
+          el.click();
+        }
+      }
+    }
+  }
+
+  document.addEventListener('keydown', handleKeyDown);
+
+  const observer = new MutationObserver(() => {
+    updateFocusableElements();
+    if (currentFocusIndex === -1 || !focusableElements[currentFocusIndex]) {
+      setFocus(0);
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  function refreshFocus() {
+    updateFocusableElements();
+    setFocus(0);
+  }
+
+  // ========== ДОПОМІЖНІ ФУНКЦІЇ ==========
   const showToast = (msg) => {
     const toast = document.getElementById('toast');
     if (!toast) return;
@@ -1444,295 +1265,8 @@
     if (lastOnlineInterval) { clearInterval(lastOnlineInterval); lastOnlineInterval = null; }
   };
 
-  // ================= Функції для скарг, мюту, блокування =================
-  async function reportUser(targetUid, reason = '') {
-    if (!currentUser) return;
-    try {
-      await addDoc(collection(db, "reports"), {
-        reportedUserId: targetUid,
-        reporterId: currentUser.uid,
-        reason: reason || 'Без причини',
-        timestamp: serverTimestamp()
-      });
-      showToast('Скаргу надіслано');
-    } catch (e) {
-      showToast('Помилка: ' + e.message);
-    }
-  }
-
-  async function muteUser(targetUid) {
-    if (!currentUser) return;
-    const userRef = doc(db, "users", currentUser.uid);
-    try {
-      await updateDoc(userRef, {
-        mutedUsers: arrayUnion(targetUid)
-      });
-      showToast('Користувача замучено');
-    } catch (e) {
-      showToast('Помилка: ' + e.message);
-    }
-  }
-
-  async function unmuteUser(targetUid) {
-    if (!currentUser) return;
-    const userRef = doc(db, "users", currentUser.uid);
-    try {
-      await updateDoc(userRef, {
-        mutedUsers: arrayRemove(targetUid)
-      });
-      showToast('Користувача розмучено');
-    } catch (e) {
-      showToast('Помилка: ' + e.message);
-    }
-  }
-
-  async function blockUser(targetUid) {
-    if (!currentUser) return;
-    const userRef = doc(db, "users", currentUser.uid);
-    try {
-      await updateDoc(userRef, {
-        blockedUsers: arrayUnion(targetUid)
-      });
-      showToast('Користувача заблоковано');
-    } catch (e) {
-      showToast('Помилка: ' + e.message);
-    }
-  }
-
-  async function unblockUser(targetUid) {
-    if (!currentUser) return;
-    const userRef = doc(db, "users", currentUser.uid);
-    try {
-      await updateDoc(userRef, {
-        blockedUsers: arrayRemove(targetUid)
-      });
-      showToast('Користувача розблоковано');
-    } catch (e) {
-      showToast('Помилка: ' + e.message);
-    }
-  }
-
-  // ================= НАВІГАЦІЯ ПУЛЬТОМ =================
-  let focusableElements = [];
-  let currentFocusIndex = -1;
-
-  function updateFocusableElements() {
-    const activeSection = document.querySelector('.section.active');
-    if (!activeSection) return;
-    const modals = document.querySelectorAll('.modal.active');
-    let elements = [];
-    if (modals.length) {
-      modals.forEach(modal => {
-        elements = elements.concat(Array.from(modal.querySelectorAll('[tabindex="0"], button, input, textarea, .nav-item, .post, .chat-item, .profile-tab')));
-      });
-    } else {
-      elements = Array.from(activeSection.querySelectorAll('[tabindex="0"], button, input, textarea, .nav-item, .post, .chat-item, .profile-tab'));
-    }
-    focusableElements = elements.filter(el => {
-      const style = window.getComputedStyle(el);
-      return style.display !== 'none' && style.visibility !== 'hidden' && el.offsetParent !== null;
-    });
-  }
-
-  function findFirstVisiblePost() {
-    const posts = document.querySelectorAll('.post');
-    const content = document.querySelector('.content');
-    const contentRect = content.getBoundingClientRect();
-    for (let post of posts) {
-      const rect = post.getBoundingClientRect();
-      if (rect.top >= contentRect.top && rect.bottom <= contentRect.bottom) {
-        return post;
-      }
-    }
-    return null;
-  }
-
-  function updateTVCursor() {
-    const cursor = document.getElementById('tvCursor');
-    if (!cursor) return;
-    if (!tvSettings.tvCursorEnabled || !tvSettings.tvNavEnabled) {
-      cursor.style.display = 'none';
-      return;
-    }
-    const focusedEl = document.querySelector('.focused');
-    if (!focusedEl) {
-      cursor.style.display = 'none';
-      return;
-    }
-    const rect = focusedEl.getBoundingClientRect();
-    cursor.style.display = 'block';
-    cursor.style.left = (rect.left - 20) + 'px';
-    cursor.style.top = (rect.top + rect.height/2 - 16) + 'px';
-  }
-
-  function setFocus(index) {
-    if (!tvSettings.tvNavEnabled && !tvSettings.remoteNavEnabled) return;
-    if (focusableElements.length === 0) return;
-    if (index < 0) index = focusableElements.length - 1;
-    if (index >= focusableElements.length) index = 0;
-    
-    focusableElements.forEach(el => el.classList.remove('focused'));
-    const el = focusableElements[index];
-    el.classList.add('focused');
-    el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    currentFocusIndex = index;
-    updateTVCursor();
-  }
-
-  function handleKeyDown(e) {
-    if (!tvSettings.tvNavEnabled && !tvSettings.remoteNavEnabled) return;
-    if (!currentUser) return;
-
-    const content = document.querySelector('.content');
-    if (!content) return;
-
-    if (e.key >= '1' && e.key <= '5') {
-      e.preventDefault();
-      const sectionMap = {
-        '1': 'home',
-        '2': 'search',
-        '3': 'profile',
-        '4': 'chats',
-        '5': 'settings'
-      };
-      const section = sectionMap[e.key];
-      if (section) {
-        const navItem = document.querySelector(`.nav-item[data-section="${section}"]`);
-        if (navItem) navItem.click();
-      }
-      return;
-    }
-
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        content.scrollBy({ top: 100, behavior: 'smooth' });
-        setTimeout(() => {
-          updateFocusableElements();
-          const visiblePost = findFirstVisiblePost();
-          if (visiblePost) {
-            focusableElements.forEach(el => el.classList.remove('focused'));
-            visiblePost.classList.add('focused');
-            currentFocusIndex = focusableElements.indexOf(visiblePost);
-            updateTVCursor();
-          }
-        }, 100);
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        content.scrollBy({ top: -100, behavior: 'smooth' });
-        setTimeout(() => {
-          updateFocusableElements();
-          const visiblePost = findFirstVisiblePost();
-          if (visiblePost) {
-            focusableElements.forEach(el => el.classList.remove('focused'));
-            visiblePost.classList.add('focused');
-            currentFocusIndex = focusableElements.indexOf(visiblePost);
-            updateTVCursor();
-          }
-        }, 100);
-        break;
-      case 'PageDown':
-        e.preventDefault();
-        content.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' });
-        break;
-      case 'PageUp':
-        e.preventDefault();
-        content.scrollBy({ top: -window.innerHeight * 0.8, behavior: 'smooth' });
-        break;
-      case 'Home':
-        e.preventDefault();
-        content.scrollTo({ top: 0, behavior: 'smooth' });
-        break;
-      case 'End':
-        e.preventDefault();
-        content.scrollTo({ top: content.scrollHeight, behavior: 'smooth' });
-        break;
-      case 'Enter':
-        e.preventDefault();
-        if (currentFocusIndex >= 0 && focusableElements[currentFocusIndex]) {
-          const el = focusableElements[currentFocusIndex];
-          if (el.tagName === 'BUTTON' || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-            el.click();
-            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.focus();
-          } else {
-            el.click();
-          }
-        }
-        break;
-    }
-  }
-
-  document.addEventListener('keydown', handleKeyDown);
-  window.addEventListener('scroll', updateTVCursor);
-  window.addEventListener('resize', updateTVCursor);
-
-  // ================= Навігація по розділах =================
-  const sections = ['home','search','hashtags','profile','chats','settings'];
-  const navItems = document.querySelectorAll('.nav-item');
-  navItems.forEach((item) => {
-    item.addEventListener('click', () => {
-      const section = item.dataset.section;
-      navItems.forEach(n => n.classList.remove('active'));
-      item.classList.add('active');
-      sections.forEach(s => document.getElementById(s).classList.remove('active'));
-      const sectionEl = document.getElementById(section);
-      if (sectionEl) sectionEl.classList.add('active');
-      document.getElementById('pageTitle').textContent = item.textContent.trim();
-      
-      cleanupListeners();
-      
-      if (section === 'home' && currentUser) resetPagination();
-      if (section === 'search' && currentUser) loadSearchUsers();
-      if (section === 'hashtags' && currentUser) loadHashtags();
-      if (section === 'chats' && currentUser) {
-        document.getElementById('chatWindow').style.display = 'none';
-        loadChatList();
-        document.getElementById('chatSearchResults').style.display = 'none';
-        document.getElementById('chatSearchInput').value = '';
-      }
-      if (section === 'profile' && currentUser) {
-        viewProfile(currentUser.uid);
-      }
-      
-      closeSidebar();
-      setTimeout(() => { currentFocusIndex = -1; setFocus(0); }, 200);
-    });
-  });
-
-  const sidebar = document.getElementById('sidebar');
-  const menuToggle = document.getElementById('menuToggle');
-  const backdrop = document.getElementById('sidebarBackdrop');
-
-  function openSidebar() {
-    sidebar.classList.add('open');
-    menuToggle.classList.add('active');
-    backdrop.classList.add('active');
-  }
-
-  function closeSidebar() {
-    sidebar.classList.remove('open');
-    menuToggle.classList.remove('active');
-    backdrop.classList.remove('active');
-  }
-
-  menuToggle.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (sidebar.classList.contains('open')) {
-      closeSidebar();
-    } else {
-      openSidebar();
-    }
-  });
-
-  backdrop.addEventListener('click', closeSidebar);
-
-  // ================= Емоджі-пікер =================
+  // ========== ЕМОДЖІ-ПІКЕР (оновлений для ТВ) ==========
   const emojiList = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥸','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','💩','👻','💀','☠️','👽','👾','🤖','🎃','😺','😸','😹','😻','😼','😽','🙀','😿','😾'];
-
-  function closeAllEmojiPickers() {
-    document.querySelectorAll('.emoji-picker').forEach(p => p.style.display = 'none');
-  }
 
   function setupEmojiPicker(buttonId, pickerId, inputId) {
     const btn = document.getElementById(buttonId);
@@ -1742,19 +1276,18 @@
     
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      closeAllEmojiPickers();
+      document.querySelectorAll('.emoji-picker').forEach(p => p.style.display = 'none');
       
       const rect = btn.getBoundingClientRect();
-      const spaceAbove = rect.top;
-      const spaceBelow = window.innerHeight - rect.bottom;
-      picker.style.bottom = spaceAbove > 280 ? '100%' : 'auto';
-      picker.style.top = spaceBelow > 280 ? 'auto' : '100%';
-      picker.style.left = 'auto';
-      picker.style.right = '0';
+      picker.style.bottom = (window.innerHeight - rect.top < 450) ? 'auto' : '100%';
+      picker.style.top = (window.innerHeight - rect.top < 450) ? '100%' : 'auto';
       
       picker.style.display = picker.style.display === 'none' ? 'grid' : 'none';
       if (picker.style.display === 'grid') {
-        setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
+        setTimeout(() => {
+          updateFocusableElements();
+          setFocus(0);
+        }, 50);
       }
     });
     
@@ -1763,7 +1296,7 @@
       const span = document.createElement('span');
       span.textContent = emoji;
       span.tabIndex = 0;
-      span.onclick = (e) => {
+      span.addEventListener('click', (e) => {
         e.stopPropagation();
         const start = input.selectionStart;
         const end = input.selectionEnd;
@@ -1774,7 +1307,7 @@
         picker.style.display = 'none';
         updateFocusableElements();
         setFocus(currentFocusIndex);
-      };
+      });
       picker.appendChild(span);
     });
     
@@ -1785,7 +1318,7 @@
     });
   }
 
-  // ================= Кастомний вибір файлу =================
+  // ========== ФУНКЦІЇ ДЛЯ ФАЙЛІВ ==========
   function setupFileInput(inputId, labelId, previewId) {
     const input = document.getElementById(inputId);
     const label = document.getElementById(labelId);
@@ -1817,13 +1350,14 @@
     });
   }
 
-  // ================= Функції для хештегів =================
+  // ========== ВИТЯГ ХЕШТЕГІВ ==========
   function extractHashtags(text) {
     const regex = /#(\w+)/g;
     const matches = text.match(regex);
     return matches ? matches.map(tag => tag.toLowerCase()) : [];
   }
 
+  // ========== ФУНКЦІЇ ДЛЯ ХЕШТЕГІВ ==========
   async function loadHashtags() {
     const list = document.getElementById('hashtagList');
     if (!list) return;
@@ -1862,7 +1396,7 @@
       console.error('Error loading hashtags:', e);
       list.innerHTML = '<p style="text-align:center; padding:20px;">Помилка завантаження</p>';
     }
-    setTimeout(() => updateFocusableElements(), 100);
+    refreshFocus();
   }
 
   function searchHashtag(tag) {
@@ -1874,16 +1408,16 @@
     }
   }
 
-  // ================= АВТОРИЗАЦІЯ =================
+  // ========== АВТОРИЗАЦІЯ ==========
   document.getElementById('toRegister').onclick = () => {
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('registerForm').style.display = 'block';
-    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
+    refreshFocus();
   };
   document.getElementById('toLogin').onclick = () => {
     document.getElementById('registerForm').style.display = 'none';
     document.getElementById('loginForm').style.display = 'block';
-    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
+    refreshFocus();
   };
 
   document.getElementById('registerBtn').onclick = async () => {
@@ -2082,7 +1616,6 @@
         }
       }, (error) => {
         console.error('Chat list snapshot error:', error);
-        alert('Помилка в реальному часі (список чатів):\n' + error.message + '\nКод: ' + error.code);
         showToast('Помилка оновлення списку чатів. Перевірте індекси Firestore.');
       });
 
@@ -2093,15 +1626,7 @@
       setupFileInput('editAvatar', 'editAvatarLabel', 'editAvatarPreview');
       setupFileInput('editPostMedia', 'editPostMediaLabel', 'editPostMediaPreview');
 
-      setTimeout(() => {
-        const content = document.querySelector('.content');
-        if (content) {
-          content.setAttribute('tabindex', '-1');
-          content.focus({ preventScroll: true });
-        }
-        updateFocusableElements();
-        setFocus(0);
-      }, 500);
+      refreshFocus();
     } else {
       currentUser = null;
       const authBox = document.getElementById('authBox');
@@ -2110,11 +1635,11 @@
       if (newPostBox) newPostBox.style.display = 'none';
       unreadCount = 0;
       updateUnreadBadge();
-      setTimeout(() => { updateFocusableElements(); setFocus(0); }, 500);
+      refreshFocus();
     }
   });
 
-  // ================= Стрічка =================
+  // ========== СТРІЧКА ==========
   document.getElementById('feedNewBtn').onclick = () => {
     if (currentFeedType === 'new') return;
     currentFeedType = 'new';
@@ -2205,7 +1730,7 @@
     } finally {
       if (skeleton) skeleton.style.display = 'none';
       loading = false;
-      setTimeout(() => { updateFocusableElements(); }, 100);
+      refreshFocus();
     }
   }
 
@@ -2357,7 +1882,7 @@
           commentsSection.style.display = 'block';
           const commentsList = document.getElementById(`comments-list-${post.id}`);
           if (commentsList) await loadComments(post.id, commentsList);
-          setTimeout(() => { updateFocusableElements(); }, 100);
+          refreshFocus();
         } else {
           commentsSection.style.display = 'none';
         }
@@ -2383,10 +1908,10 @@
         };
       }
     });
-    setTimeout(updateFocusableElements, 100);
+    refreshFocus();
   }
 
-  // ================= Редагування поста =================
+  // ========== РЕДАГУВАННЯ ПОСТА ==========
   function openEditPostModal(post) {
     currentEditingPost = post;
     document.getElementById('editPostText').value = post.text || '';
@@ -2401,13 +1926,13 @@
       }
     }
     document.getElementById('editPostModal').classList.add('active');
-    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
+    refreshFocus();
   }
 
   document.getElementById('closeEditPostModal').onclick = () => {
     document.getElementById('editPostModal').classList.remove('active');
     currentEditingPost = null;
-    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
+    refreshFocus();
   };
 
   document.getElementById('savePostEdit').onclick = async () => {
@@ -2459,7 +1984,7 @@
     }
   };
 
-  // ================= Пошук (розширений для хештегів) =================
+  // ========== ПОШУК (розширений) ==========
   async function loadSearchUsers() {
     if (!currentUser) return;
     const val = document.getElementById('searchInput').value.trim().toLowerCase();
@@ -2516,7 +2041,7 @@
       div.onclick = () => viewProfile(uid);
       userList.appendChild(div);
     });
-    setTimeout(() => { updateFocusableElements(); }, 100);
+    refreshFocus();
   }
   document.getElementById('searchInput').addEventListener('input', loadSearchUsers);
 
@@ -2535,7 +2060,7 @@
     }
   }
 
-  // ================= Профіль =================
+  // ========== ПРОФІЛЬ ==========
   async function loadMyProfile() {
     if (!currentUser) return;
     const snap = await getDoc(doc(db, "users", currentUser.uid));
@@ -2559,7 +2084,7 @@
     }
     
     closeSidebar();
-    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 200);
+    refreshFocus();
   }
 
   async function loadUserProfile(uid) {
@@ -2704,7 +2229,7 @@
           document.getElementById('editAvatarLabel').textContent = 'Обрати аватар';
           document.getElementById('editAvatarPreview').classList.remove('show');
           document.getElementById('editProfileModal').classList.add('active');
-          setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
+          refreshFocus();
         };
       }
     }
@@ -2726,7 +2251,7 @@
       });
     }
     loadProfileFeed(uid, 'posts');
-    setTimeout(() => { updateFocusableElements(); }, 100);
+    refreshFocus();
   }
 
   async function openFollowersList(uid) {
@@ -2766,7 +2291,7 @@
         list.appendChild(div);
       });
     }
-    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 100);
+    refreshFocus();
   }
 
   async function openFollowingList(uid) {
@@ -2806,16 +2331,16 @@
         list.appendChild(div);
       });
     }
-    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 100);
+    refreshFocus();
   }
 
   document.getElementById('closeFollowersModal').onclick = () => {
     document.getElementById('followersModal').classList.remove('active');
-    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
+    refreshFocus();
   };
   document.getElementById('closeFollowingModal').onclick = () => {
     document.getElementById('followingModal').classList.remove('active');
-    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
+    refreshFocus();
   };
 
   async function loadProfileFeed(uid, tab) {
@@ -2860,12 +2385,12 @@
       div.innerHTML = `<div class="post-content">${post.text || ''}</div>`;
       feed.appendChild(div);
     });
-    setTimeout(() => { updateFocusableElements(); }, 100);
+    refreshFocus();
   }
 
   document.getElementById('closeModal').onclick = () => {
     document.getElementById('editProfileModal').classList.remove('active');
-    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
+    refreshFocus();
   };
   
   document.getElementById('saveProfileEdit').onclick = async () => {
@@ -2905,7 +2430,7 @@
     }
   };
 
-  // ================= ЧАТИ =================
+  // ========== ЧАТИ ==========
   const getChatId = (uid1, uid2) => [uid1, uid2].sort().join('_');
 
   async function loadChatList() {
@@ -2979,10 +2504,9 @@
       });
     } catch (error) {
       console.error('Error loading chat list:', error);
-      alert('Помилка завантаження списку чатів:\n' + (error.message || 'Невідома помилка') + '\nКод: ' + (error.code || 'N/A'));
       showToast('Помилка завантаження списку чатів.');
     }
-    setTimeout(() => { updateFocusableElements(); }, 100);
+    refreshFocus();
   }
 
   async function openChatFromList(chatId, otherUid, otherName, otherUserId, otherAvatar) {
@@ -3020,7 +2544,7 @@
       console.error('Online status error:', error);
     });
     
-    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 200);
+    refreshFocus();
   }
 
   function openChat(otherName, otherUid, otherUserId) {
@@ -3089,16 +2613,14 @@
         loadChatList();
       } catch (error) {
         console.error('Error opening chat:', error);
-        alert('Помилка відкриття чату:\n' + error.message);
         showToast('Помилка відкриття чату');
       }
     }).catch(error => {
       console.error('Error getting chat doc:', error);
-      alert('Помилка доступу до чату:\n' + error.message);
       showToast('Помилка доступу до чату');
     });
     
-    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 200);
+    refreshFocus();
   }
 
   function formatMessageTime(timestamp) {
@@ -3178,7 +2700,6 @@
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }, (error) => {
       console.error('Error in messages snapshot:', error);
-      alert('Помилка отримання повідомлень:\n' + error.message);
       showToast('Помилка отримання повідомлень');
     });
     
@@ -3236,7 +2757,7 @@
     }
   });
 
-  // ================= ПОШУК КОРИСТУВАЧІВ У ЧАТАХ =================
+  // ========== ПОШУК КОРИСТУВАЧІВ У ЧАТАХ ==========
   let searchTimeout;
   document.getElementById('chatSearchInput').addEventListener('input', (e) => {
     clearTimeout(searchTimeout);
@@ -3298,23 +2819,92 @@
       }
       resultsContainer.appendChild(div);
     });
-    setTimeout(() => { updateFocusableElements(); }, 100);
+    refreshFocus();
   }
 
-  // ================= Налаштування =================
+  // ========== ФУНКЦІЇ ДЛЯ СКАРГ, МЮТУ, БЛОКУВАННЯ ==========
+  async function reportUser(targetUid, reason = '') {
+    if (!currentUser) return;
+    try {
+      await addDoc(collection(db, "reports"), {
+        reportedUserId: targetUid,
+        reporterId: currentUser.uid,
+        reason: reason || 'Без причини',
+        timestamp: serverTimestamp()
+      });
+      showToast('Скаргу надіслано');
+    } catch (e) {
+      showToast('Помилка: ' + e.message);
+    }
+  }
+
+  async function muteUser(targetUid) {
+    if (!currentUser) return;
+    const userRef = doc(db, "users", currentUser.uid);
+    try {
+      await updateDoc(userRef, {
+        mutedUsers: arrayUnion(targetUid)
+      });
+      showToast('Користувача замучено');
+    } catch (e) {
+      showToast('Помилка: ' + e.message);
+    }
+  }
+
+  async function unmuteUser(targetUid) {
+    if (!currentUser) return;
+    const userRef = doc(db, "users", currentUser.uid);
+    try {
+      await updateDoc(userRef, {
+        mutedUsers: arrayRemove(targetUid)
+      });
+      showToast('Користувача розмучено');
+    } catch (e) {
+      showToast('Помилка: ' + e.message);
+    }
+  }
+
+  async function blockUser(targetUid) {
+    if (!currentUser) return;
+    const userRef = doc(db, "users", currentUser.uid);
+    try {
+      await updateDoc(userRef, {
+        blockedUsers: arrayUnion(targetUid)
+      });
+      showToast('Користувача заблоковано');
+    } catch (e) {
+      showToast('Помилка: ' + e.message);
+    }
+  }
+
+  async function unblockUser(targetUid) {
+    if (!currentUser) return;
+    const userRef = doc(db, "users", currentUser.uid);
+    try {
+      await updateDoc(userRef, {
+        blockedUsers: arrayRemove(targetUid)
+      });
+      showToast('Користувача розблоковано');
+    } catch (e) {
+      showToast('Помилка: ' + e.message);
+    }
+  }
+
+  // ========== НАЛАШТУВАННЯ ==========
   document.getElementById('toggleTheme').onclick = () => {
     document.body.classList.toggle('dark');
     localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    refreshFocus();
   };
   if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
 
   document.getElementById('privacyPolicyBtn').onclick = () => {
     document.getElementById('privacyPolicyModal').classList.add('active');
-    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
+    refreshFocus();
   };
   document.getElementById('closePrivacyModal').onclick = () => {
     document.getElementById('privacyPolicyModal').classList.remove('active');
-    setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
+    refreshFocus();
   };
 
   function updateTvButtons() {
@@ -3333,26 +2923,26 @@
     updateTvButtons();
     if (!tvSettings.tvNavEnabled) {
       focusableElements.forEach(el => el.classList.remove('focused'));
-      document.getElementById('tvCursor').style.display = 'none';
     } else {
-      updateTVCursor();
+      refreshFocus();
     }
   };
   document.getElementById('remoteNavToggle').onclick = () => {
     tvSettings.remoteNavEnabled = !tvSettings.remoteNavEnabled;
     localStorage.setItem('remoteNav', tvSettings.remoteNavEnabled);
     updateTvButtons();
+    refreshFocus();
   };
   document.getElementById('focusOptimizeToggle').onclick = () => {
     tvSettings.focusOptimized = !tvSettings.focusOptimized;
     localStorage.setItem('focusOptimized', tvSettings.focusOptimized);
     updateTvButtons();
+    refreshFocus();
   };
   document.getElementById('tvCursorToggle').onclick = () => {
     tvSettings.tvCursorEnabled = !tvSettings.tvCursorEnabled;
     localStorage.setItem('tvCursor', tvSettings.tvCursorEnabled);
     updateTvButtons();
-    updateTVCursor();
   };
   updateTvButtons();
 
@@ -3361,7 +2951,7 @@
     signOut(auth);
   };
 
-  // ================= Інші обробники =================
+  // ========== ІНШІ ОБРОБНИКИ ==========
   const sentinel = document.getElementById('feedSentinel');
   if (sentinel) {
     const observer = new IntersectionObserver((entries) => {
@@ -3417,11 +3007,45 @@
   });
 
   document.addEventListener('click', (e) => {
-    const uidElement = блe.target.closest('[data-uid]');
+    const uidElement = e.target.closest('[data-uid]');
     if (uidElement) {
       const uid = uidElement.dataset.uid;
       viewProfile(uid);
     }
+  });
+
+  // ========== САЙДБАР ==========
+  const menuToggle = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    menuToggle.classList.add('active');
+    backdrop.classList.add('active');
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    menuToggle.classList.remove('active');
+    backdrop.classList.remove('active');
+  }
+
+  menuToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (sidebar.classList.contains('open')) {
+      closeSidebar();
+    } else {
+      openSidebar();
+    }
+  });
+
+  backdrop.addEventListener('click', closeSidebar);
+
+  // ========== ІНІЦІАЛІЗАЦІЯ ==========
+  window.refreshFocus = refreshFocus;
+  window.addEventListener('load', () => {
+    setTimeout(refreshFocus, 500);
   });
 </script>
 </body>

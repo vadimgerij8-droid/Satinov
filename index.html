@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"/>
-  <title>FANTASYAS · Пульт-навігація</title>
+  <title>FANTASYAS · Підписки на постах + Google TV</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
-    /* ========== ГЛОБАЛЬНІ СТИЛІ ========== */
+    /* ========== ГЛОБАЛЬНІ СТИЛІ (без змін) ========== */
     * {
       margin: 0;
       padding: 0;
@@ -82,7 +82,6 @@
       100% { box-shadow: 0 0 0 4px var(--bg), 0 0 20px var(--accent); }
     }
 
-    /* TV-стрілочка */
     #tvCursor {
       position: fixed;
       width: 32px;
@@ -382,6 +381,20 @@
       padding: 10px;
     }
 
+    .btn-follow {
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 4px 12px;
+      font-size: 0.85rem;
+      border-radius: 20px;
+      margin-left: 8px;
+    }
+    .btn-follow.following {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
     .input {
       width: 100%;
       padding: 14px 18px;
@@ -472,6 +485,7 @@
       gap: 12px;
       margin-bottom: 12px;
       align-items: center;
+      flex-wrap: wrap;
     }
     .post-header .avatar {
       width: 42px;
@@ -479,6 +493,10 @@
     }
     .post-author-info {
       flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
     }
     .post-author {
       font-weight: 700;
@@ -596,6 +614,23 @@
       margin-left: auto;
     }
 
+    .follow-btn-post {
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.1s;
+      margin-left: 8px;
+    }
+    .follow-btn-post.following {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
     .comments-section {
       margin-top: 16px;
       border-top: 1px solid var(--border);
@@ -696,7 +731,6 @@
       margin-bottom: 8px;
     }
 
-    /* Емодзі-кнопки (замість span) */
     .emoji-picker button {
       font-size: 1.8rem;
       cursor: pointer;
@@ -1340,15 +1374,58 @@
   </div>
 </div>
 
+<!-- Покращена модалка політики конфіденційності -->
 <div class="modal" id="privacyPolicyModal">
   <div class="modal-content">
     <div class="modal-header">
       <h3>Політика конфіденційності</h3>
       <span class="modal-close" id="closePrivacyModal" tabindex="0">&times;</span>
     </div>
-    <div style="max-height: 60vh; overflow-y: auto; padding-right: 10px;">
-      <p><strong>Останнє оновлення:</strong> 15 лютого 2026</p>
-      <p>FANTASYAS поважає вашу конфіденційність і зобов'язується захищати ваші персональні дані. Ця політика пояснює, як ми збираємо, використовуємо, розголошуємо та захищаємо вашу інформацію.</p>
+    <div style="max-height: 60vh; overflow-y: auto; padding-right: 10px; text-align: left;">
+      <p><strong>Останнє оновлення:</strong> 19 лютого 2026</p>
+      
+      <h4>1. Які дані ми збираємо</h4>
+      <p>Ми збираємо мінімально необхідну інформацію для роботи сервісу:</p>
+      <ul>
+        <li>Облікові дані (псевдонім, електронна пошта, пароль у зашифрованому вигляді).</li>
+        <li>Інформація профілю (аватар, біографія), яку ви надаєте добровільно.</li>
+        <li>Ваші публікації, коментарі, вподобання, збережені пости.</li>
+        <li>Дані про взаємодію (підписки, повідомлення в чатах).</li>
+        <li>Технічні дані: IP-адреса, тип пристрою, час активності.</li>
+      </ul>
+
+      <h4>2. Як ми використовуємо ваші дані</h4>
+      <p>Ваші дані використовуються виключно для:</p>
+      <ul>
+        <li>Надання функціоналу соціальної мережі (публікація постів, чати, підписки).</li>
+        <li>Персоналізації контенту (стрічка новин, рекомендації).</li>
+        <li>Забезпечення безпеки та запобігання шахрайству.</li>
+        <li>Комунікації з вами (сповіщення, відновлення пароля).</li>
+      </ul>
+
+      <h4>3. Передача даних третім особам</h4>
+      <p>Ми не продаємо ваші дані. Інформація може бути передана лише у випадках:</p>
+      <ul>
+        <li>За вашого явного дозволу.</li>
+        <li>Для виконання вимог законодавства.</li>
+        <li>Технічним партнерам (Firebase, Google Cloud) для забезпечення роботи сервісу.</li>
+      </ul>
+
+      <h4>4. Ваші права</h4>
+      <p>Ви можете в будь-який час:</p>
+      <ul>
+        <li>Переглянути та редагувати свої дані в налаштуваннях профілю.</li>
+        <li>Видалити свій акаунт (зверніться до підтримки).</li>
+        <li>Заблокувати інших користувачів.</li>
+      </ul>
+
+      <h4>5. Безпека</h4>
+      <p>Ми використовуємо сучасні методи шифрування (HTTPS, хешування паролів) та регулярно оновлюємо системи безпеки. Однак жоден метод передачі даних через Інтернет не є 100% безпечним.</p>
+
+      <h4>6. Зміни в політиці</h4>
+      <p>Про будь-які зміни ми повідомимо на цій сторінці. Рекомендуємо періодично переглядати політику.</p>
+
+      <p><strong>Контакти:</strong> Якщо у вас виникли питання, напишіть нам на privacy@fantasyas.com.</p>
     </div>
   </div>
 </div>
@@ -1383,6 +1460,7 @@
 
   // ================= Глобальні змінні =================
   let currentUser = null;
+  let currentUserFollowing = []; // масив ID користувачів, на яких підписаний поточний користувач
   let currentChatPartner = null;
   let currentChatPartnerName = '';
   let currentChatId = null;
@@ -1394,6 +1472,7 @@
   let unsubscribeChatList = null;
   let unsubscribeTyping = null;
   let unsubscribeOnlineStatus = null;
+  let unsubscribeFollowing = null; // підписка на зміни following
   let lastOnlineInterval = null;
 
   let unreadCount = 0;
@@ -1439,78 +1518,60 @@
     if (unsubscribeChatList) { unsubscribeChatList(); unsubscribeChatList = null; }
     if (unsubscribeTyping) { unsubscribeTyping(); unsubscribeTyping = null; }
     if (unsubscribeOnlineStatus) { unsubscribeOnlineStatus(); unsubscribeOnlineStatus = null; }
+    if (unsubscribeFollowing) { unsubscribeFollowing(); unsubscribeFollowing = null; }
     if (lastOnlineInterval) { clearInterval(lastOnlineInterval); lastOnlineInterval = null; }
   };
 
-  // ================= Функції для скарг, мюту, блокування =================
-  async function reportUser(targetUid, reason = '') {
+  // ================= Функції для підписок (миттєве оновлення) =================
+  async function toggleFollow(targetUid, buttonElement) {
     if (!currentUser) return;
+    
+    // Оптимістичне оновлення UI
+    const wasFollowing = currentUserFollowing.includes(targetUid);
+    const newFollowingState = !wasFollowing;
+    
+    // Оновлюємо глобальний масив
+    if (newFollowingState) {
+      currentUserFollowing.push(targetUid);
+    } else {
+      currentUserFollowing = currentUserFollowing.filter(id => id !== targetUid);
+    }
+    
+    // Оновлюємо кнопку, якщо передано
+    if (buttonElement) {
+      buttonElement.textContent = newFollowingState ? 'Відписатися' : 'Підписатися';
+      buttonElement.classList.toggle('following', newFollowingState);
+    }
+    
+    // Виконуємо реальну операцію в Firebase
     try {
-      await addDoc(collection(db, "reports"), {
-        reportedUserId: targetUid,
-        reporterId: currentUser.uid,
-        reason: reason || 'Без причини',
-        timestamp: serverTimestamp()
-      });
-      showToast('Скаргу надіслано');
-    } catch (e) {
-      showToast('Помилка: ' + e.message);
+      const myRef = doc(db, "users", currentUser.uid);
+      const targetRef = doc(db, "users", targetUid);
+      
+      if (wasFollowing) {
+        await updateDoc(myRef, { following: arrayRemove(targetUid) });
+        await updateDoc(targetRef, { followers: arrayRemove(currentUser.uid) });
+      } else {
+        await updateDoc(myRef, { following: arrayUnion(targetUid) });
+        await updateDoc(targetRef, { followers: arrayUnion(currentUser.uid) });
+        vibrate(30);
+      }
+    } catch (error) {
+      // У разі помилки повертаємо стан назад
+      if (newFollowingState) {
+        currentUserFollowing = currentUserFollowing.filter(id => id !== targetUid);
+      } else {
+        currentUserFollowing.push(targetUid);
+      }
+      if (buttonElement) {
+        buttonElement.textContent = wasFollowing ? 'Відписатися' : 'Підписатися';
+        buttonElement.classList.toggle('following', wasFollowing);
+      }
+      showToast('Помилка: ' + error.message);
     }
   }
 
-  async function muteUser(targetUid) {
-    if (!currentUser) return;
-    const userRef = doc(db, "users", currentUser.uid);
-    try {
-      await updateDoc(userRef, {
-        mutedUsers: arrayUnion(targetUid)
-      });
-      showToast('Користувача замучено');
-    } catch (e) {
-      showToast('Помилка: ' + e.message);
-    }
-  }
-
-  async function unmuteUser(targetUid) {
-    if (!currentUser) return;
-    const userRef = doc(db, "users", currentUser.uid);
-    try {
-      await updateDoc(userRef, {
-        mutedUsers: arrayRemove(targetUid)
-      });
-      showToast('Користувача розмучено');
-    } catch (e) {
-      showToast('Помилка: ' + e.message);
-    }
-  }
-
-  async function blockUser(targetUid) {
-    if (!currentUser) return;
-    const userRef = doc(db, "users", currentUser.uid);
-    try {
-      await updateDoc(userRef, {
-        blockedUsers: arrayUnion(targetUid)
-      });
-      showToast('Користувача заблоковано');
-    } catch (e) {
-      showToast('Помилка: ' + e.message);
-    }
-  }
-
-  async function unblockUser(targetUid) {
-    if (!currentUser) return;
-    const userRef = doc(db, "users", currentUser.uid);
-    try {
-      await updateDoc(userRef, {
-        blockedUsers: arrayRemove(targetUid)
-      });
-      showToast('Користувача розблоковано');
-    } catch (e) {
-      showToast('Помилка: ' + e.message);
-    }
-  }
-
-  // ================= НАВІГАЦІЯ ПУЛЬТОМ =================
+  // ================= НАВІГАЦІЯ ПУЛЬТОМ (без змін) =================
   let focusableElements = [];
   let currentFocusIndex = -1;
 
@@ -1584,17 +1645,13 @@
     const content = document.querySelector('.content');
     if (!content) return;
 
-    // Escape (Back) — закриває модалки, пікери, дропдауни
     if (e.key === 'Escape' || e.key === 'Back' || e.code === 'Escape') {
       e.preventDefault();
-      // Закрити модалки
       const modals = document.querySelectorAll('.modal.active');
       if (modals.length) {
         modals.forEach(modal => modal.classList.remove('active'));
       }
-      // Закрити всі емодзі-пікери
       document.querySelectorAll('.emoji-picker').forEach(p => p.style.display = 'none');
-      // Закрити дропдаун меню профілю
       document.querySelectorAll('.profile-menu-dropdown.show').forEach(d => d.classList.remove('show'));
       setTimeout(() => { updateFocusableElements(); setFocus(0); }, 50);
       return;
@@ -1647,16 +1704,13 @@
         }, 100);
         break;
       case 'ArrowLeft':
-        // Можна використати для закриття сайдбару або навігації назад
         e.preventDefault();
-        // Наприклад, закрити сайдбар якщо відкритий
         if (sidebar.classList.contains('open')) {
           closeSidebar();
         }
         break;
       case 'ArrowRight':
         e.preventDefault();
-        // Відкрити сайдбар
         if (!sidebar.classList.contains('open') && window.innerWidth <= 768) {
           openSidebar();
         }
@@ -1696,7 +1750,7 @@
   window.addEventListener('scroll', updateTVCursor);
   window.addEventListener('resize', updateTVCursor);
 
-  // ================= Навігація по розділах =================
+  // ================= Навігація по розділах (без змін) =================
   const sections = ['home','search','hashtags','profile','chats','settings'];
   const navItems = document.querySelectorAll('.nav-item');
   navItems.forEach((item) => {
@@ -1756,7 +1810,7 @@
 
   backdrop.addEventListener('click', closeSidebar);
 
-  // ================= Емоджі-пікер (покращений: кнопки замість span) =================
+  // ================= Емоджі-пікер (без змін) =================
   const emojiList = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥸','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','💩','👻','💀','☠️','👽','👾','🤖','🎃','😺','😸','😹','😻','😼','😽','🙀','😿','😾'];
 
   function closeAllEmojiPickers() {
@@ -1982,8 +2036,13 @@
     }
   };
 
+  // Google Login (покращено для TV)
   document.getElementById('googleLoginBtn').onclick = async () => {
     const provider = new GoogleAuthProvider();
+    // Для TV додамо налаштування, щоб не блокувати попап
+    provider.setCustomParameters({
+      prompt: 'select_account'
+    });
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
@@ -2014,7 +2073,12 @@
       }
       showToast('Вхід через Google успішний');
     } catch (error) {
-      showToast('Помилка: ' + error.message);
+      console.error('Google login error:', error);
+      if (error.code === 'auth/popup-blocked') {
+        alert('Будь ласка, дозвольте спливаючі вікна для цього сайту, щоб увійти через Google.');
+      } else {
+        showToast('Помилка: ' + error.message);
+      }
     }
   };
 
@@ -2093,6 +2157,25 @@
         updateDoc(doc(db, "users", currentUser.uid), { lastOnline: serverTimestamp() }).catch(console.error);
       }, 30000);
       
+      // Підписка на зміни following
+      const userRef = doc(db, "users", currentUser.uid);
+      unsubscribeFollowing = onSnapshot(userRef, (docSnap) => {
+        if (docSnap.exists()) {
+          currentUserFollowing = docSnap.data().following || [];
+          // Оновлюємо всі кнопки підписок на постах (якщо вони вже відрендерені)
+          document.querySelectorAll('.follow-btn-post').forEach(btn => {
+            const targetUid = btn.dataset.uid;
+            if (targetUid) {
+              const isFollowing = currentUserFollowing.includes(targetUid);
+              btn.textContent = isFollowing ? 'Відписатися' : 'Підписатися';
+              btn.classList.toggle('following', isFollowing);
+            }
+          });
+        }
+      }, (error) => {
+        console.error('Error in following snapshot:', error);
+      });
+      
       resetPagination();
       loadMyProfile();
       
@@ -2134,6 +2217,7 @@
       }, 500);
     } else {
       currentUser = null;
+      currentUserFollowing = [];
       const authBox = document.getElementById('authBox');
       if (authBox) authBox.style.display = 'block';
       const newPostBox = document.getElementById('newPostBox');
@@ -2144,7 +2228,7 @@
     }
   });
 
-  // ================= Стрічка =================
+  // ================= Стрічка з кнопкою підписки на постах =================
   document.getElementById('feedNewBtn').onclick = () => {
     if (currentFeedType === 'new') return;
     currentFeedType = 'new';
@@ -2296,6 +2380,8 @@
       const saved = post.saves?.includes(currentUser?.uid) || false;
       const postTime = post.createdAt ? new Date(post.createdAt.seconds * 1000).toLocaleString() : '';
       const isAuthor = currentUser && post.author === currentUser.uid;
+      const isFollowing = currentUserFollowing.includes(post.author);
+      
       const postEl = document.createElement('div');
       postEl.className = 'post';
       postEl.dataset.postId = post.id;
@@ -2314,6 +2400,10 @@
       const hashtagRegex = /#(\w+)/g;
       contentHtml = contentHtml.replace(hashtagRegex, '<span class="hashtag" data-tag="$1">#$1</span>');
       
+      // Кнопка підписки на автора (якщо це не поточний користувач)
+      const followButtonHtml = !isAuthor && currentUser ? 
+        `<button class="follow-btn-post ${isFollowing ? 'following' : ''}" data-uid="${post.author}" tabindex="0">${isFollowing ? 'Відписатися' : 'Підписатися'}</button>` : '';
+      
       postEl.innerHTML = `
         ${actionsHtml}
         <div class="post-header">
@@ -2322,6 +2412,7 @@
             <div>
               <span class="post-author" data-uid="${post.author}" tabindex="0">${post.authorName || 'Невідомо'}</span>
               <span class="post-meta">${post.authorUserId || ''}</span>
+              ${followButtonHtml}
             </div>
             <div class="post-time">${postTime}</div>
           </div>
@@ -2362,6 +2453,16 @@
       feed.appendChild(postEl);
 
       incrementPostView(post.id);
+
+      // Обробник для кнопки підписки
+      const followBtn = postEl.querySelector('.follow-btn-post');
+      if (followBtn) {
+        followBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const targetUid = followBtn.dataset.uid;
+          toggleFollow(targetUid, followBtn);
+        });
+      }
 
       if (isAuthor) {
         postEl.querySelector('.edit-post-btn').onclick = () => openEditPostModal(post);
@@ -2416,7 +2517,7 @@
     setTimeout(updateFocusableElements, 100);
   }
 
-  // ================= Редагування поста =================
+  // ================= Редагування поста (без змін) =================
   function openEditPostModal(post) {
     currentEditingPost = post;
     document.getElementById('editPostText').value = post.text || '';
@@ -2489,7 +2590,7 @@
     }
   };
 
-  // ================= Пошук (розширений для хештегів) =================
+  // ================= Пошук =================
   async function loadSearchUsers() {
     if (!currentUser) return;
     const val = document.getElementById('searchInput').value.trim().toLowerCase();
@@ -2538,10 +2639,11 @@
         </div>
         <button class="btn follow-btn" tabindex="0">${isFollowing ? 'Відписатися' : 'Підписатися'}</button>
       `;
-      div.querySelector('.follow-btn').onclick = async (e) => {
+      const followBtn = div.querySelector('.follow-btn');
+      followBtn.onclick = async (e) => {
         e.stopPropagation();
-        await toggleFollow(uid);
-        loadSearchUsers();
+        await toggleFollow(uid, followBtn);
+        // Оновлюємо текст кнопки після підписки (оптимістично вже оновлено в toggleFollow)
       };
       div.onclick = () => viewProfile(uid);
       userList.appendChild(div);
@@ -2550,22 +2652,7 @@
   }
   document.getElementById('searchInput').addEventListener('input', loadSearchUsers);
 
-  async function toggleFollow(targetUid) {
-    if (!currentUser) return;
-    const myRef = doc(db, "users", currentUser.uid);
-    const targetRef = doc(db, "users", targetUid);
-    const mySnap = await getDoc(myRef);
-    const following = mySnap.data().following || [];
-    if (following.includes(targetUid)) {
-      await updateDoc(myRef, { following: arrayRemove(targetUid) });
-      await updateDoc(targetRef, { followers: arrayRemove(currentUser.uid) });
-    } else {
-      await updateDoc(myRef, { following: arrayUnion(targetUid) });
-      await updateDoc(targetRef, { followers: arrayUnion(currentUser.uid) });
-    }
-  }
-
-  // ================= Профіль =================
+  // ================= Профіль (оновлено кнопку підписки) =================
   async function loadMyProfile() {
     if (!currentUser) return;
     const snap = await getDoc(doc(db, "users", currentUser.uid));
@@ -2670,8 +2757,7 @@
       const profileFollowBtn = document.getElementById('profileFollowBtn');
       if (profileFollowBtn) {
         profileFollowBtn.onclick = async () => {
-          await toggleFollow(uid);
-          loadUserProfile(uid);
+          await toggleFollow(uid, profileFollowBtn);
         };
       }
       const profileMessageBtn = document.getElementById('profileMessageBtn');
@@ -2935,7 +3021,7 @@
     }
   };
 
-  // ================= ЧАТИ =================
+  // ================= ЧАТИ (без змін) =================
   const getChatId = (uid1, uid2) => [uid1, uid2].sort().join('_');
 
   async function loadChatList() {

@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"/>
-  <title>FANTASYAS · Підписки на постах + Google TV</title>
+  <title>FANTASYAS · Підписки + Google TV</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
-    /* ========== ГЛОБАЛЬНІ СТИЛІ (без змін) ========== */
+    /* ========== ГЛОБАЛЬНІ СТИЛІ ========== */
     * {
       margin: 0;
       padding: 0;
@@ -1522,56 +1522,75 @@
     if (lastOnlineInterval) { clearInterval(lastOnlineInterval); lastOnlineInterval = null; }
   };
 
-  // ================= Функції для підписок (миттєве оновлення) =================
-  async function toggleFollow(targetUid, buttonElement) {
+  // ================= Функції для скарг, мюту, блокування (без змін) =================
+  async function reportUser(targetUid, reason = '') {
     if (!currentUser) return;
-    
-    // Оптимістичне оновлення UI
-    const wasFollowing = currentUserFollowing.includes(targetUid);
-    const newFollowingState = !wasFollowing;
-    
-    // Оновлюємо глобальний масив
-    if (newFollowingState) {
-      currentUserFollowing.push(targetUid);
-    } else {
-      currentUserFollowing = currentUserFollowing.filter(id => id !== targetUid);
-    }
-    
-    // Оновлюємо кнопку, якщо передано
-    if (buttonElement) {
-      buttonElement.textContent = newFollowingState ? 'Відписатися' : 'Підписатися';
-      buttonElement.classList.toggle('following', newFollowingState);
-    }
-    
-    // Виконуємо реальну операцію в Firebase
     try {
-      const myRef = doc(db, "users", currentUser.uid);
-      const targetRef = doc(db, "users", targetUid);
-      
-      if (wasFollowing) {
-        await updateDoc(myRef, { following: arrayRemove(targetUid) });
-        await updateDoc(targetRef, { followers: arrayRemove(currentUser.uid) });
-      } else {
-        await updateDoc(myRef, { following: arrayUnion(targetUid) });
-        await updateDoc(targetRef, { followers: arrayUnion(currentUser.uid) });
-        vibrate(30);
-      }
-    } catch (error) {
-      // У разі помилки повертаємо стан назад
-      if (newFollowingState) {
-        currentUserFollowing = currentUserFollowing.filter(id => id !== targetUid);
-      } else {
-        currentUserFollowing.push(targetUid);
-      }
-      if (buttonElement) {
-        buttonElement.textContent = wasFollowing ? 'Відписатися' : 'Підписатися';
-        buttonElement.classList.toggle('following', wasFollowing);
-      }
-      showToast('Помилка: ' + error.message);
+      await addDoc(collection(db, "reports"), {
+        reportedUserId: targetUid,
+        reporterId: currentUser.uid,
+        reason: reason || 'Без причини',
+        timestamp: serverTimestamp()
+      });
+      showToast('Скаргу надіслано');
+    } catch (e) {
+      showToast('Помилка: ' + e.message);
     }
   }
 
-  // ================= НАВІГАЦІЯ ПУЛЬТОМ (без змін) =================
+  async function muteUser(targetUid) {
+    if (!currentUser) return;
+    const userRef = doc(db, "users", currentUser.uid);
+    try {
+      await updateDoc(userRef, {
+        mutedUsers: arrayUnion(targetUid)
+      });
+      showToast('Користувача замучено');
+    } catch (e) {
+      showToast('Помилка: ' + e.message);
+    }
+  }
+
+  async function unmuteUser(targetUid) {
+    if (!currentUser) return;
+    const userRef = doc(db, "users", currentUser.uid);
+    try {
+      await updateDoc(userRef, {
+        mutedUsers: arrayRemove(targetUid)
+      });
+      showToast('Користувача розмучено');
+    } catch (e) {
+      showToast('Помилка: ' + e.message);
+    }
+  }
+
+  async function blockUser(targetUid) {
+    if (!currentUser) return;
+    const userRef = doc(db, "users", currentUser.uid);
+    try {
+      await updateDoc(userRef, {
+        blockedUsers: arrayUnion(targetUid)
+      });
+      showToast('Користувача заблоковано');
+    } catch (e) {
+      showToast('Помилка: ' + e.message);
+    }
+  }
+
+  async function unblockUser(targetUid) {
+    if (!currentUser) return;
+    const userRef = doc(db, "users", currentUser.uid);
+    try {
+      await updateDoc(userRef, {
+        blockedUsers: arrayRemove(targetUid)
+      });
+      showToast('Користувача розблоковано');
+    } catch (e) {
+      showToast('Помилка: ' + e.message);
+    }
+  }
+
+  // ================= НАВІГАЦІЯ ПУЛЬТОМ =================
   let focusableElements = [];
   let currentFocusIndex = -1;
 
@@ -1750,7 +1769,7 @@
   window.addEventListener('scroll', updateTVCursor);
   window.addEventListener('resize', updateTVCursor);
 
-  // ================= Навігація по розділах (без змін) =================
+  // ================= Навігація по розділах =================
   const sections = ['home','search','hashtags','profile','chats','settings'];
   const navItems = document.querySelectorAll('.nav-item');
   navItems.forEach((item) => {
@@ -1810,7 +1829,7 @@
 
   backdrop.addEventListener('click', closeSidebar);
 
-  // ================= Емоджі-пікер (без змін) =================
+  // ================= Емоджі-пікер =================
   const emojiList = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥸','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','💩','👻','💀','☠️','👽','👾','🤖','🎃','😺','😸','😹','😻','😼','😽','🙀','😿','😾'];
 
   function closeAllEmojiPickers() {
@@ -2039,7 +2058,6 @@
   // Google Login (покращено для TV)
   document.getElementById('googleLoginBtn').onclick = async () => {
     const provider = new GoogleAuthProvider();
-    // Для TV додамо налаштування, щоб не блокувати попап
     provider.setCustomParameters({
       prompt: 'select_account'
     });
@@ -2075,9 +2093,11 @@
     } catch (error) {
       console.error('Google login error:', error);
       if (error.code === 'auth/popup-blocked') {
-        alert('Будь ласка, дозвольте спливаючі вікна для цього сайту, щоб увійти через Google.');
+        showToast('Будь ласка, дозвольте спливаючі вікна для цього сайту, щоб увійти через Google.');
+      } else if (error.code === 'auth/operation-not-allowed') {
+        showToast('Вхід через Google не налаштовано в Firebase. Перевірте консоль Firebase.');
       } else {
-        showToast('Помилка: ' + error.message);
+        showToast('Помилка входу: ' + error.message);
       }
     }
   };
@@ -2228,7 +2248,7 @@
     }
   });
 
-  // ================= Стрічка з кнопкою підписки на постах =================
+  // ================= Стрічка з кнопкою підписки =================
   document.getElementById('feedNewBtn').onclick = () => {
     if (currentFeedType === 'new') return;
     currentFeedType = 'new';
@@ -2517,7 +2537,62 @@
     setTimeout(updateFocusableElements, 100);
   }
 
-  // ================= Редагування поста (без змін) =================
+  // ================= Функція підписки з оптимістичним оновленням та покращеною обробкою помилок =================
+  async function toggleFollow(targetUid, buttonElement) {
+    if (!currentUser) return;
+    
+    // Оптимістичне оновлення UI
+    const wasFollowing = currentUserFollowing.includes(targetUid);
+    const newFollowingState = !wasFollowing;
+    
+    // Оновлюємо глобальний масив
+    if (newFollowingState) {
+      currentUserFollowing.push(targetUid);
+    } else {
+      currentUserFollowing = currentUserFollowing.filter(id => id !== targetUid);
+    }
+    
+    // Оновлюємо кнопку, якщо передано
+    if (buttonElement) {
+      buttonElement.textContent = newFollowingState ? 'Відписатися' : 'Підписатися';
+      buttonElement.classList.toggle('following', newFollowingState);
+    }
+    
+    // Виконуємо реальну операцію в Firebase
+    try {
+      const myRef = doc(db, "users", currentUser.uid);
+      const targetRef = doc(db, "users", targetUid);
+      
+      if (wasFollowing) {
+        await updateDoc(myRef, { following: arrayRemove(targetUid) });
+        await updateDoc(targetRef, { followers: arrayRemove(currentUser.uid) });
+      } else {
+        await updateDoc(myRef, { following: arrayUnion(targetUid) });
+        await updateDoc(targetRef, { followers: arrayUnion(currentUser.uid) });
+        vibrate(30);
+      }
+    } catch (error) {
+      // У разі помилки повертаємо стан назад
+      console.error('Follow error:', error);
+      if (newFollowingState) {
+        currentUserFollowing = currentUserFollowing.filter(id => id !== targetUid);
+      } else {
+        currentUserFollowing.push(targetUid);
+      }
+      if (buttonElement) {
+        buttonElement.textContent = wasFollowing ? 'Відписатися' : 'Підписатися';
+        buttonElement.classList.toggle('following', wasFollowing);
+      }
+      // Показуємо детальне повідомлення про помилку
+      if (error.code === 'permission-denied') {
+        showToast('Помилка: недостатньо прав. Перевірте правила безпеки Firestore.');
+      } else {
+        showToast('Помилка: ' + (error.message || 'Невідома помилка'));
+      }
+    }
+  }
+
+  // ================= Редагування поста =================
   function openEditPostModal(post) {
     currentEditingPost = post;
     document.getElementById('editPostText').value = post.text || '';
@@ -2643,7 +2718,6 @@
       followBtn.onclick = async (e) => {
         e.stopPropagation();
         await toggleFollow(uid, followBtn);
-        // Оновлюємо текст кнопки після підписки (оптимістично вже оновлено в toggleFollow)
       };
       div.onclick = () => viewProfile(uid);
       userList.appendChild(div);

@@ -1601,8 +1601,9 @@
     document.querySelectorAll('.profile-menu-dropdown.show').forEach(d => d.classList.remove('show'));
   }
 
+  // ========== ВИПРАВЛЕНА ФУНКЦІЯ ОБРОБКИ КЛАВІШ ==========
   function handleKeyDown(e) {
-    // Якщо TV-навігація вимкнена – нічого не робимо
+    // Якщо навігація вимкнена – нічого не робимо
     if (!tvSettings.tvNavEnabled && !tvSettings.remoteNavEnabled) return;
 
     const arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
@@ -1617,6 +1618,19 @@
       updateFocusableCache();
     }
 
+    // Визначаємо поточний фокусований елемент (може не мати класу .focused, але мати браузерний фокус)
+    const focusedElement = document.activeElement;
+    const isInputField = focusedElement && (focusedElement.tagName === 'INPUT' || focusedElement.tagName === 'TEXTAREA' || focusedElement.isContentEditable);
+
+    // Якщо фокус у полі введення – не заважаємо стандартній поведінці (крім Escape)
+    if (isInputField) {
+      if (isArrow || isEnter) {
+        // Дозволяємо стандартну обробку стрілок (переміщення курсора) та Enter (новий рядок або відправка форми)
+        return;
+      }
+      // Escape обробляємо далі (для закриття модалок)
+    }
+
     // ===== BACK / ESCAPE =====
     if (isBack) {
       e.preventDefault();
@@ -1625,8 +1639,15 @@
       const openEmojiPicker = document.querySelector('.emoji-picker[style*="display: grid"]');
       if (openEmojiPicker) {
         openEmojiPicker.style.display = 'none';
-        // Повертаємо фокус на кнопку, яка його відкрила
-        if (lastFocusedElement) setFocusOnElement(lastFocusedElement);
+        // Повертаємо фокус на кнопку, яка його відкрила (якщо пам'ятаємо)
+        if (lastFocusedElement && lastFocusedElement.classList.contains('emoji-button')) {
+          setFocusOnElement(lastFocusedElement);
+        } else {
+          // Інакше шукаємо щось розумне
+          updateFocusableCache();
+          const first = cachedFocusableElements[0];
+          if (first) setFocusOnElement(first);
+        }
         return;
       }
 
@@ -1634,7 +1655,9 @@
       const openDropdown = document.querySelector('.profile-menu-dropdown.show');
       if (openDropdown) {
         openDropdown.classList.remove('show');
-        if (lastFocusedElement) setFocusOnElement(lastFocusedElement);
+        // Повертаємо фокус на кнопку меню
+        const menuBtn = document.querySelector('.profile-menu-btn');
+        if (menuBtn) setFocusOnElement(menuBtn);
         return;
       }
 
@@ -1644,8 +1667,10 @@
         activeModals.forEach(modal => modal.classList.remove('active'));
         setTimeout(() => {
           updateFocusableCache();
-          if (lastFocusedElement) setFocusOnElement(lastFocusedElement);
-          else {
+          // Повертаємо фокус на елемент, який був до відкриття модалки, або перший доступний
+          if (lastFocusedElement && !lastFocusedElement.closest('.modal')) {
+            setFocusOnElement(lastFocusedElement);
+          } else {
             const first = cachedFocusableElements[0];
             if (first) setFocusOnElement(first);
           }
@@ -1675,11 +1700,11 @@
 
     // ===== ENTER =====
     if (isEnter) {
-      const focused = document.querySelector('.focused');
+      // Якщо поле введення – ми вже вийшли вище, тому тут воно не повинно опинитись.
+      const focused = document.querySelector('.focused') || document.activeElement;
       if (focused) {
-        // Для полів введення – не перехоплюємо Enter (дозволяємо новий рядок або відправку форми)
+        // Для полів введення – нічого не робимо (але ми вже перевірили isInputField)
         if (focused.tagName === 'INPUT' || focused.tagName === 'TEXTAREA' || focused.isContentEditable) {
-          // Не викликаємо preventDefault, щоб спрацювала стандартна поведінка
           return;
         } else {
           e.preventDefault();
@@ -1695,8 +1720,15 @@
 
     // ===== СТРІЛКИ =====
     if (isArrow) {
+      // Якщо поле введення – ми вже вийшли, тому тут стрілки не повинні оброблятись.
       e.preventDefault();
+      
+      // Поточний елемент із класом .focused (якщо є) або активний елемент
       let current = document.querySelector('.focused');
+      if (!current) {
+        // Якщо немає .focused, але є активний елемент (браузерний фокус) – використовуємо його
+        current = document.activeElement;
+      }
       
       if (!current) {
         const first = cachedFocusableElements[0];

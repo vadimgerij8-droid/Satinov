@@ -48,7 +48,8 @@ const tvSettings = {
   tvNavEnabled: localStorage.getItem('tvNav') !== 'false',   // true за замовчуванням
   remoteNavEnabled: localStorage.getItem('remoteNav') !== 'false',
   focusOptimized: localStorage.getItem('focusOptimized') !== 'false',
-  tvCursorEnabled: localStorage.getItem('tvCursor') === 'true'
+  tvCursorEnabled: localStorage.getItem('tvCursor') === 'true',
+  vibrateOnFocus: localStorage.getItem('vibrateOnFocus') !== 'false' // нове налаштування
 };
 
 // ================= НАВІГАЦІЯ ПУЛЬТОМ (D-Pad) =================
@@ -56,12 +57,14 @@ const tvSettings = {
 let cachedFocusableElements = [];
 let lastDOMUpdate = 0;
 let lastFocusedElement = null; // для відновлення після закриття модалок
+let focusUpdatePending = false;
 
 // Отримує всі видимі фокусовані елементи з урахуванням активних модалок
 function getFocusableElements() {
   const activeModal = document.querySelector('.modal.active');
   let container = activeModal || document;
 
+  // Розширений список селекторів для елементів, які можуть отримати фокус
   const baseSelector = `
     button, input, textarea, select, a[href], 
     [tabindex]:not([tabindex="-1"]), 
@@ -69,7 +72,8 @@ function getFocusableElements() {
     .hashtag-item, .modal-close, .emoji-button, 
     .btn, .file-input-button, .post-actions button,
     .comment-author, .post-author, .avatar, .hashtag,
-    .follow-btn-post, .profile-menu-btn, .profile-menu-item
+    .follow-btn-post, .profile-menu-btn, .profile-menu-item,
+    [role="button"], [role="link"], [role="menuitem"]
   `;
 
   const elements = Array.from(container.querySelectorAll(baseSelector));
@@ -80,13 +84,24 @@ function getFocusableElements() {
            style.visibility !== 'hidden' && 
            el.offsetParent !== null && 
            !el.disabled &&
-           !el.hasAttribute('aria-hidden');
+           !el.hasAttribute('aria-hidden') &&
+           el.getAttribute('aria-hidden') !== 'true';
   });
 }
 
 function updateFocusableCache() {
   cachedFocusableElements = getFocusableElements();
   lastDOMUpdate = Date.now();
+  focusUpdatePending = false;
+}
+
+function requestFocusUpdate() {
+  if (!focusUpdatePending) {
+    focusUpdatePending = true;
+    requestAnimationFrame(() => {
+      updateFocusableCache();
+    });
+  }
 }
 
 function getCenter(el) {
@@ -95,6 +110,21 @@ function getCenter(el) {
     x: rect.left + rect.width / 2,
     y: rect.top + rect.height / 2
   };
+}
+
+// Покращене визначення сітки: повертає кількість колонок, якщо елементи вирівняні по сітці
+function detectGrid(elements) {
+  if (elements.length < 2) return 1;
+  // Отримуємо позиції перших кількох елементів
+  const positions = elements.slice(0, Math.min(10, elements.length)).map(getCenter);
+  // Перевіряємо, чи є повторювані координати X
+  const xCoords = positions.map(p => Math.round(p.x));
+  const uniqueX = [...new Set(xCoords)];
+  if (uniqueX.length > 1 && uniqueX.length < 5) {
+    // Ймовірно, сітка: повертаємо кількість унікальних X
+    return uniqueX.length;
+  }
+  return 1;
 }
 
 function findClosestElement(currentEl, direction) {
@@ -127,9 +157,17 @@ function findClosestElement(currentEl, direction) {
 
     const length = Math.sqrt(dx * dx + dy * dy);
     const cosAngle = dot / length;
-    if (cosAngle < 0.5) return;
+    if (cosAngle < 0.6) return; // збільшено поріг для точнішого вибору
 
-    const score = length / cosAngle;
+    // Додаємо штраф за зміщення по вертикалі для горизонтальних рухів і навпаки
+    let offAxisPenalty = 0;
+    if (dir.dx !== 0) {
+      offAxisPenalty = Math.abs(dy) * 2; // вертикальне зміщення шкодить
+    } else {
+      offAxisPenalty = Math.abs(dx) * 2;
+    }
+
+    const score = length / cosAngle + offAxisPenalty;
     if (score < bestScore) {
       bestScore = score;
       best = candidate;
@@ -142,11 +180,9 @@ function findClosestElement(currentEl, direction) {
 function setFocusOnElement(el) {
   if (!el) return;
   
-  // Не знімаємо фокус, якщо це поле введення і воно вже активне
+  // Якщо це поле введення, фокусуємо стандартно
   if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable) {
     el.focus();
-    // Додаємо клас focused для візуального виділення, але не знімаємо з інших?
-    // Краще додати клас тільки цьому елементу, а з інших зняти
     document.querySelectorAll('.focused').forEach(e => {
       if (e !== el) e.classList.remove('focused');
     });
@@ -154,7 +190,7 @@ function setFocusOnElement(el) {
   } else {
     document.querySelectorAll('.focused').forEach(e => e.classList.remove('focused'));
     el.classList.add('focused');
-    el.focus({ preventScroll: true }); // фокус без прокрутки, щоб не збивати
+    el.focus({ preventScroll: true });
   }
   
   el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -164,6 +200,11 @@ function setFocusOnElement(el) {
   if (tvSettings.tvCursorEnabled) {
     updateTVCursor();
   }
+  
+  // Вібрація при зміні фокусу (короткий імпульс)
+  if (tvSettings.vibrateOnFocus && navigator.vibrate) {
+    navigator.vibrate(10);
+  }
 }
 
 function closeAllPopups() {
@@ -171,7 +212,7 @@ function closeAllPopups() {
   document.querySelectorAll('.profile-menu-dropdown.show').forEach(d => d.classList.remove('show'));
 }
 
-// ========== ВИПРАВЛЕНА ФУНКЦІЯ ОБРОБКИ КЛАВІШ ==========
+// ========== ПОКРАЩЕНА ФУНКЦІЯ ОБРОБКИ КЛАВІШ ==========
 function handleKeyDown(e) {
   // Якщо навігація вимкнена – нічого не робимо
   if (!tvSettings.tvNavEnabled && !tvSettings.remoteNavEnabled) return;
@@ -274,6 +315,10 @@ function handleKeyDown(e) {
     if (focused) {
       e.preventDefault();
       focused.click();
+      // Вібрація при кліку
+      if (tvSettings.vibrateOnFocus && navigator.vibrate) {
+        navigator.vibrate(20);
+      }
     } else {
       e.preventDefault();
       const first = cachedFocusableElements[0];
@@ -297,14 +342,14 @@ function handleKeyDown(e) {
       return;
     }
 
-    // Якщо поточний елемент всередині емоджі-пікера
+    // Якщо поточний елемент всередині емоджі-пікера – спеціальна навігація по сітці
     const emojiPicker = current.closest('.emoji-picker');
     if (emojiPicker && emojiPicker.style.display === 'grid') {
       const emojiButtons = Array.from(emojiPicker.querySelectorAll('button'));
       const currentIndex = emojiButtons.indexOf(current);
       if (currentIndex !== -1) {
         let nextIndex;
-        const cols = 8;
+        const cols = 8; // відомо, що емоджі-пікер має 8 колонок
         if (e.key === 'ArrowRight') nextIndex = currentIndex + 1;
         else if (e.key === 'ArrowLeft') nextIndex = currentIndex - 1;
         else if (e.key === 'ArrowDown') nextIndex = currentIndex + cols;
@@ -314,6 +359,28 @@ function handleKeyDown(e) {
           setFocusOnElement(emojiButtons[nextIndex]);
         }
         return;
+      }
+    }
+
+    // Перевіряємо, чи знаходимося ми в сітці (наприклад, список хештегів)
+    const gridContainer = current.closest('.hashtag-list, .chat-list, .profile-tabs, .post-footer');
+    if (gridContainer) {
+      const items = Array.from(gridContainer.querySelectorAll('[tabindex], button, .hashtag-item, .chat-item, .profile-tab, .post-footer button')).filter(el => el.offsetParent !== null);
+      if (items.length > 1) {
+        const cols = detectGrid(items);
+        const currentIndex = items.indexOf(current);
+        if (currentIndex !== -1) {
+          let nextIndex;
+          if (e.key === 'ArrowRight') nextIndex = currentIndex + 1;
+          else if (e.key === 'ArrowLeft') nextIndex = currentIndex - 1;
+          else if (e.key === 'ArrowDown') nextIndex = currentIndex + cols;
+          else if (e.key === 'ArrowUp') nextIndex = currentIndex - cols;
+          
+          if (nextIndex >= 0 && nextIndex < items.length) {
+            setFocusOnElement(items[nextIndex]);
+            return;
+          }
+        }
       }
     }
 
@@ -339,15 +406,26 @@ function updateTVCursor() {
   }
   const rect = focusedEl.getBoundingClientRect();
   cursor.style.display = 'block';
+  // Позиціонуємо стрілочку ліворуч від елемента (для вертикальної навігації)
+  // Але якщо елемент маленький, можна змістити інакше
   cursor.style.left = (rect.left - 20) + 'px';
   cursor.style.top = (rect.top + rect.height/2 - 16) + 'px';
 }
 
-// Спостерігач за змінами DOM
+// Спостерігач за змінами DOM – використовуємо requestAnimationFrame для оптимізації
 const observer = new MutationObserver(() => {
-  updateFocusableCache();
+  requestFocusUpdate();
 });
-observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+
+// Додатково оновлюємо кеш при прокручуванні (можуть з'явитися нові елементи)
+let scrollTimeout;
+window.addEventListener('scroll', () => {
+  clearTimeout(scrollTimeout);
+  scrollTimeout = setTimeout(() => {
+    requestFocusUpdate();
+  }, 150);
+}, { passive: true });
 
 // Фокус на перший елемент після завантаження
 window.addEventListener('load', () => {

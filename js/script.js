@@ -59,7 +59,7 @@ let lastFocusedElement = null;          // останній сфокусован
 let lastFocusedElementBeforeModal = null; // елемент, який відкрив модалку
 let focusUpdatePending = false;
 
-// Додаємо глобальні стилі для підсвічування фокусу (якщо їх немає)
+// Додаємо глобальні стилі для підсвічування фокусу
 function ensureFocusStyles() {
   if (document.getElementById('focus-styles')) return;
   const style = document.createElement('style');
@@ -256,20 +256,24 @@ function focusFirstInContainer(container) {
   return false;
 }
 
-// Фокус на перший елемент після завантаження (з перевіркою)
+// Перевіряє, чи поточний фокус валідний, і якщо ні – встановлює на перший елемент
+function ensureFocus() {
+  updateFocusableCache();
+  const focused = document.querySelector('.focused');
+  if (focused && cachedFocusableElements.includes(focused)) {
+    return; // фокус валідний
+  }
+  const first = cachedFocusableElements[0];
+  if (first) setFocusOnElement(first);
+}
+
+// Фокус на перший елемент після завантаження розділу (використовується тільки при зміні розділу)
 function focusFirstElementAfterLoad() {
   setTimeout(() => {
     requestAnimationFrame(() => {
-      updateFocusableCache();
-      const activeModal = document.querySelector('.modal.active');
-      if (activeModal) {
-        focusFirstInContainer(activeModal);
-      } else {
-        const first = cachedFocusableElements[0];
-        if (first) setFocusOnElement(first);
-      }
+      ensureFocus();
     });
-  }, 100); // невелика затримка для завершення рендеру
+  }, 100);
 }
 
 function closeAllPopups() {
@@ -307,9 +311,7 @@ function handleKeyDown(e) {
       if (lastFocusedElement && lastFocusedElement.classList.contains('emoji-button')) {
         setFocusOnElement(lastFocusedElement);
       } else {
-        updateFocusableCache();
-        const first = cachedFocusableElements[0];
-        if (first) setFocusOnElement(first);
+        ensureFocus();
       }
       return;
     }
@@ -333,8 +335,7 @@ function handleKeyDown(e) {
         } else if (lastFocusedElement && !lastFocusedElement.closest('.modal')) {
           setFocusOnElement(lastFocusedElement);
         } else {
-          const first = cachedFocusableElements[0];
-          if (first) setFocusOnElement(first);
+          ensureFocus();
         }
       }, 50);
       return;
@@ -373,11 +374,10 @@ function handleKeyDown(e) {
       if (tvSettings.vibrateOnFocus && navigator.vibrate) {
         navigator.vibrate(20);
       }
-      // Якщо після кліку елемент не зник і не відкрилася модалка, фокус залишається на ньому
+      // Після кліку фокус залишається на елементі, якщо він не зник
     } else {
       e.preventDefault();
-      const first = cachedFocusableElements[0];
-      if (first) setFocusOnElement(first);
+      ensureFocus();
     }
     return;
   }
@@ -391,8 +391,7 @@ function handleKeyDown(e) {
     let current = document.querySelector('.focused') || activeEl;
     
     if (!current) {
-      const first = cachedFocusableElements[0];
-      if (first) setFocusOnElement(first);
+      ensureFocus();
       return;
     }
 
@@ -476,9 +475,7 @@ window.addEventListener('scroll', () => {
 
 window.addEventListener('load', () => {
   setTimeout(() => {
-    updateFocusableCache();
-    const first = cachedFocusableElements[0];
-    if (first) setFocusOnElement(first);
+    ensureFocus();
   }, 500);
 });
 
@@ -597,16 +594,11 @@ navItems.forEach((item) => {
     
     cleanupListeners();
     
-    // Завантажуємо дані для розділу
     if (section === 'home' && currentUser) {
       resetPagination();
-      // Після завантаження фокус встановиться автоматично в resetPagination?
-      // Але resetPagination викликає loadMorePosts, який асинхронний, тому фокус треба ставити після завершення
-      // Тому поки що просто викликаємо focusFirstElementAfterLoad із затримкою
-      focusFirstElementAfterLoad();
     }
     if (section === 'search' && currentUser) {
-      await loadSearchUsers(); // вона сама оновить фокус через focusFirstElementAfterLoad
+      await loadSearchUsers();
     }
     if (section === 'hashtags' && currentUser) {
       await loadHashtags();
@@ -616,16 +608,17 @@ navItems.forEach((item) => {
       await loadChatList();
       document.getElementById('chatSearchResults').style.display = 'none';
       document.getElementById('chatSearchInput').value = '';
-      focusFirstElementAfterLoad();
     }
     if (section === 'profile' && currentUser) {
       await viewProfile(currentUser.uid);
     }
     if (section === 'settings') {
-      focusFirstElementAfterLoad();
+      // нічого не завантажуємо
     }
     
     closeSidebar();
+    // Після зміни розділу встановлюємо фокус на перший елемент
+    focusFirstElementAfterLoad();
   });
 });
 
@@ -801,7 +794,8 @@ async function loadHashtags() {
     console.error('Error loading hashtags:', e);
     list.innerHTML = '<p style="text-align:center; padding:20px;">Помилка завантаження</p>';
   }
-  focusFirstElementAfterLoad();
+  // Не чіпаємо фокус – він залишається на поточному елементі
+  requestFocusUpdate();
 }
 
 function searchHashtag(tag) {
@@ -1066,8 +1060,7 @@ onAuthStateChanged(auth, (user) => {
         content.setAttribute('tabindex', '-1');
         content.focus({ preventScroll: true });
       }
-      updateFocusableCache();
-      setFocusOnElement(cachedFocusableElements[0]);
+      ensureFocus();
     }, 500);
   } else {
     currentUser = null;
@@ -1078,7 +1071,7 @@ onAuthStateChanged(auth, (user) => {
     if (newPostBox) newPostBox.style.display = 'none';
     unreadCount = 0;
     updateUnreadBadge();
-    setTimeout(() => { updateFocusableCache(); setFocusOnElement(cachedFocusableElements[0]); }, 500);
+    setTimeout(() => { ensureFocus(); }, 500);
   }
 });
 
@@ -1173,7 +1166,8 @@ async function loadMorePosts() {
   } finally {
     if (skeleton) skeleton.style.display = 'none';
     loading = false;
-    focusFirstElementAfterLoad(); // після завантаження нових постів
+    // Після завантаження нових постів перевіряємо фокус, але не змінюємо його, якщо він валідний
+    ensureFocus();
   }
 }
 
@@ -1366,7 +1360,8 @@ function renderPosts(docs, container = null) {
       };
     }
   });
-  focusFirstElementAfterLoad(); // після рендеру фокус на перший елемент
+  // Після рендеру перевіряємо фокус, але не змінюємо його, якщо він валідний
+  ensureFocus();
 }
 
 async function toggleFollow(targetUid, buttonElement) {
@@ -1444,7 +1439,7 @@ document.getElementById('closeEditPostModal').onclick = () => {
       setFocusOnElement(lastFocusedElementBeforeModal);
       lastFocusedElementBeforeModal = null;
     } else {
-      setFocusOnElement(cachedFocusableElements[0]);
+      ensureFocus();
     }
   }, 50);
 };
@@ -1517,7 +1512,7 @@ async function loadSearchUsers() {
       userList.appendChild(feedDiv);
       renderPosts(snapshot.docs, feedDiv);
     }
-    focusFirstElementAfterLoad();
+    // Не чіпаємо фокус – він залишається на поточному елементі
     return;
   }
   
@@ -1555,7 +1550,7 @@ async function loadSearchUsers() {
     div.onclick = () => viewProfile(uid);
     userList.appendChild(div);
   });
-  focusFirstElementAfterLoad();
+  // Не чіпаємо фокус
 }
 document.getElementById('searchInput').addEventListener('input', loadSearchUsers);
 
@@ -1563,7 +1558,6 @@ async function loadMyProfile() {
   if (!currentUser) return;
   const snap = await getDoc(doc(db, "users", currentUser.uid));
   if (snap.exists()) renderProfile(snap.data(), currentUser.uid, true);
-  focusFirstElementAfterLoad();
 }
 
 function viewProfile(uid) {
@@ -1589,7 +1583,6 @@ async function loadUserProfile(uid) {
   if (!currentUser) return;
   const snap = await getDoc(doc(db, "users", uid));
   if (snap.exists()) renderProfile(snap.data(), uid, uid === currentUser.uid);
-  focusFirstElementAfterLoad();
 }
 
 function renderProfile(data, uid, isOwn) {
@@ -1759,7 +1752,7 @@ function renderProfile(data, uid, isOwn) {
     });
   }
   loadProfileFeed(uid, 'posts');
-  focusFirstElementAfterLoad();
+  // Після оновлення профілю не чіпаємо фокус
 }
 
 async function openFollowersList(uid) {
@@ -1852,7 +1845,7 @@ document.getElementById('closeFollowersModal').onclick = () => {
       setFocusOnElement(lastFocusedElementBeforeModal);
       lastFocusedElementBeforeModal = null;
     } else {
-      setFocusOnElement(cachedFocusableElements[0]);
+      ensureFocus();
     }
   }, 50);
 };
@@ -1864,7 +1857,7 @@ document.getElementById('closeFollowingModal').onclick = () => {
       setFocusOnElement(lastFocusedElementBeforeModal);
       lastFocusedElementBeforeModal = null;
     } else {
-      setFocusOnElement(cachedFocusableElements[0]);
+      ensureFocus();
     }
   }, 50);
 };
@@ -1911,7 +1904,7 @@ async function loadProfileFeed(uid, tab) {
     div.innerHTML = `<div class="post-content">${post.text || ''}</div>`;
     feed.appendChild(div);
   });
-  focusFirstElementAfterLoad();
+  // Після завантаження стрічки профілю не чіпаємо фокус
 }
 
 document.getElementById('closeModal').onclick = () => {
@@ -1922,7 +1915,7 @@ document.getElementById('closeModal').onclick = () => {
       setFocusOnElement(lastFocusedElementBeforeModal);
       lastFocusedElementBeforeModal = null;
     } else {
-      setFocusOnElement(cachedFocusableElements[0]);
+      ensureFocus();
     }
   }, 50);
 };
@@ -2040,7 +2033,7 @@ async function loadChatList() {
     alert('Помилка завантаження списку чатів:\n' + (error.message || 'Невідома помилка') + '\nКод: ' + (error.code || 'N/A'));
     showToast('Помилка завантаження списку чатів.');
   }
-  focusFirstElementAfterLoad();
+  // Не чіпаємо фокус
 }
 
 async function openChatFromList(chatId, otherUid, otherName, otherUserId, otherAvatar) {
@@ -2377,7 +2370,7 @@ document.getElementById('closePrivacyModal').onclick = () => {
       setFocusOnElement(lastFocusedElementBeforeModal);
       lastFocusedElementBeforeModal = null;
     } else {
-      setFocusOnElement(cachedFocusableElements[0]);
+      ensureFocus();
     }
   }, 50);
 };

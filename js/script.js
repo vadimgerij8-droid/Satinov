@@ -52,7 +52,7 @@ const tvSettings = {
   vibrateOnFocus: localStorage.getItem('vibrateOnFocus') !== 'false'
 };
 
-// ================= НОВА СИСТЕМА НАВІГАЦІЇ (spatial navigation) =================
+// ================= НОВА СИСТЕМА НАВІГАЦІЇ (spatial navigation з покращеннями) =================
 const TVNavigation = (() => {
   // Приватні змінні
   let focusableElements = [];
@@ -61,6 +61,9 @@ const TVNavigation = (() => {
   let updatePending = false;
   let domObserver = null;
   let keyDebounceTimer = null;
+  let keyRepeatTimer = null;
+  let currentDirection = null;
+  let repeatCount = 0;
 
   // CSS стилі для фокусу
   const injectStyles = () => {
@@ -179,7 +182,12 @@ const TVNavigation = (() => {
       }
 
       // Зважена оцінка: відстань / cosAngle + перпендикуляр * коефіцієнт
-      const score = distance / cosAngle + perpendicularDistance * 2;
+      let score = distance / cosAngle + perpendicularDistance * 2;
+
+      // Покращення для повторного натискання: зменшуємо оцінку, якщо повторюємо напрямок
+      if (direction === currentDirection) {
+        score /= (1 + repeatCount * 0.2); // робимо дальші елементи привабливішими при утриманні
+      }
 
       if (score < bestScore) {
         bestScore = score;
@@ -206,8 +214,12 @@ const TVNavigation = (() => {
       el.focus({ preventScroll: true });
     }
 
-    // Плавний скрол до елемента
-    el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    // Плавний скрол до елемента з покращенням (центруємо)
+    const rect = el.getBoundingClientRect();
+    const container = el.closest('.content') || document.documentElement;
+    const containerRect = container.getBoundingClientRect();
+    const offset = rect.top - containerRect.top - (containerRect.height / 2 - rect.height / 2);
+    container.scrollBy({ top: offset, behavior: 'smooth' });
 
     lastFocusedElement = el;
 
@@ -276,24 +288,16 @@ const TVNavigation = (() => {
     document.querySelectorAll('.profile-menu-dropdown.show').forEach(d => d.classList.remove('show'));
   };
 
-  // Обробник клавіш з debounce
+  // Обробник натискання клавіш
   const handleKeyDown = (e) => {
     if (!tvSettings.tvNavEnabled && !tvSettings.remoteNavEnabled) return;
 
     const arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
     const isArrow = arrowKeys.includes(e.key);
     const isEnter = e.key === 'Enter';
-    const isBack = e.key === 'Escape' || e.key === 'Back' || e.code === 'Escape';
+    const isBack = e.key === 'Escape' || e.key === 'Backspace' || e.code === 'Escape';
 
     if (!isArrow && !isEnter && !isBack) return;
-
-    // Debounce для стрілок (запобігання подвійним спрацюванням)
-    if (isArrow) {
-      if (keyDebounceTimer) return;
-      keyDebounceTimer = setTimeout(() => {
-        keyDebounceTimer = null;
-      }, 50);
-    }
 
     e.preventDefault();
 
@@ -303,7 +307,7 @@ const TVNavigation = (() => {
     const activeEl = document.activeElement;
     const isInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable);
 
-    // ===== BACK / ESCAPE =====
+    // ===== BACK / EXIT =====
     if (isBack) {
       // Якщо активне поле введення – не обробляємо (користувач хоче вийти з поля)
       if (isInput) return;
@@ -362,7 +366,7 @@ const TVNavigation = (() => {
       return;
     }
 
-    // ===== ENTER =====
+    // ===== ENTER / OK =====
     if (isEnter) {
       if (isInput) return;
 
@@ -416,6 +420,24 @@ const TVNavigation = (() => {
       // Загальний випадок – пошук найближчого
       const next = findClosestElement(current, e.key);
       if (next) setFocus(next);
+
+      // Підтримка утримання клавіші
+      currentDirection = e.key;
+      repeatCount++;
+      clearTimeout(keyRepeatTimer);
+      keyRepeatTimer = setTimeout(() => {
+        handleKeyDown(e); // Рекурсивний виклик для repeat
+      }, repeatCount > 1 ? 100 : 300); // Швидше після першого repeat
+    }
+  };
+
+  // Обробник відпускання клавіші
+  const handleKeyUp = (e) => {
+    const arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+    if (arrowKeys.includes(e.key)) {
+      currentDirection = null;
+      repeatCount = 0;
+      clearTimeout(keyRepeatTimer);
     }
   };
 
@@ -438,8 +460,9 @@ const TVNavigation = (() => {
       }, 150);
     }, { passive: true });
 
-    // Обробник клавіш
+    // Обробники клавіш
     document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
 
     // Початкове оновлення та фокус
     window.addEventListener('load', () => {
@@ -1318,8 +1341,7 @@ function renderPosts(docs, container = null) {
     if (followBtn) {
       followBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const targetUid = followBtn.dataset.uid;
-        toggleFollow(targetUid, followBtn);
+        toggleFollow(post.author, followBtn);
       });
     }
 
@@ -2478,17 +2500,4 @@ document.addEventListener('click', async (e) => {
         await updateDoc(userRef, { savedPosts: arrayRemove(postId) });
         await updateDoc(postRef, { saves: arrayRemove(currentUser.uid) });
       } else {
-        await updateDoc(userRef, { savedPosts: arrayUnion(postId) });
-        await updateDoc(postRef, { saves: arrayUnion(currentUser.uid) });
-      }
-    } catch { target.classList.toggle('saved'); }
-  }
-});
-
-document.addEventListener('click', (e) => {
-  const uidElement = e.target.closest('[data-uid]');
-  if (uidElement) {
-    const uid = uidElement.dataset.uid;
-    viewProfile(uid);
-  }
-});
+        await updateDoc(userRef, { savedPosts: arrayUnion(postId

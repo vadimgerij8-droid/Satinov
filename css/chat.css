@@ -95,6 +95,7 @@
 .chat-item:hover .chat-avatar {
   transform: scale(1.1) rotate(5deg);
 }
+/* Оновлений індикатор онлайн – тепер рамка адаптивна */
 .chat-avatar .online-indicator {
   position: absolute;
   bottom: 2px;
@@ -102,9 +103,10 @@
   width: 14px;
   height: 14px;
   background: #22c55e;
-  border: 2px solid var(--card);
+  border: 2px solid var(--card);   /* було white, тепер адаптується під тему */
   border-radius: 50%;
   margin: 0;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
 }
 .chat-info {
   flex: 1;
@@ -228,6 +230,11 @@
   display: flex;
   align-items: center;
   gap: 6px;
+}
+/* Оновлений статус онлайн – насичений зелений */
+.chat-status.online {
+  color: #22c55e;
+  font-weight: 600;
 }
 .chat-status.online::before {
   content: '';
@@ -461,15 +468,21 @@
 }
 .date-divider::before { left: 0; }
 .date-divider::after { right: 0; }
+
+/* ================= ВИПРАВЛЕНИЙ ІНДИКАТОР «ПИШЕ...» ================= */
 .typing-indicator {
-  padding: 12px 16px;
-  color: var(--text-tertiary);
-  font-size: 0.9rem;
-  display: flex;
+  display: flex;                /* не ховаємо, керування через JS/клас */
   align-items: center;
   gap: 8px;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  color: var(--text-tertiary) !important;   /* адаптивний колір */
+  font-style: italic;
   background: var(--surface);
-  border-top: 1px solid var(--border);
+  border: 1px solid var(--border);          /* повна рамка замість border-top */
+  border-radius: 8px;
+  margin: 8px 16px 0 16px;                 /* зовнішні відступи, щоб не прилипало */
+  box-shadow: var(--shadow-sm);
   animation: slideUpFade 0.3s ease-out;
 }
 .typing-dots {
@@ -477,15 +490,30 @@
   gap: 4px;
 }
 .typing-dots span {
-  animation: typingDot 1.4s infinite;
-  opacity: 0;
-  font-size: 1.5rem;
-  line-height: 1;
-  color: var(--accent);
+  width: 6px;
+  height: 6px;
+  background-color: var(--text-tertiary);
+  border-radius: 50%;
+  animation: typing-blink 1.4s infinite;
 }
-.typing-dots span:nth-child(1) { animation-delay: 0s; }
-.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+.typing-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.typing-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+@keyframes typing-blink {
+  0%, 60%, 100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-6px);
+  }
+}
+/* ================================================================== */
+
 .chat-input-area {
   display: flex;
   align-items: center;
@@ -883,73 +911,4 @@
 
 * {
   transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* ========== ВИПРАВЛЕНІ ІНДИКАТОРИ (додано в кінець) ========== */
-
-/* Статус онлайн */
-.chat-status.online {
-  color: #22c55e;               /* Насичений зелений, добре читається на світлому фоні */
-  font-weight: 600;
-}
-
-/* Індикатор онлайн в списку чатів */
-.online-indicator {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  background-color: #22c55e;    /* Той самий зелений */
-  border: 2px solid white;
-  border-radius: 50%;
-  bottom: 0;
-  right: 0;
-  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);  /* легка зелена тінь */
-}
-
-/* Індикатор «пише...» */
-.typing-indicator {
-  display: none;                          /* за замовчуванням прихований, показується через JS */
-  align-items: center;
-  gap: 4px;
-  padding: 8px 16px;
-  font-size: 0.85rem;
-  color: var(--text-tertiary) !important;   /* адаптивний колір тексту */
-  font-style: italic;
-  background-color: var(--surface);         /* адаптивний фон */
-  border-radius: 8px;
-  margin: 8px 16px 0 16px;
-  border: 1px solid var(--border);          /* контрастна рамка */
-  box-shadow: var(--shadow-sm);             /* легка тінь, щоб не зливався з фоном */
-}
-
-.typing-dots {
-  display: flex;
-  gap: 2px;
-}
-
-.typing-dots span {
-  width: 6px;
-  height: 6px;
-  background-color: var(--text-tertiary);   /* крапки теж адаптивні */
-  border-radius: 50%;
-  animation: typing-blink 1.4s infinite;
-}
-
-.typing-dots span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.typing-dots span:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-@keyframes typing-blink {
-  0%, 60%, 100% {
-    opacity: 0.3;
-    transform: translateY(0);
-  }
-  30% {
-    opacity: 1;
-    transform: translateY(-6px);
-  }
 }

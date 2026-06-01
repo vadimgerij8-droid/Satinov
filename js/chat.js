@@ -13,6 +13,36 @@ import { viewProfile, blockUser } from './profile.js';
 
 export const getChatId = (uid1, uid2) => [uid1, uid2].sort().join('_');
 
+// ─── Typing timeout ───────────────────────────────────────────────────────────
+let typingTimeout;
+
+// ─── handleTyping (export для main.js) ───────────────────────────────────────
+export async function handleTyping() {
+  if (!state.currentUser || !state.currentChatId || !state.currentChatPartner) return;
+
+  const typingRef = doc(db, `chats/${state.currentChatId}/typing/${state.currentUser.uid}`);
+
+  try {
+    const input = document.getElementById('chatText');
+    const hasText = input && input.value.trim().length > 0;
+
+    if (hasText) {
+      await setDoc(typingRef, { isTyping: true, timestamp: serverTimestamp() }, { merge: true });
+
+      clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(async () => {
+        await setDoc(typingRef, { isTyping: false, timestamp: serverTimestamp() }, { merge: true });
+      }, 2000);
+    } else {
+      clearTimeout(typingTimeout);
+      await setDoc(typingRef, { isTyping: false, timestamp: serverTimestamp() }, { merge: true });
+    }
+  } catch (error) {
+    console.error("Помилка оновлення статусу друку:", error);
+  }
+}
+
+// ─── loadChatList ─────────────────────────────────────────────────────────────
 export async function loadChatList() {
   if (!state.currentUser) return;
   const listEl = document.getElementById('chatList');
@@ -103,6 +133,7 @@ function renderChatList(chatItems) {
   });
 }
 
+// ─── openChat ─────────────────────────────────────────────────────────────────
 export async function openChat(chatId, otherUid, otherName, otherUserId, otherAvatar) {
   if (!state.currentUser) return;
 
@@ -131,7 +162,7 @@ export async function openChat(chatId, otherUid, otherName, otherUserId, otherAv
 
   subscribeToMessages(chatId);
 
-  // Слухач статусу партнера (замінює старий блок presence)
+  // ── Підписка на статус партнера (онлайн / час) ────────────────────────────
   if (state.unsubscribeChatPresence) state.unsubscribeChatPresence();
   const partnerRef = doc(db, "users", otherUid);
   const unsubPresence = onSnapshot(partnerRef, (docSnap) => {
@@ -139,20 +170,29 @@ export async function openChat(chatId, otherUid, otherName, otherUserId, otherAv
       const data = docSnap.data();
       const statusEl = document.getElementById('chatStatus');
       if (statusEl) {
-        const statusText = formatLastSeen(data.lastOnline);
-        statusEl.textContent = statusText;
-        statusEl.style.color = statusText === "Активний(а) зараз"
-          ? "#4ade80"
-          : "rgba(255,255,255,0.5)";
+        const lastOnline = data.lastOnline?.seconds * 1000 || 0;
+        const isOnline = (Date.now() - lastOnline) < 60000;
+
+        if (isOnline) {
+          statusEl.textContent = 'Активний(а) зараз';
+          statusEl.className = 'chat-status online';
+          statusEl.style.color = '#4ade80';
+        } else {
+          statusEl.textContent = formatLastSeen(data.lastOnline);
+          statusEl.className = 'chat-status';
+          statusEl.style.color = 'rgba(255,255,255,0.5)';
+        }
       }
     }
   });
   setUnsubscribeChatPresence(unsubPresence);
 
+  // ── Підписка на typing ────────────────────────────────────────────────────
   if (state.unsubscribeTyping) state.unsubscribeTyping();
   const typingRef = doc(db, `chats/${chatId}/typing/${otherUid}`);
   const unsubTyping = onSnapshot(typingRef, (docSnap) => {
     const indicator = document.getElementById('typingIndicator');
+    if (!indicator) return;
     if (docSnap.exists() && docSnap.data().isTyping) {
       indicator.style.display = 'flex';
     } else {
@@ -164,6 +204,7 @@ export async function openChat(chatId, otherUid, otherName, otherUserId, otherAv
   setTimeout(() => document.getElementById('chatText')?.focus(), 200);
 }
 
+// ─── subscribeToMessages ──────────────────────────────────────────────────────
 function subscribeToMessages(chatId) {
   if (!state.currentUser) return;
   if (state.unsubscribeMessages) state.unsubscribeMessages();
@@ -199,6 +240,7 @@ function subscribeToMessages(chatId) {
   setUnsubscribeMessages(unsub);
 }
 
+// ─── createMessageElement ─────────────────────────────────────────────────────
 function createMessageElement(msg) {
   const isMine = msg.from === state.currentUser.uid;
   const wrapper = document.createElement('div');
@@ -339,7 +381,7 @@ function formatMessageDate(timestamp) {
   return date.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long' });
 }
 
-let typingTimeout;
+// ─── sendMessage ──────────────────────────────────────────────────────────────
 export async function sendMessage(text, file) {
   if (!text && !file) return;
   if (!state.currentUser || !state.currentChatId || !state.currentChatPartner) {
@@ -397,26 +439,17 @@ export async function sendMessage(text, file) {
     const attachBtn = document.getElementById('chatAttachBtn');
     if (attachBtn) attachBtn.innerHTML = '📎';
 
+    // Скидаємо typing після відправки
     const typingRef = doc(db, `chats/${state.currentChatId}/typing/${state.currentUser.uid}`);
     await setDoc(typingRef, { isTyping: false }, { merge: true });
+    clearTimeout(typingTimeout);
   } catch (error) {
     console.error('Помилка відправки:', error);
     showToast('Не вдалося відправити повідомлення');
   }
 }
 
-export function handleTyping() {
-  if (!state.currentUser || !state.currentChatId || !state.currentChatPartner) return;
-
-  const typingRef = doc(db, `chats/${state.currentChatId}/typing/${state.currentUser.uid}`);
-  setDoc(typingRef, { isTyping: true }, { merge: true }).catch(console.error);
-
-  clearTimeout(typingTimeout);
-  typingTimeout = setTimeout(() => {
-    setDoc(typingRef, { isTyping: false }, { merge: true }).catch(console.error);
-  }, 2000);
-}
-
+// ─── Context menu ─────────────────────────────────────────────────────────────
 let selectedMessageId = null;
 
 function showMessageContextMenu(event, msg) {
@@ -514,6 +547,7 @@ export async function toggleReaction(messageId, emoji) {
   await updateDoc(messageRef, { reactions });
 }
 
+// ─── searchUsersForChat ───────────────────────────────────────────────────────
 export async function searchUsersForChat(queryStr) {
   if (!state.currentUser) return;
 
@@ -602,7 +636,19 @@ export async function searchUsersForChat(queryStr) {
   }
 }
 
+// ─── closeChat ────────────────────────────────────────────────────────────────
 export function closeChat() {
+  // Скидаємо typing-статус поточного користувача
+  if (state.currentUser && state.currentChatId) {
+    const typingRef = doc(db, `chats/${state.currentChatId}/typing/${state.currentUser.uid}`);
+    setDoc(typingRef, { isTyping: false }, { merge: true }).catch(console.error);
+  }
+  clearTimeout(typingTimeout);
+
+  // Приховуємо індикатор друку
+  const indicator = document.getElementById('typingIndicator');
+  if (indicator) indicator.style.display = 'none';
+
   const chatWindow = document.getElementById('chatWindowContainer');
   if (chatWindow) chatWindow.style.display = 'none';
   const chatSidebar = document.getElementById('chatListSidebar');

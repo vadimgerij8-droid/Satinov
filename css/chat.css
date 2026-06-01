@@ -885,9 +885,11 @@
   transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* ========== ВИПРАВЛЕНІ ІНДИКАТОРИ (додано в кінець) ========== */
+
 /* Статус онлайн */
 .chat-status.online {
-  color: #4CAF50;
+  color: #22c55e;               /* Насичений зелений, добре читається на світлому фоні */
   font-weight: 600;
 }
 
@@ -896,26 +898,28 @@
   position: absolute;
   width: 12px;
   height: 12px;
-  background-color: #4CAF50;
+  background-color: #22c55e;    /* Той самий зелений */
   border: 2px solid white;
   border-radius: 50%;
   bottom: 0;
   right: 0;
-  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);  /* легка зелена тінь */
 }
 
 /* Індикатор «пише...» */
 .typing-indicator {
-  display: none;
+  display: none;                          /* за замовчуванням прихований, показується через JS */
   align-items: center;
   gap: 4px;
   padding: 8px 16px;
   font-size: 0.85rem;
-  color: #999;
+  color: var(--text-tertiary) !important;   /* адаптивний колір тексту */
   font-style: italic;
-  background-color: #f5f5f5;
+  background-color: var(--surface);         /* адаптивний фон */
   border-radius: 8px;
   margin: 8px 16px 0 16px;
+  border: 1px solid var(--border);          /* контрастна рамка */
+  box-shadow: var(--shadow-sm);             /* легка тінь, щоб не зливався з фоном */
 }
 
 .typing-dots {
@@ -926,7 +930,7 @@
 .typing-dots span {
   width: 6px;
   height: 6px;
-  background-color: #999;
+  background-color: var(--text-tertiary);   /* крапки теж адаптивні */
   border-radius: 50%;
   animation: typing-blink 1.4s infinite;
 }

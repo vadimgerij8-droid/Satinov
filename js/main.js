@@ -107,6 +107,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (nickname) await resetPassword(nickname);
   };
   document.getElementById('logoutBtn').onclick = () => {
+    // Очищуємо інтервал оновлення онлайн-статусу перед виходом
+    if (state.onlineInterval) {
+      clearInterval(state.onlineInterval);
+      state.onlineInterval = null;
+    }
     cleanupAllListeners();
     logout();
   };
@@ -394,6 +399,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 onAuthStateChanged(auth, (user) => {
+  // Очищуємо попередній інтервал онлайн при зміні стану авторизації
+  if (state.onlineInterval) {
+    clearInterval(state.onlineInterval);
+    state.onlineInterval = null;
+  }
+
   cleanupAllListeners();
 
   if (user) {
@@ -403,6 +414,12 @@ onAuthStateChanged(auth, (user) => {
     const newPostBox = document.getElementById('newPostBox');
     if (newPostBox) newPostBox.style.display = 'block';
 
+    // Оновлення lastOnline одразу при вході + кожні 45 секунд
+    updateLastOnline();
+    const onlineInterval = setInterval(updateLastOnline, 45000);
+    state.onlineInterval = onlineInterval;
+
+    // Зберігаємо також стандартний інтервал через setLastOnlineInterval (для cleanupAllListeners)
     const interval = setInterval(updateLastOnline, 30000);
     setLastOnlineInterval(interval);
 
